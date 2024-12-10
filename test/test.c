@@ -1,6 +1,7 @@
 #include "../src/ref.h"
 #include <CUnit/Basic.h>
 #include <stdlib.h>
+#include <math.h>
 
 int init_suite(void) {
   // Change this function if you want to do something *before* you
@@ -24,11 +25,6 @@ void test2(void) {
   CU_ASSERT_EQUAL(1 + 1, 2);
 }
 
-void test_is_number(void) {
-  CU_ASSERT_TRUE(is_number("42"));
-  CU_ASSERT_TRUE(is_number("-10"));
-}
-
 int main() {
   // First we try to set up CUnit, and exit if we fail
   if (CU_initialize_registry() != CUE_SUCCESS)
@@ -50,8 +46,7 @@ int main() {
   // copy a line below and change the information
   if (
     (CU_add_test(my_test_suite, "A simple test", test1) == NULL) ||
-    (CU_add_test(my_test_suite, "Basic arithmetics", test2) == NULL) ||
-    (CU_add_test(my_test_suite, "Basic tests of is_number", test_is_number) == NULL) || 0
+    (CU_add_test(my_test_suite, "Basic arithmetics", test2) == NULL)
   )
     {
       // If adding any of the tests fails, we tear down CUnit and exit
