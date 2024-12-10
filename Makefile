@@ -1,23 +1,27 @@
 # Define compiler and options
 C_COMPILER     = gcc
 C_OPTIONS      = -Wall -pedantic -Wextra -g
-C_LINK_OPTIONS = -lm 
+C_LINK_OPTIONS = -lm
 CUNIT_LINK     = -lcunit
 
-REF = src/ref.c
-test = test/test.c
+# Source and object files
+REF            = src/ref.c
+REF_OBJ        = src/ref.o
+TEST_SRC       = test/test.c
+TEST_OBJ       = test/test.o
 
 # Pattern rule to compile .c files into .o files
 %.o: %.c
-	$(C_COMPILER) $(C_OPTIONS) $^ -c
+	$(C_COMPILER) $(C_OPTIONS) -c $< -o $@
 
-# Target for linking the final executable
-ref: src/ref.o
-	$(C_COMPILER) $(C_LINK_OPTIONS) src/ref.o -o $@
+# Target for the reference executable
+ref: $(REF_OBJ)
+	$(C_COMPILER) $(C_LINK_OPTIONS) $(REF_OBJ) -o $@
 
-ref_test: src/ref.o ref.h
-	$(C_COMPILER) $(C_LINK_OPTIONS) src/ref.o -o $@ $(CUNIT_LINK)
+# Target for the test executable
+ref_test: $(REF_OBJ) $(TEST_OBJ)
+	$(C_COMPILER) $(C_LINK_OPTIONS) $(REF_OBJ) $(TEST_OBJ) -o $@ $(CUNIT_LINK)
 
-
-clean: 
-	rm -f *.o ref ref_test
+# Clean up generated files
+clean:
+	rm -f src/*.o test/*.o ref ref_test
