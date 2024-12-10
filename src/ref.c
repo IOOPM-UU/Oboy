@@ -39,8 +39,3 @@ size_t rc(obj_t *obj) {
     return obj->cnt;
 }
 
-
-size_t rc(obj_t *obj) {
-    return obj->cnt;
-}
-
