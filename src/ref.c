@@ -24,7 +24,21 @@ void retain(obj_t *obj) {
 
 void release(obj_t *obj) {
     obj->cnt--;
+    if (obj->cnt == 1) {
+        deallocate(obj);
+    }
 }
+
+obj_t *allocate_array(size_t elements, size_t elem_size) {
+        obj_t *obj = calloc(elements, elem_size);
+        obj->cnt = 1;
+        return obj;
+}
+
+size_t rc(obj_t *obj) {
+    return obj->cnt;
+}
+
 
 size_t rc(obj_t *obj) {
     return obj->cnt;
