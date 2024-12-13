@@ -1,8 +1,9 @@
 #pragma once
 #include <stddef.h>
+// Max 255 references
 struct obj {
     void *info;
-    int cnt;
+    uint8_t cnt;
 };
 
 typedef struct obj obj_t;

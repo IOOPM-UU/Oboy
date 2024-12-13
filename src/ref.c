@@ -12,7 +12,7 @@ void deallocate(obj_t *obj) {
     }
 }
 
-obj_t *allocate(size_t size){
+obj_t *allocate(size_t size, function1_t destructor){
     obj_t *obj = calloc(1, size);
     obj->cnt = 1;
     return obj;
@@ -29,7 +29,7 @@ void release(obj_t *obj) {
     }
 }
 
-obj_t *allocate_array(size_t elements, size_t elem_size) {
+obj_t *allocate_array(size_t elements, size_t elem_size, function1_t destructor) {
         obj_t *obj = calloc(elements, elem_size);
         obj->cnt = 1;
         return obj;
