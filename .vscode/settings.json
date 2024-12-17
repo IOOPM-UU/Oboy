@@ -1,6 +1,9 @@
 {
     "files.associations": {
         "stdio.h": "c",
-        "ref.h": "c"
+        "ref.h": "c",
+        "functional": "c",
+        "common.h": "c",
+        "hash_table.h": "c"
     }
 }
