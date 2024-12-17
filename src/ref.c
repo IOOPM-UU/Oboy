@@ -1,41 +1,70 @@
-#include <stdio.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include "ref.h"
+#include "refmem.h"
+int CASCADE_LIMIT = 100;
+struct memdata{
+    size_t rc;
+    function1_t destructor;
+}
 
 
-void deallocate(obj_t *obj) {
-    if (obj->cnt == 1) {
-        free(obj);
-        return;
+
+obj *allocate(size_t size, function1_t *destructor) {
+    free_scheduled_tasks(size);
+    obj *obj = malloc(size);
+    ioopm_hash_table_insert(ht_rc, &obj, memdata_generate(destructor));
+}
+
+memdata_t memdata_generate(function1_t *destructor) {
+    memdata_t memdata = alloc(1, sizeof(memdata_t));
+    memdata->rc = 0;
+    memdata->destructor = destructor;
+    return memdata;
+}
+
+void release(obj * obj) {
+    if (obj != NULL) {
+        if (rc == 0) {
+            add_to_schedule(obj);
+        } else {
+            rc--;
+        }
+    }
+    free_scheduled_tasks();
+}
+
+free_scheduled_tasks(size) {
+    size_t freed_size = 0;
+    for (int i = 0; i < CASCADE_LIMIT; i++) {
+        to_remove = list_get(i);
+        release_destructor(to_remove);
+        linked_list_remove(0);
+        ht_remove()
     }
 }
 
-obj_t *allocate(size_t size, function1_t destructor){
-    obj_t *obj = calloc(1, size);
-    obj->cnt = 1;
-    return obj;
+release_destructor(to_remove) {
+    return destructor();
 }
 
-void retain(obj_t *obj) {
-    obj->cnt++;
-} 
-
-void release(obj_t *obj) {
-    obj->cnt--;
-    if (obj->cnt == 1) {
-        deallocate(obj);
-    }
+cleanup() {
+    free_scheduled_tasks(sizeof(scheduled_list));
+    // for all entries in ht where rc = 0 call release
+    // remove the aforementioned entries from ht
 }
 
-obj_t *allocate_array(size_t elements, size_t elem_size, function1_t destructor) {
-        obj_t *obj = calloc(elements, elem_size);
-        obj->cnt = 1;
-        return obj;
+shutdown() {
+    free_all();
 }
 
-size_t rc(obj_t *obj) {
-    return obj->cnt;
+free_all() {
+    hash_table_destroy(ht_rc);
+    linked_list_destroy(scheduled_list);
+    free_scheduled_tasks(size_of(scheduled_list));
 }
 
+size_t get_cascade_limit(){
+    return CASCADE_LIMIT;
+}
+
+void set_cascade_limit(size_t size){
+    CASCADE_LIMIT = size;
+}
