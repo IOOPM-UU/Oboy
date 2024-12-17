@@ -14,7 +14,7 @@ obj *allocate(size_t size, function1_t *destructor) {
 }
 
 memdata_t memdata_generate(function1_t *destructor) {
-    memdata_t memdata = alloc(1, sizeof(memdata_t));
+    memdata_t memdata = calloc(1, sizeof(memdata_t));
     memdata->rc = 0;
     memdata->destructor = destructor;
     return memdata;
