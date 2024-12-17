@@ -8,6 +8,7 @@
 
 
 //TODO: fixa alla destructor funktioner: länkar, lista, iterator
+
 #define null_elem \
     (elem_t) { 0 }
 
@@ -31,6 +32,8 @@ struct link
     link_t *previous;
     link_t *next;
 };
+
+
 
 bool ioopm_linked_list_is_empty(ioopm_list_t *list)
 {
