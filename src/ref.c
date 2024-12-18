@@ -46,20 +46,18 @@ void release(obj *object) {
         memdata_t *memdata = (memdata_t *) ioopm_hash_table_lookup(ht_rc, int_elem((int) object)).value.p; // Change to macro, and maybe check for success
         if (memdata->rc == 0) {
             add_to_schedule(object);
+        } else {
+            memdata->rc --;
+        }
+       free_scheduled_tasks();
+    }
+}
+
 void add_to_schedule(obj *obj) {
     ioopm_linked_list_append(schedule_list, obj);
 }
 
-void release(obj * obj) {
-    if (obj != NULL) {
-        if (rc == 0) {
-            add_to_schedule(obj);
-        } else {
-            memdata->rc--;
-        }
-    }
-    free_scheduled_tasks(0);
-}
+
 
 free_scheduled_tasks(size) {
     size_t freed_size = 0;
