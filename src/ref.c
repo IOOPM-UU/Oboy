@@ -1,6 +1,8 @@
 #include "refmem.h"
 #include "inlupp2/generic_data_structures/hash_table.h"
 #include "inlupp2/generic_data_structures/common.h"
+#include "ref.h"
+int CASCADE_LIMIT = 100;
 
 bool int_eq(elem_t e1, elem_t e2)
 {
@@ -13,18 +15,14 @@ bool ptr_eq(elem_t e1, elem_t e2)
 }
 
 ioopm_hash_table_t *ht_rc = ioopm_hash_table_create(int_eq, ptr_eq, );
-int CASCADE_LIMIT = 100;
+
 typedef struct memdata memdata_t;
 struct memdata{
     size_t rc;
     function1_t destructor;
 };
 
-
-
-
-
-obj *allocate(size_t size, function1_t *destructor) {
+obj *allocate(size_t size, function1_t destructor) {
     free_scheduled_tasks(size);
     obj *object = malloc(size);
     ioopm_hash_table_insert(ht_rc, int_elem((int) object), ptr_elem(memdata_generate(destructor)));
@@ -48,6 +46,14 @@ void release(obj *object) {
         memdata_t *memdata = (memdata_t *) ioopm_hash_table_lookup(ht_rc, int_elem((int) object)).value.p; // Change to macro, and maybe check for success
         if (memdata->rc == 0) {
             add_to_schedule(object);
+void add_to_schedule(obj *obj) {
+    ioopm_linked_list_append(schedule_list, obj);
+}
+
+void release(obj * obj) {
+    if (obj != NULL) {
+        if (rc == 0) {
+            add_to_schedule(obj);
         } else {
             memdata->rc--;
         }
