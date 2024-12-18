@@ -7,9 +7,9 @@ struct memdata{
 
 
 
-obj *allocate(size_t size, function1_t *destructor) {
-    free_scheduled_tasks(size);
-    obj *obj = malloc(size);
+obj *allocate(size_t bytes, function1_t *destructor) {
+    free_scheduled_tasks(bytes);
+    obj *obj = malloc(bytes);
     ioopm_hash_table_insert(ht_rc, &obj, memdata_generate(destructor));
 }
 

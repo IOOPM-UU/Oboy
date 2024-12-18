@@ -1,28 +1,21 @@
 #pragma once
+#include <stdlib.h>
 #include <stddef.h>
-// Max 255 references
-struct obj {
-    void *info;
-    uint8_t cnt;
-};
-
-typedef struct obj obj_t;
-
-/**
- */
-void deallocate(obj_t *);
-
-/**
- */
-obj_t *allocate(size_t size);
-
-/** 
-*/
-void retain(obj_t *obj);
-
-/**
- */
-void release(obj_t *obj);
+#include "inlupp2/generic_data_structures/hash_table.h"
+#include "inlupp2/generic_data_structures/linked_list.h"
+#include "inlupp2/business_logic/common.h"
 
 
-obj_t *allocate_array(size_t elements, size_t elem_size);
+typedef void obj;
+typedef void(*function1_t)(obj *);
+
+void retain(obj *);
+void release(obj *);
+size_t rc(obj *);
+obj *allocate(size_t bytes, function1_t destructor);
+obj*allocate_array(size_t elements, size_t elem_size, function1_t destructor);
+void deallocate(obj *);
+void set_cascade_limit(size_t);
+size_t get_cascade_limit();
+void cleanup();
+void shutdown();
