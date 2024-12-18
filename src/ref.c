@@ -45,7 +45,7 @@ memdata_t *memdata_generate(function1_t destructor) {
 
 obj *allocate_array(size_t elements, size_t elem_size, function1_t destructor) {
     free_scheduled_tasks(elem_size);
-    obj *object = calloc(elements, elem_size);
+    obj *obj = calloc(elements, elem_size);
     ioopm_hash_table_insert(get_memdata_ht, int_elem(&obj), ptr_elem(memdata_generate(destructor)));
 }
 
