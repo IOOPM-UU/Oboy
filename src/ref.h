@@ -2,6 +2,13 @@
 #include <stdlib.h>
 #include <stddef.h>
 
+// Max 255 references
+struct obj {
+    void *info;
+    uint8_t cnt;
+};
+
+
 
 typedef void obj;
 typedef void(*function1_t)(obj *);
