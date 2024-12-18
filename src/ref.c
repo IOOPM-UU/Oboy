@@ -20,6 +20,10 @@ memdata_t memdata_generate(function1_t *destructor) {
     return memdata;
 }
 
+void add_to_schedule(obj *obj) {
+    ioopm_linked_list_append(schedule_list, obj);
+}
+
 void release(obj * obj) {
     if (obj != NULL) {
         if (rc == 0) {
