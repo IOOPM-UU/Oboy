@@ -1,4 +1,3 @@
-#include "refmem.h"
 #include "inlupp2/generic_data_structures/hash_table.h"
 #include "inlupp2/generic_data_structures/common.h"
 #include "ref.h"
@@ -14,6 +13,11 @@ bool ptr_eq(elem_t e1, elem_t e2)
     return e1.p == e2.p;
 }
 
+static int default_hash_function(elem_t value)
+{
+    return value.i;
+}
+
 ioopm_hash_table_t *ht_rc = ioopm_hash_table_create(int_eq, ptr_eq, );
 
 typedef struct memdata memdata_t;
@@ -22,23 +26,31 @@ struct memdata{
     function1_t destructor;
 };
 
-obj *allocate(size_t size, function1_t destructor) {
-    free_scheduled_tasks(size);
-    obj *object = malloc(size);
-    ioopm_hash_table_insert(ht_rc, int_elem((int) object), ptr_elem(memdata_generate(destructor)));
+ioopm_hash_table_t *get_memdata_ht(){
+    static ioopm_hash_table_t *memdata = NULL;
+    if(memdata == NULL){
+        memdata = ioopm_hash_table_create(int_eq, NULL, default_hash_function);
+    }
+    return memdata;
+}
+
+obj *allocate(size_t bytes, function1_t destructor) {
+    free_scheduled_tasks(bytes);
+    obj *obj = malloc(bytes);
+    ioopm_hash_table_insert(get_memdata_ht, int_elem(&obj), ptr_elem(memdata_generate(destructor)));
+}
+
+memdata_t *memdata_generate(function1_t destructor) {
+    memdata_t *memdata = calloc(1, sizeof(memdata_t));
+    memdata->rc = 0;
+    memdata->destructor = destructor;
+    return memdata;
 }
 
 obj *allocate_array(size_t elements, size_t elem_size, function1_t destructor) {
     free_scheduled_tasks(elem_size);
     obj *object = calloc(elements, elem_size);
-    ioopm_hash_table_insert(ht_rc, int_elem((int) object), ptr_elem(memdata_generate(destructor)));
-}
-
-memdata_t *memdata_generate(function1_t *destructor) {
-    memdata_t *memdata = calloc(1, sizeof(memdata_t));
-    memdata->rc = 0;
-    memdata->destructor = destructor;
-    return memdata;
+    ioopm_hash_table_insert(get_memdata_ht, int_elem(&obj), ptr_elem(memdata_generate(destructor)));
 }
 
 void release(obj *object) {
@@ -56,8 +68,6 @@ void release(obj *object) {
 void add_to_schedule(obj *obj) {
     ioopm_linked_list_append(schedule_list, obj);
 }
-
-
 
 free_scheduled_tasks(size) {
     size_t freed_size = 0;
