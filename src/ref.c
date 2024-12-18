@@ -1,12 +1,31 @@
+#include "inlupp2/generic_data_structures/hash_table.h"
+#include "inlupp2/generic_data_structures/common.h"
 #include "ref.h"
 int CASCADE_LIMIT = 100;
+
+bool int_eq(elem_t e1, elem_t e2)
+{
+    return e1.i == e2.i;
+}
+
+bool ptr_eq(elem_t e1, elem_t e2)
+{
+    return e1.p == e2.p;
+}
 
 static int default_hash_function(elem_t value)
 {
     return value.i;
 }
 
- 
+ioopm_hash_table_t *ht_rc = ioopm_hash_table_create(int_eq, ptr_eq, );
+
+typedef struct memdata memdata_t;
+struct memdata{
+    size_t rc;
+    function1_t destructor;
+};
+
 ioopm_hash_table_t *get_memdata_ht(){
     static ioopm_hash_table_t *memdata = NULL;
     if(memdata == NULL){
@@ -15,7 +34,6 @@ ioopm_hash_table_t *get_memdata_ht(){
     return memdata;
 }
 
-
 obj *allocate(size_t bytes, function1_t destructor) {
     free_scheduled_tasks(bytes);
     obj *obj = malloc(bytes);
@@ -23,30 +41,41 @@ obj *allocate(size_t bytes, function1_t destructor) {
 }
 
 memdata_t *memdata_generate(function1_t destructor) {
-    memdata_t *memdata = alloc(1, sizeof(memdata_t));
+    memdata_t *memdata = calloc(1, sizeof(memdata_t));
     memdata->rc = 0;
     memdata->destructor = destructor;
     return memdata;
 }
 
-void release(obj * obj) {
-    if (obj != NULL) {
-        if (rc == 0) {
-            add_to_schedule(obj);
-        } else {
-            rc--;
+obj *allocate_array(size_t elements, size_t elem_size, function1_t destructor) {
+    free_scheduled_tasks(elem_size);
+    obj *object = calloc(elements, elem_size);
+    ioopm_hash_table_insert(get_memdata_ht, int_elem(&obj), ptr_elem(memdata_generate(destructor)));
+}
+
+void release(obj *object) {
+    if (object != NULL) {
+        memdata_t *memdata = (memdata_t *) ioopm_hash_table_lookup(ht_rc, int_elem((int) object)).value.p; // Change to macro, and maybe check for success
+        if (memdata->rc == 0) {
+            add_to_schedule(object);
+        } else {
+            memdata->rc --;
         }
+       free_scheduled_tasks();
     }
-    free_scheduled_tasks();
+}
+
+void add_to_schedule(obj *obj) {
+    ioopm_linked_list_append(schedule_list, obj);
 }
 
 free_scheduled_tasks(size) {
     size_t freed_size = 0;
     for (int i = 0; i < CASCADE_LIMIT; i++) {
-        to_remove = list_get(i);
+        obj *to_remove = list_get(i);
         release_destructor(to_remove);
-        linked_list_remove(0);
-        ht_remove()
+        linked_list_remove(i);
+        ioopm_hash_table_remove(ht_rc, int_elem((int) to_remove));
     }
 }
 
