@@ -23,11 +23,11 @@ struct memdata{
 };
 
 ioopm_hash_table_t *get_memdata_ht(){
-    static ioopm_hash_table_t *memdata = NULL;
-    if(memdata == NULL){
-        memdata = ioopm_hash_table_create(int_eq, NULL, default_hash_function);
+    static ioopm_hash_table_t *memdata_ht = NULL;
+    if(memdata_ht == NULL){
+        memdata_ht = ioopm_hash_table_create(int_eq, NULL, default_hash_function);
     }
-    return memdata;
+    return memdata_ht;
 }
 
 obj *allocate(size_t bytes, function1_t destructor) {
