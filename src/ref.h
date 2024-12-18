@@ -5,7 +5,11 @@
 #include "inlupp2/generic_data_structures/linked_list.h"
 #include "inlupp2/business_logic/common.h"
 
-
+struct memdata{
+    size_t rc;
+    function1_t destructor;
+};
+typedef struct memdata memdata_t;
 typedef void obj;
 typedef void(*function1_t)(obj *);
 

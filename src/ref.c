@@ -1,20 +1,29 @@
-#include "refmem.h"
+#include "ref.h"
 int CASCADE_LIMIT = 100;
-struct memdata{
-    size_t rc;
-    function1_t destructor;
+
+static int default_hash_function(elem_t value)
+{
+    return value.i;
+}
+
+ 
+ioopm_hash_table_t *get_memdata_ht(){
+    static ioopm_hash_table_t *memdata = NULL;
+    if(memdata == NULL){
+        memdata = ioopm_hash_table_create(int_eq, NULL, default_hash_function);
+    }
+    return memdata;
 }
 
 
-
-obj *allocate(size_t bytes, function1_t *destructor) {
+obj *allocate(size_t bytes, function1_t destructor) {
     free_scheduled_tasks(bytes);
     obj *obj = malloc(bytes);
-    ioopm_hash_table_insert(ht_rc, &obj, memdata_generate(destructor));
+    ioopm_hash_table_insert(get_memdata_ht, int_elem(&obj), ptr_elem(memdata_generate(destructor)));
 }
 
-memdata_t memdata_generate(function1_t *destructor) {
-    memdata_t memdata = alloc(1, sizeof(memdata_t));
+memdata_t *memdata_generate(function1_t destructor) {
+    memdata_t *memdata = alloc(1, sizeof(memdata_t));
     memdata->rc = 0;
     memdata->destructor = destructor;
     return memdata;
