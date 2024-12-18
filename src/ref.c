@@ -1,5 +1,3 @@
-#include "inlupp2/generic_data_structures/hash_table.h"
-#include "inlupp2/generic_data_structures/common.h"
 #include "ref.h"
 int CASCADE_LIMIT = 100;
 
@@ -17,8 +15,6 @@ static int default_hash_function(elem_t value)
 {
     return value.i;
 }
-
-ioopm_hash_table_t *ht_rc = ioopm_hash_table_create(int_eq, ptr_eq, );
 
 typedef struct memdata memdata_t;
 struct memdata{
@@ -58,7 +54,7 @@ void release(obj *object) {
         memdata_t *memdata = (memdata_t *) ioopm_hash_table_lookup(ht_rc, int_elem((int) object)).value.p; // Change to macro, and maybe check for success
         if (memdata->rc == 0) {
             add_to_schedule(object);
-        } else {
+        } else {
             memdata->rc --;
         }
        free_scheduled_tasks();
