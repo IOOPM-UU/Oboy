@@ -30,7 +30,7 @@ obj *allocate(size_t size, function1_t destructor) {
 
 obj *allocate_array(size_t elements, size_t elem_size, function1_t destructor) {
     free_scheduled_tasks(elem_size);
-    obj *object = calloc(elements * elem_size);
+    obj *object = calloc(elements, elem_size);
     ioopm_hash_table_insert(ht_rc, int_elem((int) object), ptr_elem(memdata_generate(destructor)));
 }
 
