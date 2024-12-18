@@ -29,6 +29,13 @@ ioopm_hash_table_t *get_memdata_ht(){
     }
     return memdata_ht;
 }
+ioopm_list_t *get_schedule_linked_list(){
+    static ioopm_list_t *schedule_linked_list = NULL;
+    if(schedule_linked_list == NULL){
+        schedule_linked_list = ioopm_linked_list_create(int_eq);
+    }
+    return schedule_linked_list;
+}
 
 obj *allocate(size_t bytes, function1_t destructor) {
     free_scheduled_tasks(bytes);
