@@ -1,5 +1,6 @@
 #include "ref.h"
-int CASCADE_LIMIT = 100;
+
+int CASCADE_LIMIT;
 
 bool int_eq(elem_t e1, elem_t e2)
 {
@@ -76,11 +77,15 @@ void free_scheduled_tasks(size_t size) {
     size_t freed_size = 0;
     bool successful1 = NULL;
     bool successful2 = NULL;
-    for (int i = 0; i < CASCADE_LIMIT; i++) {
-        obj *to_remove = ioopm_linked_list_get(get_schedule_linked_list(), i, &successful1).p;
+    for (int i = 0; i < get_cascade_limit() || freed_size <= size ; i++) {
+        obj *to_remove = ioopm_linked_list_get(get_schedule_linked_list(), 0, &successful1).p;
+        freed_size+=sizeof(to_remove);
         release_destructor(to_remove);
-        ioopm_linked_list_remove(get_schedule_linked_list(), i, &successful2);
+        ioopm_linked_list_remove(get_schedule_linked_list(), 0, &successful2);
         ioopm_hash_table_remove(get_memdata_ht(), int_elem((int) to_remove));
+        if (freed_size >=size){
+            break;
+        }
     }
 }
 

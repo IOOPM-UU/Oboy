@@ -108,10 +108,55 @@ void test_add_to_schedule(){
 }
 
 void test_free_scheduled_task_empty(){
-    free_scheduled_tasks();
+    set_cascade_limit(3);
+    ioopm_list_t *list= get_schedule_linked_list();
+    free_scheduled_tasks(5);
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
 }
 
+void test_free_scheduled_task_one_task(){
+    set_cascade_limit(3);
+    ioopm_list_t *list = get_schedule_linked_list();
+    obj *object = malloc(sizeof(obj));
+    add_to_schedule(object);
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 1);
+    free_scheduled_tasks(1);
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
+    free(object);
 
+}
+
+void test_free_scheduled_tasks_over_cascade(){
+    set_cascade_limit(3);
+    ioopm_list_t *list = get_schedule_linked_list();
+    obj *object = malloc(sizeof(obj));
+    add_to_schedule(object);
+    add_to_schedule(object);
+    add_to_schedule(object);
+    add_to_schedule(object);
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 4);
+    free_scheduled_tasks(4*sizeof(object));
+  
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
+    
+    free(object);
+}
+
+void test_free_scheduled_tasks_until_size(){
+
+    set_cascade_limit(100);
+    ioopm_list_t *list = get_schedule_linked_list();
+    obj *object = malloc(sizeof(obj));
+    add_to_schedule(object);
+    add_to_schedule(object);
+    add_to_schedule(object);
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 3);
+    free_scheduled_tasks(2*sizeof(object));
+  
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 1);
+    free(object);
+    
+}
 
 int main() {
     // First we try to set up CUnit, and exit if we fail
@@ -135,9 +180,13 @@ int main() {
     if (
         (CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht) == NULL) ||
         (CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht_retrieve) == NULL) ||
-        (CU_add_test(unit_test_suite1, "memdata generate", test_memdata_generate) == NULL) ||
-        (CU_add_test(unit_test_suite1, "memdata generate_insert", test_memdata_generate_insert_ht) == NULL) ||
-        (CU_add_test(unit_test_suite1, "add to schedule", test_add_to_schedule) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Memdata generate", test_memdata_generate) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Memdata generate_insert", test_memdata_generate_insert_ht) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Add to schedule", test_add_to_schedule) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Free schedule with one task", test_free_scheduled_task_one_task) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Free schedule that goes over cascade limit", test_free_scheduled_tasks_over_cascade) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Free schedule that goes until size limit", test_free_scheduled_tasks_until_size) == NULL) ||
         0
     ) 
     {
