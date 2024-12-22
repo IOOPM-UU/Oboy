@@ -5,7 +5,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include "linked_list.h"
-#include "../../refmem.h"
 
 #define Success(k, v) \
     (ioopm_option_t) { .success = true, .key = k, .value = v }
@@ -45,7 +44,7 @@ static int default_hash_function(elem_t value)
 ioopm_hash_table_t *ioopm_hash_table_create(ioopm_eq_function *key_eq_func, ioopm_eq_function *value_eq_func, ioopm_hash_function *hash_function)
 {
     // Allocate space for a ioopm_hast_table_t = 17 pointers to entry_ts, which are set to NULL due to CALLOC
-    ioopm_hash_table_t *result = allocate(sizeof(ioopm_hash_table_t), );
+    //ioopm_hash_table_t *result = allocate(sizeof(ioopm_hash_table_t), );
     ioopm_hash_table_t *result = calloc(1, sizeof(ioopm_hash_table_t));
     result->size = 0;
     result->key_eq_func = key_eq_func;

@@ -25,6 +25,7 @@ ref: $(REF_OBJ)
 # Target for the test executable
 ref_test: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
 	$(C_COMPILER) $(C_LINK_OPTIONS) $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ) -o $@ $(CUNIT_LINK)
+	valgrind ./ref_test
 
 # Clean up generated files
 clean:

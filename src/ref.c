@@ -16,13 +16,13 @@ static int default_hash_function(elem_t value)
     return value.i;
 }
 
-typedef struct memdata memdata_t;
+// typedef struct memdata memdata_t;
 struct memdata{
     size_t rc;
     function1_t destructor;
 };
 
-ioopm_hash_table_t *get_memdata_ht(){
+ioopm_hash_table_t *get_memdata_ht() {
     static ioopm_hash_table_t *memdata_ht = NULL;
     if(memdata_ht == NULL){
         memdata_ht = ioopm_hash_table_create(int_eq, NULL, default_hash_function);
@@ -40,7 +40,7 @@ ioopm_list_t *get_schedule_linked_list(){
 obj *allocate(size_t bytes, function1_t destructor) {
     free_scheduled_tasks(bytes);
     obj *obj = malloc(bytes);
-    ioopm_hash_table_insert(get_memdata_ht, int_elem(&obj), ptr_elem(memdata_generate(destructor)));
+    ioopm_hash_table_insert(get_memdata_ht(), int_elem(&obj), ptr_elem(memdata_generate(destructor)));
 }
 
 memdata_t *memdata_generate(function1_t destructor) {
@@ -58,48 +58,50 @@ obj *allocate_array(size_t elements, size_t elem_size, function1_t destructor) {
 
 void release(obj *object) {
     if (object != NULL) {
-        memdata_t *memdata = (memdata_t *) ioopm_hash_table_lookup(ht_rc, int_elem((int) object)).value.p; // Change to macro, and maybe check for success
+        memdata_t *memdata = (memdata_t *) ioopm_hash_table_lookup(get_memdata_ht(), int_elem((int) object)).value.p; // Change to macro, and maybe check for success
         if (memdata->rc == 0) {
             add_to_schedule(object);
         } else {
             memdata->rc --;
         }
-       free_scheduled_tasks();
+       free_scheduled_tasks(0); //TODO: ska ej vara 0 sen
     }
 }
 
-void add_to_schedule(obj *obj) {
-    ioopm_linked_list_append(schedule_list, obj);
+void add_to_schedule(obj *object) {
+    ioopm_linked_list_append(get_schedule_linked_list(), ptr_elem(object));
 }
 
-free_scheduled_tasks(size) {
+void free_scheduled_tasks(size_t size) {
     size_t freed_size = 0;
+    bool successful1 = NULL;
+    bool successful2 = NULL;
     for (int i = 0; i < CASCADE_LIMIT; i++) {
-        obj *to_remove = list_get(i);
+        obj *to_remove = ioopm_linked_list_get(get_schedule_linked_list(), i, &successful1).p;
         release_destructor(to_remove);
-        linked_list_remove(i);
-        ioopm_hash_table_remove(ht_rc, int_elem((int) to_remove));
+        ioopm_linked_list_remove(get_schedule_linked_list(), i, &successful2);
+        ioopm_hash_table_remove(get_memdata_ht(), int_elem((int) to_remove));
     }
 }
 
-release_destructor(to_remove) {
-    return destructor();
+void release_destructor(to_remove) {
+    //return destructor(); // TODO
 }
 
-cleanup() {
-    free_scheduled_tasks(sizeof(scheduled_list));
+void cleanup() {
+    free_scheduled_tasks(sizeof(get_schedule_linked_list()));
     // for all entries in ht where rc = 0 call release
     // remove the aforementioned entries from ht
 }
 
-shutdown() {
+void shutdown() {
     free_all();
 }
 
-free_all() {
-    hash_table_destroy(ht_rc);
-    linked_list_destroy(scheduled_list);
-    free_scheduled_tasks(size_of(scheduled_list));
+void free_all() {
+    ioopm_hash_table_destroy(get_memdata_ht());
+    free_scheduled_tasks(sizeof(get_schedule_linked_list()));
+    ioopm_linked_list_destroy(get_schedule_linked_list());
 }
 
 size_t get_cascade_limit(){
