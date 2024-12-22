@@ -12,6 +12,7 @@ int init_suite(void) {
 int clean_suite(void) {
     // Change this function if you want to do something *after* you
     // run a test suite
+    shutdown();
     return 0;
 }
 
@@ -32,12 +33,53 @@ int clean_suite(void) {
 void test2(void) {
     CU_ASSERT_EQUAL(1 + 1, 2);
 }
+void dummy_destructor(voidptr) {
+        free(voidptr);
+    }
 
-void test_get_memdata_ht(void) {
+void test_get_memdata_ht(void) {    
     ioopm_hash_table_t *ht_rc = get_memdata_ht();
     CU_ASSERT_PTR_NOT_NULL(ht_rc);
     ioopm_hash_table_t *ht_rc2 = get_memdata_ht();
     CU_ASSERT_PTR_EQUAL(ht_rc, ht_rc2);
+    
+    //ioopm_hash_table_destroy(ht_rc); //TODO swap for shutdown later?? //DANGLING POINTERS
+}
+
+void test_get_memdata_ht_retrieve(void) {
+    ioopm_hash_table_t *ht_rc = get_memdata_ht();
+    CU_ASSERT_PTR_NOT_NULL(ht_rc);
+    
+    ioopm_option_t check = ioopm_hash_table_lookup(ht_rc, int_elem(4));
+    CU_ASSERT_FALSE(check.success);
+    
+    
+    //ioopm_hash_table_destroy(ht_rc); //TODO swap for shutdown later?? //DANGLING POINTERS
+}
+void dummy_destructor(void *ptr) {
+        free(ptr);
+    }
+
+void test_memdata_generate(void) {
+    memdata_t *memdata = memdata_generate(dummy_destructor);
+        CU_ASSERT_PTR_NOT_NULL(memdata);
+        CU_ASSERT_EQUAL(memdata->rc, 0);
+        CU_ASSERT_EQUAL(memdata->destructor, dummy_destructor);
+        memdata->destructor(memdata); 
+}
+// currently leaks, need a special destructor for memdata
+void test_memdata_generate_insert_ht(void) {
+    memdata_t *memdata = memdata_generate(dummy_destructor);
+    CU_ASSERT_PTR_NOT_NULL(memdata);
+    ioopm_hash_table_insert(get_memdata_ht(), int_elem(1), ptr_elem(memdata_generate(dummy_destructor)));
+    ioopm_option_t option =  ioopm_hash_table_lookup(get_memdata_ht(), int_elem(1));
+    CU_ASSERT_TRUE(option.success);
+    ioopm_hash_table_insert(get_memdata_ht(), int_elem(2), ptr_elem(memdata_generate(dummy_destructor)));
+    option = ioopm_hash_table_lookup(get_memdata_ht(), int_elem(2));
+    CU_ASSERT_TRUE(option.success);
+    option = ioopm_hash_table_lookup(get_memdata_ht(), int_elem(1));
+    CU_ASSERT_TRUE(option.success);
+}
 }
 
 void test_add_to_schedule(){
@@ -86,7 +128,9 @@ int main() {
         // (CU_add_test(unit_test_suite1, "Basic arithmetics", test2) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Basic tests of is_number", test_is_number) == NULL)
         (CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Create a new schedule", test_add_to_schedule) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht_retrieve) == NULL) ||
+        (CU_add_test(unit_test_suite1, "memdata generate", test_memdata_generate) == NULL) ||
+         (CU_add_test(unit_test_suite1, "memdata generate_insert", test_memdata_generate_insert_ht) == NULL) ||
         0
     ) 
     {
