@@ -35,11 +35,6 @@ ioopm_list_t *get_schedule_linked_list(){
     return schedule_linked_list;
 }
 
-obj *allocate(size_t bytes, function1_t destructor) {
-    free_scheduled_tasks(bytes);
-    obj *obj = malloc(bytes);
-    ioopm_hash_table_insert(get_memdata_ht(), int_elem(&obj), ptr_elem(memdata_generate(destructor)));
-}
 
 memdata_t *memdata_generate(function1_t destructor) {
     memdata_t *memdata = calloc(1, sizeof(memdata_t));
@@ -48,29 +43,16 @@ memdata_t *memdata_generate(function1_t destructor) {
     return memdata;
 }
 
-obj *allocate_array(size_t elements, size_t elem_size, function1_t destructor) {
-    free_scheduled_tasks(elem_size);
-    obj *obj = calloc(elements, elem_size);
-    ioopm_hash_table_insert(get_memdata_ht(), int_elem(&obj), ptr_elem(memdata_generate(destructor)));
-}
 
-void release(obj *object) {
-    if (object != NULL) {
-        memdata_t *memdata = (memdata_t *) ioopm_hash_table_lookup(get_memdata_ht(), int_elem((int) object)).value.p; // Change to macro, and maybe check for success
-        if (memdata->rc == 0) {
-            add_to_schedule(object);
-        } else {
-            memdata->rc --;
-        }
-       free_scheduled_tasks(0); //TODO: ska ej vara 0 sen
-    }
-}
 
 //hjälp funktion
 void add_to_schedule(obj *object) {
     ioopm_linked_list_append(get_schedule_linked_list(), ptr_elem(object));
 }
 
+void release_destructor(obj *to_remove) {
+    //return destructor(); // TODO
+}
 
 //hjälp funktion
 void free_scheduled_tasks(size_t size) {
@@ -89,8 +71,30 @@ void free_scheduled_tasks(size_t size) {
     }
 }
 
-void release_destructor(to_remove) {
-    //return destructor(); // TODO
+obj *allocate(size_t bytes, function1_t destructor) {
+    free_scheduled_tasks(bytes);
+    obj *obj = malloc(bytes);
+    ioopm_hash_table_insert(get_memdata_ht(), int_elem((int)(intptr_t)obj), ptr_elem(memdata_generate(destructor)));
+    return obj;
+}
+
+obj *allocate_array(size_t elements, size_t elem_size, function1_t destructor) {
+    free_scheduled_tasks(elem_size);
+    obj *obj = calloc(elements, elem_size);
+    ioopm_hash_table_insert(get_memdata_ht(), int_elem((int)(intptr_t)obj), ptr_elem(memdata_generate(destructor)));
+    return obj;
+}
+
+void release(obj *object) {
+    if (object != NULL) {
+        memdata_t *memdata = (memdata_t *) ioopm_hash_table_lookup(get_memdata_ht(), int_elem((int) object)).value.p; // Change to macro, and maybe check for success
+        if (memdata->rc == 0) {
+            add_to_schedule(object);
+        } else {
+            memdata->rc --;
+        }
+       free_scheduled_tasks(0); //TODO: ska ej vara 0 sen
+    }
 }
 
 void cleanup() {
@@ -98,17 +102,18 @@ void cleanup() {
     // for all entries in ht where rc = 0 call release
     // remove the aforementioned entries from ht
 }
-
-void shutdown() {
-    free_all();
-}
-
 void free_all() {
     // ioopm_hash_table_clear(get_memdata_ht());
     ioopm_hash_table_destroy(get_memdata_ht());
     ioopm_linked_list_destroy(get_schedule_linked_list());
     
 }
+
+void shutdown() {
+    free_all();
+}
+
+
 
 size_t get_cascade_limit(){
     return CASCADE_LIMIT;
