@@ -144,3 +144,7 @@ int string_sum_hash(elem_t e);
 /// @brief Frees all the memory attached to a cart item
 /// @param cart_item the cart_item to be destroyed
 void destroy_cart_item(cart_item_t *cart_item);
+
+bool int_eq(elem_t e1, elem_t e2);
+
+
