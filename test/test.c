@@ -40,6 +40,28 @@ void test_get_memdata_ht(void) {
     CU_ASSERT_PTR_EQUAL(ht_rc, ht_rc2);
 }
 
+void test_add_to_schedule(){
+    ioopm_list_t *list = get_schedule_linked_list();
+    //Check if list doesn´t exist:
+    CU_ASSERT_PTR_NOT_NULL(list);
+    obj *object=malloc(sizeof(obj));
+
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
+    // If list exist, add object to schedule:
+    add_to_schedule(object);
+    //Check if object was added
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 1);
+    add_to_schedule(object);
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 2);
+    //shutdown()
+}
+
+void test_free_scheduled_task_empty(){
+    free_scheduled_tasks()
+}
+
+
+
 int main() {
     // First we try to set up CUnit, and exit if we fail
     if (CU_initialize_registry() != CUE_SUCCESS)
@@ -64,6 +86,7 @@ int main() {
         // (CU_add_test(unit_test_suite1, "Basic arithmetics", test2) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Basic tests of is_number", test_is_number) == NULL)
         (CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Create a new schedule", test_add_to_schedule) == NULL) ||
         0
     ) 
     {
