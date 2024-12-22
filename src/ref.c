@@ -96,9 +96,9 @@ void shutdown() {
 }
 
 void free_all() {
-    //free_scheduled_tasks(sizeof(get_schedule_linked_list()));
+    // ioopm_hash_table_clear(get_memdata_ht());
     ioopm_hash_table_destroy(get_memdata_ht());
-    ioopm_linked_list_destroy(get_schedule_linked_list());
+    // ioopm_linked_list_destroy(get_schedule_linked_list());
     
 }
 
