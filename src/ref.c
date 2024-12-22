@@ -17,10 +17,7 @@ static int default_hash_function(elem_t value)
 }
 
 // typedef struct memdata memdata_t;
-struct memdata{
-    size_t rc;
-    function1_t destructor;
-};
+
 
 ioopm_hash_table_t *get_memdata_ht() {
     static ioopm_hash_table_t *memdata_ht = NULL;

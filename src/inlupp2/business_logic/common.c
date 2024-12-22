@@ -36,6 +36,11 @@ bool string_eq(elem_t e1, elem_t e2)
     return (strcmp((char *)e1.p, (char *)e2.p) == 0);
 }
 
+bool int_eq(elem_t e1, elem_t e2)
+{
+    return  e1.i == e2.i;
+}
+
 bool merch_eq(elem_t e1, elem_t e2)
 {
     ioopm_merch_t *merch1 = e1.p;
