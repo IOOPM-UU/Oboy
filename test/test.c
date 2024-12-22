@@ -119,7 +119,6 @@ int main() {
     if (
         //(CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht) == NULL) ||
         //(CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht_retrieve) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht_retrieve) == NULL) ||
         //(CU_add_test(unit_test_suite1, "memdata generate", test_memdata_generate) == NULL) ||
         (CU_add_test(unit_test_suite1, "memdata generate_insert", test_memdata_generate_insert_ht) == NULL) ||
         0
