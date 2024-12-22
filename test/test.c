@@ -13,7 +13,6 @@ int clean_suite(void) {
     // Change this function if you want to do something *after* you
     // run a test suite
     shutdown();
-    shutdown();
     return 0;
 }
 
@@ -34,9 +33,6 @@ int clean_suite(void) {
 void test2(void) {
     CU_ASSERT_EQUAL(1 + 1, 2);
 }
-void dummy_destructor(voidptr) {
-        free(voidptr);
-    }
 
 void test_get_memdata_ht(void) {    
     ioopm_hash_table_t *ht_rc = get_memdata_ht();
@@ -58,11 +54,6 @@ void test_get_memdata_ht_retrieve(void) {
     //ioopm_hash_table_destroy(ht_rc); //TODO swap for shutdown later?? //DANGLING POINTERS
 }
 
-void test_get_memdata_ht_retrieve(void) {
-    ioopm_hash_table_t *ht_rc = get_memdata_ht();
-    CU_ASSERT_PTR_NOT_NULL(ht_rc);
-    CU_ASSERT_FALSE(ioopm_hash_table_lookup(ht_rc, int_elem(4)).success);
-}
 void dummy_destructor(void *ptr) {
     free(ptr);
 }
@@ -97,13 +88,13 @@ void test_memdata_generate_insert_ht(void) {
 
     // TODO run cleanup at end of every test??
 }
-}
+
 
 void test_add_to_schedule(){
     ioopm_list_t *list = get_schedule_linked_list();
     //Check if list doesn´t exist:
     CU_ASSERT_PTR_NOT_NULL(list);
-    obj *object=malloc(sizeof(obj));
+    obj *object = malloc(sizeof(obj));
 
     CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
     // If list exist, add object to schedule:
@@ -112,11 +103,12 @@ void test_add_to_schedule(){
     CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 1);
     add_to_schedule(object);
     CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 2);
-    //shutdown()
+    free(object);
+    ioopm_linked_list_clear(list);
 }
 
 void test_free_scheduled_task_empty(){
-    free_scheduled_tasks()
+    free_scheduled_tasks();
 }
 
 
@@ -141,10 +133,11 @@ int main() {
     // the test in question. If you want to add another test, just
     // copy a line below and change the information
     if (
-        //(CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht) == NULL) ||
-        //(CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht_retrieve) == NULL) ||
-        //(CU_add_test(unit_test_suite1, "memdata generate", test_memdata_generate) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht_retrieve) == NULL) ||
+        (CU_add_test(unit_test_suite1, "memdata generate", test_memdata_generate) == NULL) ||
         (CU_add_test(unit_test_suite1, "memdata generate_insert", test_memdata_generate_insert_ht) == NULL) ||
+        (CU_add_test(unit_test_suite1, "add to schedule", test_add_to_schedule) == NULL) ||
         0
     ) 
     {

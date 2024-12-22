@@ -4,6 +4,7 @@
         "ref.h": "c",
         "functional": "c",
         "common.h": "c",
-        "hash_table.h": "c"
+        "hash_table.h": "c",
+        "linked_list.h": "c"
     }
 }

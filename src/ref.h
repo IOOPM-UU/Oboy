@@ -1,9 +1,9 @@
 #pragma once
 #include <stdlib.h>
 #include <stddef.h>
-#include "inlupp2/generic_data_structures/hash_table.h"
-#include "inlupp2/generic_data_structures/linked_list.h"
-#include "inlupp2/business_logic/common.h"
+#include "inlupp2_DONOTTOUCH/generic_data_structures/hash_table.h"
+#include "inlupp2_DONOTTOUCH/generic_data_structures/linked_list.h"
+#include "inlupp2_DONOTTOUCH/business_logic/common.h"
 
 typedef void obj;
 typedef void(*function1_t)(obj *);

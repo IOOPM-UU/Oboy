@@ -65,10 +65,13 @@ void release(obj *object) {
     }
 }
 
+//hjälp funktion
 void add_to_schedule(obj *object) {
     ioopm_linked_list_append(get_schedule_linked_list(), ptr_elem(object));
 }
 
+
+//hjälp funktion
 void free_scheduled_tasks(size_t size) {
     size_t freed_size = 0;
     bool successful1 = NULL;
@@ -98,7 +101,7 @@ void shutdown() {
 void free_all() {
     // ioopm_hash_table_clear(get_memdata_ht());
     ioopm_hash_table_destroy(get_memdata_ht());
-    // ioopm_linked_list_destroy(get_schedule_linked_list());
+    ioopm_linked_list_destroy(get_schedule_linked_list());
     
 }
 
