@@ -13,7 +13,6 @@ int clean_suite(void) {
     // Change this function if you want to do something *after* you
     // run a test suite
     shutdown();
-    shutdown();
     return 0;
 }
 
@@ -34,9 +33,6 @@ int clean_suite(void) {
 void test2(void) {
     CU_ASSERT_EQUAL(1 + 1, 2);
 }
-void dummy_destructor(voidptr) {
-        free(voidptr);
-    }
 
 void test_get_memdata_ht(void) {    
     ioopm_hash_table_t *ht_rc = get_memdata_ht();
@@ -58,11 +54,6 @@ void test_get_memdata_ht_retrieve(void) {
     //ioopm_hash_table_destroy(ht_rc); //TODO swap for shutdown later?? //DANGLING POINTERS
 }
 
-void test_get_memdata_ht_retrieve(void) {
-    ioopm_hash_table_t *ht_rc = get_memdata_ht();
-    CU_ASSERT_PTR_NOT_NULL(ht_rc);
-    CU_ASSERT_FALSE(ioopm_hash_table_lookup(ht_rc, int_elem(4)).success);
-}
 void dummy_destructor(void *ptr) {
     free(ptr);
 }
@@ -97,6 +88,76 @@ void test_memdata_generate_insert_ht(void) {
 
     // TODO run cleanup at end of every test??
 }
+
+
+void test_add_to_schedule(){
+    ioopm_list_t *list = get_schedule_linked_list();
+    //Check if list doesn´t exist:
+    CU_ASSERT_PTR_NOT_NULL(list);
+    obj *object = malloc(sizeof(obj));
+
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
+    // If list exist, add object to schedule:
+    add_to_schedule(object);
+    //Check if object was added
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 1);
+    add_to_schedule(object);
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 2);
+    free(object);
+    ioopm_linked_list_clear(list);
+}
+
+void test_free_scheduled_task_empty(){
+    set_cascade_limit(3);
+    ioopm_list_t *list= get_schedule_linked_list();
+    free_scheduled_tasks(5);
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
+}
+
+void test_free_scheduled_task_one_task(){
+    set_cascade_limit(3);
+    ioopm_list_t *list = get_schedule_linked_list();
+    obj *object = malloc(sizeof(obj));
+    add_to_schedule(object);
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 1);
+    free_scheduled_tasks(1);
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
+    free(object);
+
+}
+
+void test_free_scheduled_tasks_over_cascade(){
+    set_cascade_limit(3);
+    ioopm_list_t *list = get_schedule_linked_list();
+    obj *object = malloc(sizeof(obj));
+    add_to_schedule(object);
+    add_to_schedule(object);
+    add_to_schedule(object);
+    add_to_schedule(object);
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 4);
+    free_scheduled_tasks(4*sizeof(object));
+  
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
+    
+    free(object);
+}
+
+void test_free_scheduled_tasks_until_size(){
+
+    set_cascade_limit(100);
+    ioopm_list_t *list = get_schedule_linked_list();
+    obj *object = malloc(sizeof(obj));
+    add_to_schedule(object);
+    add_to_schedule(object);
+    add_to_schedule(object);
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 3);
+    free_scheduled_tasks(2*sizeof(object));
+  
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 1);
+    free(object);
+    
+}
+
 int main() {
     // First we try to set up CUnit, and exit if we fail
     if (CU_initialize_registry() != CUE_SUCCESS)
@@ -117,10 +178,15 @@ int main() {
     // the test in question. If you want to add another test, just
     // copy a line below and change the information
     if (
-        //(CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht) == NULL) ||
-        //(CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht_retrieve) == NULL) ||
-        //(CU_add_test(unit_test_suite1, "memdata generate", test_memdata_generate) == NULL) ||
-        (CU_add_test(unit_test_suite1, "memdata generate_insert", test_memdata_generate_insert_ht) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht_retrieve) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Memdata generate", test_memdata_generate) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Memdata generate_insert", test_memdata_generate_insert_ht) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Add to schedule", test_add_to_schedule) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Free schedule with one task", test_free_scheduled_task_one_task) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Free schedule that goes over cascade limit", test_free_scheduled_tasks_over_cascade) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Free schedule that goes until size limit", test_free_scheduled_tasks_until_size) == NULL) ||
         0
     ) 
     {

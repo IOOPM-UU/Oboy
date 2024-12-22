@@ -9,10 +9,10 @@ REF            = src/ref.c
 REF_OBJ        = src/ref.o
 TEST_SRC       = test/test.c
 TEST_OBJ       = test/test.o
-HASH 		   = src/inlupp2/generic_data_structures/hash_table.c
-HASH_OBJ	   = src/inlupp2/generic_data_structures/hash_table.o
-LIST 		   = src/inlupp2/generic_data_structures/linked_list.c
-LIST_OBJ	   = src/inlupp2/generic_data_structures/linked_list.o
+HASH 		   = src/inlupp2_DONOTTOUCH/generic_data_structures/hash_table.c
+HASH_OBJ	   = src/inlupp2_DONOTTOUCH/generic_data_structures/hash_table.o
+LIST 		   = src/inlupp2_DONOTTOUCH/generic_data_structures/linked_list.c
+LIST_OBJ	   = src/inlupp2_DONOTTOUCH/generic_data_structures/linked_list.o
 
 # Pattern rule to compile .c files into .o files
 %.o: %.c
