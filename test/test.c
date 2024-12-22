@@ -12,6 +12,7 @@ int init_suite(void) {
 int clean_suite(void) {
     // Change this function if you want to do something *after* you
     // run a test suite
+    shutdown();
     return 0;
 }
 
@@ -32,12 +33,28 @@ int clean_suite(void) {
 void test2(void) {
     CU_ASSERT_EQUAL(1 + 1, 2);
 }
+void dummy_destructor(voidptr) {
+        free(voidptr);
+    }
 
-void test_get_memdata_ht(void) {
+void test_get_memdata_ht(void) {    
     ioopm_hash_table_t *ht_rc = get_memdata_ht();
     CU_ASSERT_PTR_NOT_NULL(ht_rc);
     ioopm_hash_table_t *ht_rc2 = get_memdata_ht();
     CU_ASSERT_PTR_EQUAL(ht_rc, ht_rc2);
+    
+    //ioopm_hash_table_destroy(ht_rc); //TODO swap for shutdown later?? //DANGLING POINTERS
+}
+
+void test_get_memdata_ht_retrieve(void) {
+    ioopm_hash_table_t *ht_rc = get_memdata_ht();
+    CU_ASSERT_PTR_NOT_NULL(ht_rc);
+    
+    ioopm_option_t check = ioopm_hash_table_lookup(ht_rc, int_elem(4));
+    CU_ASSERT_FALSE(check.success);
+    
+    
+    //ioopm_hash_table_destroy(ht_rc); //TODO swap for shutdown later?? //DANGLING POINTERS
 }
 
 int main() {
@@ -64,6 +81,7 @@ int main() {
         // (CU_add_test(unit_test_suite1, "Basic arithmetics", test2) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Basic tests of is_number", test_is_number) == NULL)
         (CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht_retrieve) == NULL) ||
         0
     ) 
     {
