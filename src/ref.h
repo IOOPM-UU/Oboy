@@ -23,7 +23,7 @@ obj *allocate_array(size_t elements, size_t elem_size, function1_t destructor);
 
 /// @brief Retrieves the static hashtable with allocated memdata. Creates the hashtable the first
 /// time the function is called, later calls returns the pointer. (Free'd by shutdown)
-/// @return returns the hashtable we're op
+/// @return returns the static hashtable we have in global.
 ioopm_hash_table_t *get_memdata_ht();
 
 memdata_t *memdata_generate(function1_t destructor);
