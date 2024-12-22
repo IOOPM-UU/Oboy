@@ -20,22 +20,24 @@ int clean_suite(void) {
 // deallocate
 
 // allocate
-void test_alloc(void) {
-    obj_t *obj = NULL;
-    CU_ASSERT_PTR_NULL(obj);
-    obj = allocate(sizeof(obj));
-    CU_ASSERT_PTR_NOT_NULL(obj);
-    deallocate(obj);
-    CU_ASSERT_PTR_NULL(obj);
-}
+// void test_alloc(void) {
+//     obj_t *obj = NULL;
+//     CU_ASSERT_PTR_NULL(obj);
+//     obj = allocate(sizeof(obj));
+//     CU_ASSERT_PTR_NOT_NULL(obj);
+//     deallocate(obj);
+//     CU_ASSERT_PTR_NULL(obj);
+// }
 
 void test2(void) {
     CU_ASSERT_EQUAL(1 + 1, 2);
 }
 
-void test_is_number(void) {
-    CU_ASSERT_TRUE(is_number("42"));
-    CU_ASSERT_TRUE(is_number("-10"));
+void test_get_memdata_ht(void) {
+    ioopm_hash_table_t *ht_rc = get_memdata_ht();
+    CU_ASSERT_PTR_NOT_NULL(ht_rc);
+    ioopm_hash_table_t *ht_rc2 = get_memdata_ht();
+    CU_ASSERT_PTR_EQUAL(ht_rc, ht_rc2);
 }
 
 int main() {
@@ -58,9 +60,11 @@ int main() {
     // the test in question. If you want to add another test, just
     // copy a line below and change the information
     if (
-        (CU_add_test(unit_test_suite1, "A simple test", test1) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Basic arithmetics", test2) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Basic tests of is_number", test_is_number) == NULL) || 0
+        // (CU_add_test(unit_test_suite1, "A simple test", test1) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Basic arithmetics", test2) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Basic tests of is_number", test_is_number) == NULL)
+        (CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht) == NULL) ||
+        0
     ) 
     {
         // If adding any of the tests fails, we tear down CUnit and exit

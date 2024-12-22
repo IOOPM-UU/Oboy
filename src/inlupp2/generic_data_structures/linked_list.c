@@ -42,7 +42,8 @@ bool ioopm_linked_list_is_empty(ioopm_list_t *list)
 
 static link_t *link_create(elem_t value, link_t *previous, link_t *next)
 {
-    link_t *link = allocate(sizeof(link_t), link_destructor);
+    link_t *link = calloc(1, sizeof(link_t));
+    //link_t *link = allocate(sizeof(link_t), link_destructor);
     link->previous = previous;
     link->next = next;
     link->value = value;
@@ -51,7 +52,8 @@ static link_t *link_create(elem_t value, link_t *previous, link_t *next)
 
 ioopm_list_t *ioopm_linked_list_create(ioopm_eq_function *eq_func)
 {
-    ioopm_list_t *result = allocate(sizeof(ioopm_list_t), linked_list_destructor);
+    ioopm_list_t *result = calloc(1, sizeof(ioopm_list_t));
+    // ioopm_list_t *result = allocate(sizeof(ioopm_list_t), linked_list_destructor);
     result->size = 0;
     result->first = result->last = link_create(null_elem, NULL, NULL);
     result->eq_func = eq_func;
@@ -85,7 +87,8 @@ ioopm_list_t *ioopm_linked_list_create(ioopm_eq_function *eq_func)
 
 void ioopm_linked_list_destroy(ioopm_list_t *list)
 {
-    release(list);
+    free(list);
+    // release(list);
 }
 
 void ioopm_linked_list_append(ioopm_list_t *list, elem_t value)
@@ -323,7 +326,8 @@ struct iter
 
 ioopm_list_iterator_t *ioopm_list_iterator(ioopm_list_t *list)
 {
-    ioopm_list_iterator_t *iter = alocate(sizeof(ioopm_list_iterator_t), iter_destructor);
+    ioopm_list_iterator_t *iter = calloc(1, sizeof(ioopm_list_iterator_t));
+    // ioopm_list_iterator_t *iter = allocate(sizeof(ioopm_list_iterator_t), iter_destructor);
 
     iter->list = list;
     ioopm_iterator_reset(iter);
