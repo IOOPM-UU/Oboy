@@ -1,0 +1,8 @@
+File 'tests/backend_tests.c'
+Lines executed:91.23% of 399
+Branches executed:94.44% of 72
+Taken at least once:47.22% of 72
+Calls executed:91.37% of 278
+Creating 'backend_tests.c.gcov'
+
+Lines executed:91.23% of 399

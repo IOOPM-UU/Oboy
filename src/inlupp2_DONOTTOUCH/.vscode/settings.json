@@ -1,0 +1,25 @@
+{
+    "files.associations": {
+        "stdlib.h": "c",
+        "common.h": "c",
+        "__bit_reference": "c",
+        "bitset": "c",
+        "chrono": "c",
+        "unordered_map": "c",
+        "algorithm": "c",
+        "__node_handle": "c",
+        "__memory": "c",
+        "limits": "c",
+        "optional": "c",
+        "ratio": "c",
+        "system_error": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "vector": "c",
+        "__functional_base": "c",
+        "functional": "c",
+        "iterator": "c",
+        "memory": "c",
+        "linked_list.h": "c"
+    }
+}
