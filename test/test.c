@@ -58,8 +58,8 @@ void dummy_destructor(void *ptr) {
     free(ptr);
 }
 
-void memdata_destructor(memdata_t *memdata) {
-    free(memdata);
+void memdata_destructor(void *ptr) {
+    free(ptr);
 }
 
 void test_memdata_generate(void) {
@@ -158,6 +158,41 @@ void test_free_scheduled_tasks_until_size(){
     
 }
 
+
+void test_allocate() {
+    // Test 1: Allocate memory and check if it's not NULL
+    obj *object = allocate(100, NULL);
+    CU_ASSERT_PTR_NOT_NULL(object);
+
+    // Test 2: Check if the reference count is initialized to 0
+    memdata_t *metadata = get_memdata_ht();
+    CU_ASSERT_EQUAL(metadata->rc, 0);
+
+    free(object);
+    // Test 3: Check if the destructor is set correctly
+    object = allocate(100, dummy_destructor);
+    metadata = get_memdata_ht();
+    CU_ASSERT_EQUAL(metadata->destructor, dummy_destructor);
+    free(object);
+}
+
+void test_allocate_array() {
+    // Test 1: Allocate an array and check if it's not NULL
+    obj *object = allocate_array(10, sizeof(int), NULL);
+        CU_ASSERT_PTR_NOT_NULL(object);
+
+    // Test 2: Check if the reference count is initialized to 0
+    memdata_t *metadata = get_memdata_ht();
+    CU_ASSERT_EQUAL(metadata->rc, 0);
+
+    free(object);
+    // Test 3: Check if the destructor is set correctly
+    object = allocate(100, dummy_destructor);
+    metadata = get_memdata_ht();
+    CU_ASSERT_EQUAL(metadata->destructor, dummy_destructor);
+    free(object);
+}
+
 int main() {
     // First we try to set up CUnit, and exit if we fail
     if (CU_initialize_registry() != CUE_SUCCESS)
@@ -187,6 +222,7 @@ int main() {
         (CU_add_test(unit_test_suite1, "Free schedule with one task", test_free_scheduled_task_one_task) == NULL) ||
         (CU_add_test(unit_test_suite1, "Free schedule that goes over cascade limit", test_free_scheduled_tasks_over_cascade) == NULL) ||
         (CU_add_test(unit_test_suite1, "Free schedule that goes until size limit", test_free_scheduled_tasks_until_size) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Allocate", test_allocate) == NULL) ||
         0
     ) 
     {
