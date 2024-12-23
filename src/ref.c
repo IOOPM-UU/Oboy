@@ -1,5 +1,5 @@
 #include "ref.h"
-
+#include <stdint.h>
 int CASCADE_LIMIT;
 
 bool int_eq(elem_t e1, elem_t e2)
@@ -73,22 +73,22 @@ void free_scheduled_tasks(size_t size) {
 
 obj *allocate(size_t bytes, function1_t destructor) {
     free_scheduled_tasks(bytes);
-    obj *obj = malloc(bytes);
-    ioopm_hash_table_insert(get_memdata_ht(), int_elem((int)(intptr_t)obj), ptr_elem(memdata_generate(destructor)));
-    return obj;
+    memdata_t *metadata = memdata_generate(destructor);
+    obj *object = (obj *)(metadata + 1);
+    ioopm_hash_table_insert(get_memdata_ht(), int_elem((int)(intptr_t)object), ptr_elem(metadata));
+    return object;
 }
 
 obj *allocate_array(size_t elements, size_t elem_size, function1_t destructor) {
-    free_scheduled_tasks(elem_size);
-    obj *obj = calloc(elements, elem_size);
-    ioopm_hash_table_insert(get_memdata_ht(), int_elem((int)(intptr_t)obj), ptr_elem(memdata_generate(destructor)));
-    return obj;
+    free_scheduled_tasks(elements * elem_size);
+    size_t total_size = elements * elem_size;
+    obj *array = allocate(total_size, destructor);
+    return array;  
 }
 
 void release(obj *object) {
     if (object != NULL) {
-        memdata_t *memdata = (memdata_t *) ioopm_hash_table_lookup(get_memdata_ht(), int_elem((int) object)).value.p; // Change to macro, and maybe check for success
-        if (memdata->rc == 0) {
+        memdata_t *memdata = (memdata_t *) ioopm_hash_table_lookup(get_memdata_ht(), int_elem((int)(intptr_t)(object))).value.p;        if (memdata->rc == 0) {
             add_to_schedule(object);
         } else {
             memdata->rc --;

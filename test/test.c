@@ -2,6 +2,7 @@
 #include <CUnit/Basic.h>
 #include <stdlib.h>
 #include <math.h>
+#include <stdint.h>
 
 int init_suite(void) {
     // Change this function if you want to do something *before* you
@@ -159,38 +160,33 @@ void test_free_scheduled_tasks_until_size(){
 }
 
 
-void test_allocate() {
-    // Test 1: Allocate memory and check if it's not NULL
-    obj *object = allocate(100, NULL);
+void check_allocation(obj *object, function1_t expected_destructor) {
     CU_ASSERT_PTR_NOT_NULL(object);
-
-    // Test 2: Check if the reference count is initialized to 0
-    memdata_t *metadata = get_memdata_ht();
+    // Look up the metadata in the hash table
+    memdata_t *metadata = (memdata_t *)ioopm_hash_table_lookup(get_memdata_ht(), int_elem((int)(intptr_t)object)).value.p;
     CU_ASSERT_EQUAL(metadata->rc, 0);
+    CU_ASSERT_EQUAL(metadata->destructor, expected_destructor);
+    free(metadata);  
+}
 
-    free(object);
-    // Test 3: Check if the destructor is set correctly
+void test_allocate() {
+    // Test 1: Allocate memory with no destructor
+    obj *object = allocate(100, NULL);
+    check_allocation(object, NULL);
+
+    // Test 2: Allocate memory with a custom destructor
     object = allocate(100, dummy_destructor);
-    metadata = get_memdata_ht();
-    CU_ASSERT_EQUAL(metadata->destructor, dummy_destructor);
-    free(object);
+    check_allocation(object, dummy_destructor);
 }
 
 void test_allocate_array() {
-    // Test 1: Allocate an array and check if it's not NULL
+    // Test 1: Allocate an array with no destructor
     obj *object = allocate_array(10, sizeof(int), NULL);
-        CU_ASSERT_PTR_NOT_NULL(object);
+    check_allocation(object, NULL);
 
-    // Test 2: Check if the reference count is initialized to 0
-    memdata_t *metadata = get_memdata_ht();
-    CU_ASSERT_EQUAL(metadata->rc, 0);
-
-    free(object);
-    // Test 3: Check if the destructor is set correctly
-    object = allocate(100, dummy_destructor);
-    metadata = get_memdata_ht();
-    CU_ASSERT_EQUAL(metadata->destructor, dummy_destructor);
-    free(object);
+    // Test 2: Allocate an array with a custom destructor
+    object = allocate_array(10, sizeof(int), dummy_destructor);
+    check_allocation(object, dummy_destructor);
 }
 
 int main() {
@@ -223,6 +219,7 @@ int main() {
         (CU_add_test(unit_test_suite1, "Free schedule that goes over cascade limit", test_free_scheduled_tasks_over_cascade) == NULL) ||
         (CU_add_test(unit_test_suite1, "Free schedule that goes until size limit", test_free_scheduled_tasks_until_size) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate", test_allocate) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Allocate array", test_allocate_array) == NULL) ||
         0
     ) 
     {
