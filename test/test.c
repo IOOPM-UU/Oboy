@@ -176,6 +176,23 @@ void test_allocate() {
     free(object);
 }
 
+void test_allocate_array() {
+    // Test 1: Allocate an array and check if it's not NULL
+    obj *object = allocate_array(10, sizeof(int), NULL);
+        CU_ASSERT_PTR_NOT_NULL(object);
+
+    // Test 2: Check if the reference count is initialized to 0
+    memdata_t *metadata = get_memdata_ht();
+    CU_ASSERT_EQUAL(metadata->rc, 0);
+
+    free(object);
+    // Test 3: Check if the destructor is set correctly
+    object = allocate(100, dummy_destructor);
+    metadata = get_memdata_ht();
+    CU_ASSERT_EQUAL(metadata->destructor, dummy_destructor);
+    free(object);
+}
+
 int main() {
     // First we try to set up CUnit, and exit if we fail
     if (CU_initialize_registry() != CUE_SUCCESS)
