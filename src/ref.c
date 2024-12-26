@@ -88,7 +88,8 @@ obj *allocate_array(size_t elements, size_t elem_size, function1_t destructor) {
 
 void release(obj *object) {
     if (object != NULL) {
-        memdata_t *memdata = (memdata_t *) ioopm_hash_table_lookup(get_memdata_ht(), int_elem((int)(intptr_t)(object))).value.p;        if (memdata->rc == 0) {
+        memdata_t *memdata = (memdata_t *) ioopm_hash_table_lookup(get_memdata_ht(), int_elem((int)(intptr_t)(object))).value.p;        
+        if (memdata->rc == 0) {
             add_to_schedule(object);
         } else {
             memdata->rc --;
