@@ -6,6 +6,7 @@
 #include "inlupp2_DONOTTOUCH/generic_data_structures/linked_list.h"
 #include "inlupp2_DONOTTOUCH/business_logic/common.h"
 
+// Retrieves the metadata for the object, which is stored just before the object on the heap
 #define GET_METADATA(obj) ((memdata_t *)((char *)(obj) - sizeof(memdata_t)))
 
 /// Dummy 'obj' is just a void pointer as far as this manager is concerned

@@ -11,7 +11,7 @@ bool int_eq(void *a, void *b) {
     return *(int *)a == *(int *)b;
 }
 
-int CASCADE_LIMIT;
+int CASCADE_LIMIT = 10;
 
 
 ioopm_list_t *get_schedule_linked_list() 
@@ -22,16 +22,16 @@ ioopm_list_t *get_schedule_linked_list()
     return schedule_linked_list;
 }
 
-memdata_t *memdata_generate(function1_t destructor, size_t size) 
-{
-    memdata_t *memdata = calloc(1, sizeof(memdata_t));
-    if (!memdata) return NULL;
+// memdata_t *memdata_generate(function1_t destructor, size_t size) 
+// {
+//     memdata_t *memdata = calloc(1, sizeof(memdata_t));
+//     if (!memdata) return NULL;
 
-    memdata->rc         = 0;
-    memdata->destructor = destructor;
-    memdata->size       = size;
-    return memdata;
-}
+//     memdata->rc         = 0;
+//     memdata->destructor = destructor;
+//     memdata->size       = size;
+//     return memdata;
+// }
 
 void add_to_schedule(obj *object) 
 {
@@ -49,11 +49,12 @@ void release_destructor(obj *to_remove)
     }
 }
 
+// Calling free_scheduled_tasks(INT_MAX) frees everything
 void free_scheduled_tasks(size_t size) 
 {
     size_t freed_size = 0;
 
-    while (freed_size < size && ioopm_linked_list_size(get_schedule_linked_list()) > 0) 
+    while (freed_size < size && ioopm_linked_list_size(get_schedule_linked_list()) > 0)
     {
         bool successful1 = false;
         obj *to_remove = ioopm_linked_list_get(get_schedule_linked_list(), 0, &successful1).p;
@@ -75,7 +76,6 @@ void free_scheduled_tasks(size_t size)
             }
             continue;
         }
-
        
         if (metadata->rc > 0) 
         {
@@ -154,6 +154,40 @@ void release(obj *object)
         metadata->rc--;
     }
     free_scheduled_tasks(0);
+}
+
+static bool is_valid_pointer(void *object)
+{
+    if (!object) return false;
+    memdata_t *metadata = GET_METADATA(object);
+    if (metadata) {
+        return true;
+    }
+    return false;
+}
+
+void default_destructor(obj* object)
+{
+    if(!object)
+    {
+        return;
+    }
+    memdata_t *metadata = GET_METADATA(object);
+    if (!metadata)
+    {
+        return;
+    }
+    size_t object_size = metadata->size;
+
+    for(size_t offset = 0; offset <= object_size - sizeof(void*); offset++)
+    {
+        void **possible_pointer = (void **)((char *)object + offset);
+        if(is_valid_pointer(*possible_pointer))
+        {
+            release(*possible_pointer);
+            offset += sizeof(void*) - 1; // -1 since for loop increments
+        }
+    }
 }
 
 void cleanup() 
