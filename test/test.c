@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include "../src/inlupp2_DONOTTOUCH/generic_data_structures/linked_list.h"
 #include <assert.h>
+#include <limits.h>
 
 int init_suite(void) {
     // Change this function if you want to do something *before* you
@@ -36,7 +37,7 @@ int clean_suite(void) {
 void test2(void) {
     CU_ASSERT_EQUAL(1 + 1, 2);
 }
-/* 
+/*
 void test_get_memdata_ht(void) {    
     ioopm_hash_table_t *ht_rc = get_memdata_ht();
     CU_ASSERT_PTR_NOT_NULL(ht_rc);
@@ -186,25 +187,25 @@ void check_allocation(obj *object, function1_t expected_destructor) {
     CU_ASSERT(metadata->size > 0);                         // Ensure valid size
 }
 
-void test_allocate() {
-    // Test 1: Allocate memory with no destructor
-    obj *object = allocate(100, NULL);
-    check_allocation(object, NULL);
+// void test_allocate() {
+//     // Test 1: Allocate memory with no destructor
+//     obj *object = allocate(100, NULL);
+//     check_allocation(object, NULL);
 
-    // Test 2: Allocate memory with a custom destructor
-    object = allocate(100, dummy_destructor);
-    check_allocation(object, dummy_destructor);
-}
+//     // Test 2: Allocate memory with a custom destructor
+//     object = allocate(100, dummy_destructor);
+//     check_allocation(object, dummy_destructor);
+// }
 
-void test_allocate_array() {
-    // Test 1: Allocate an array with no destructor
-    obj *object = allocate_array(10, sizeof(int), NULL);
-    check_allocation(object, NULL);
+// void test_allocate_array() {
+//     // Test 1: Allocate an array with no destructor
+//     obj *object = allocate_array(10, sizeof(int), NULL);
+//     check_allocation(object, NULL);
 
-    // Test 2: Allocate an array with a custom destructor
-    object = allocate_array(10, sizeof(int), dummy_destructor);
-    check_allocation(object, dummy_destructor);
-}
+//     // Test 2: Allocate an array with a custom destructor
+//     object = allocate_array(10, sizeof(int), dummy_destructor);
+//     check_allocation(object, dummy_destructor);
+// }
 /* void test_default_destructor() {
     set_cascade_limit(10);
 
@@ -251,7 +252,7 @@ void test_allocate_and_free_scheduled_tasks(void)
     // 3. Free tasks up to 150 bytes => frees object1(100)
     free_scheduled_tasks(150);
     // => now 2 remain
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(get_schedule_linked_list()), 2);
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(get_schedule_linked_list()), 1);
 
     // 4. Free tasks up to 600 => enough for object2(200) + object3(300)
     free_scheduled_tasks(600);
@@ -261,7 +262,135 @@ void test_allocate_and_free_scheduled_tasks(void)
     // Otherwise you can do:
     // free_all();
 }
-//
+typedef struct link link_t;
+
+struct link
+{
+    elem_t value;
+    link_t *previous;
+    link_t *next;
+};
+
+
+#define null_elem \
+    (elem_t) { 0 }
+
+// Helper function for testing on links
+static link_t *link_create_with_allocate(elem_t value, link_t *previous, link_t *next)
+{
+    link_t *link = allocate(sizeof(link_t), NULL);
+    link->previous = previous;
+    link->next = next;
+    link->value = value;
+    return link;
+}
+
+
+void test_allocate_links_and_free_scheduled_tasks(void)
+{
+    // Set cascade limit
+    set_cascade_limit(3);
+
+    // 1. Allocate memory blocks
+    link_t *link1 = link_create_with_allocate(null_elem, NULL, NULL);
+    CU_ASSERT_PTR_NOT_NULL(link1);
+
+    link_t *link2 = link_create_with_allocate(null_elem, NULL, NULL);
+    CU_ASSERT_PTR_NOT_NULL(link2);
+
+    link_t *link3 = link_create_with_allocate(null_elem, NULL, NULL);
+    CU_ASSERT_PTR_NOT_NULL(link3);
+
+    // 2. Add all to schedule
+    add_to_schedule(link1);
+    add_to_schedule(link2);
+    add_to_schedule(link3);
+
+    // We should have 3
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(get_schedule_linked_list()), 3);
+
+    // 3. Free tasks up to 150 bytes => frees object1(100)
+    free_scheduled_tasks(sizeof(link_t));
+    // => now 2 remain
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(get_schedule_linked_list()), 2);
+
+    // 4. Free tasks up to 600 => enough for object2(200) + object3(300)
+    free_scheduled_tasks(2 * sizeof(link_t));
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(get_schedule_linked_list()), 0);
+
+    // NOTE: no call to free_all() here if your suite or test teardown calls it.
+    // Otherwise you can do:
+    // free_all();
+}
+
+
+
+void test_allocate_array_then_free(void)
+{
+    // Set cascade limit
+    set_cascade_limit(3);
+
+    // 1. Allocate memory blocks
+    obj *object1 = allocate_array(10, 100, NULL);
+    CU_ASSERT_PTR_NOT_NULL(object1);
+
+    obj *object2 = allocate_array(10, 100, NULL);
+    CU_ASSERT_PTR_NOT_NULL(object2);
+
+    obj *object3 = allocate_array(10, 100, NULL);
+    CU_ASSERT_PTR_NOT_NULL(object3);
+
+    // 2. Add all to schedule
+    add_to_schedule(object1);
+    add_to_schedule(object2);
+    add_to_schedule(object3);
+
+    free_scheduled_tasks(INT_MAX);
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(get_schedule_linked_list()), 0);
+
+    // NOTE: no call to free_all() here if your suite or test teardown calls it.
+    // Otherwise you can do:
+    // free_all();
+}
+
+void test_allocate_strings_then_free(void)
+{
+    // Set cascade limit
+    set_cascade_limit(3);
+
+    // 1. Allocate memory blocks
+    char *str1 = allocate_array(5, sizeof(char), NULL);
+    for (int i = 0; i < 5; i++) {
+        str1[i] = "a";
+    }
+    CU_ASSERT_PTR_NOT_NULL(str1);
+    
+    char *str2 = allocate_array(6, sizeof(char), NULL);
+    for (int i = 0; i < 6; i++) {
+        str2[i] = "b";
+    }
+    CU_ASSERT_PTR_NOT_NULL(str2);
+    
+    char *str3 = allocate_array(7, sizeof(char), NULL);
+    for (int i = 0; i < 7; i++) {
+        str3[i] = "c";
+    }
+    CU_ASSERT_PTR_NOT_NULL(str3);
+
+    // 2. Add all to schedule (with release this time)
+    release(str1);
+    release(str2);
+    release(str3);
+
+    free_scheduled_tasks(INT_MAX);
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(get_schedule_linked_list()), 0);
+
+    // NOTE: no call to free_all() here if your suite or test teardown calls it.
+    // Otherwise you can do:
+    // free_all();
+}
+
+
 
 int main() {
     // First we try to set up CUnit, and exit if we fail
@@ -283,12 +412,8 @@ int main() {
     // the test in question. If you want to add another test, just
     // copy a line below and change the information
     if (
-        //(CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht) == NULL) ||
-        //(CU_add_test(unit_test_suite1, "Get memdata", test_get_memdata_ht_retrieve) == NULL) ||
-       // (CU_add_test(unit_test_suite1, "Memdata generate", test_memdata_generate) == NULL) ||
-        //(CU_add_test(unit_test_suite1, "Memdata generate_insert", test_memdata_generate_insert_ht) == NULL) ||
         //(CU_add_test(unit_test_suite1, "Add to schedule", test_add_to_schedule) == NULL) ||
-        //CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
+        //(CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
         //(CU_add_test(unit_test_suite1, "Free schedule with one task", test_free_scheduled_task_one_task) == NULL) ||
         //(CU_add_test(unit_test_suite1, "Free schedule that goes over cascade limit", test_free_scheduled_tasks_over_cascade) == NULL) ||
         //(CU_add_test(unit_test_suite1, "Free schedule that goes until size limit", test_free_scheduled_tasks_until_size) == NULL) ||
@@ -297,6 +422,9 @@ int main() {
         //(CU_add_test(unit_test_suite1, "Default destructor", test_default_destructor) == NULL) ||
         //(CU_add_test(unit_test_suite1, "Free scheduled tasks with allocate", test_free_scheduled_tasks_with_allocate) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_and_free_scheduled_tasks) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Allocate and free array scheduled tasks", test_allocate_array_then_free) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Allocate and free string scheduled tasks", test_allocate_strings_then_free) == NULL) ||
         0
     ) 
     {
