@@ -52,8 +52,9 @@ void release_destructor(obj *to_remove)
 void free_scheduled_tasks(size_t size) 
 {
     size_t freed_size = 0;
+    size_t freed_amount = 0;
 
-    while (freed_size < size && ioopm_linked_list_size(get_schedule_linked_list()) > 0) 
+    while ((freed_size < size || freed_size < CASCADE_LIMIT) && ioopm_linked_list_size(get_schedule_linked_list()) > 0) 
     {
         bool successful1 = false;
         obj *to_remove = ioopm_linked_list_get(get_schedule_linked_list(), 0, &successful1).p;
@@ -153,7 +154,8 @@ void release(obj *object)
     {
         metadata->rc--;
     }
-    free_scheduled_tasks(0);
+    size_t size = metadata->size;
+    free_scheduled_tasks(size);
 }
 
 void cleanup() 

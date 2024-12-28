@@ -19,6 +19,18 @@ int clean_suite(void) {
     return 0;
 }
 
+struct cell
+{
+  struct cell *cell;
+  int i;
+  char *string;
+};
+
+void cell_destructor(obj *c)
+{
+  release(((struct cell *) c)->cell);
+}
+
 // Unit tests
 
 // deallocate
@@ -261,7 +273,35 @@ void test_allocate_and_free_scheduled_tasks(void)
     // Otherwise you can do:
     // free_all();
 }
-//
+
+void test_retain_release() {
+    set_cascade_limit(100);
+    struct cell *cell = allocate(sizeof(struct cell), cell_destructor); //allocate a cell
+    struct cell *cell2 = allocate(sizeof(struct cell), cell_destructor);
+    struct cell *cell3 = allocate(sizeof(struct cell), cell_destructor);
+
+    retain(cell);
+    retain(cell2);
+    retain(cell3);
+
+    release(cell);
+    release(cell2);
+    release(cell3);
+
+    free_scheduled_tasks(sizeof(cell));
+
+    memdata_t *found = GET_METADATA(cell);
+    CU_ASSERT_PTR_NOT_NULL(found);
+    CU_ASSERT_EQUAL(found->rc, 1);
+
+    memdata_t *found2 = GET_METADATA(cell2);
+    CU_ASSERT_PTR_NULL(found2);
+    
+    memdata_t *found3 = GET_METADATA(cell3);
+    CU_ASSERT_PTR_NULL(found3);
+
+    CU_ASSERT_EQUAL(found->rc, 0);
+}
 
 int main() {
     // First we try to set up CUnit, and exit if we fail
@@ -289,14 +329,15 @@ int main() {
         //(CU_add_test(unit_test_suite1, "Memdata generate_insert", test_memdata_generate_insert_ht) == NULL) ||
         //(CU_add_test(unit_test_suite1, "Add to schedule", test_add_to_schedule) == NULL) ||
         //CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
-        //(CU_add_test(unit_test_suite1, "Free schedule with one task", test_free_scheduled_task_one_task) == NULL) ||
-        //(CU_add_test(unit_test_suite1, "Free schedule that goes over cascade limit", test_free_scheduled_tasks_over_cascade) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Free schedule with one task", test_free_scheduled_task_one_task) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Free schedule that goes over cascade limit", test_free_scheduled_tasks_over_cascade) == NULL) ||
         //(CU_add_test(unit_test_suite1, "Free schedule that goes until size limit", test_free_scheduled_tasks_until_size) == NULL) ||
         //(CU_add_test(unit_test_suite1, "Allocate", test_allocate) == NULL) ||
         //(CU_add_test(unit_test_suite1, "Allocate array", test_allocate_array) == NULL) ||
         //(CU_add_test(unit_test_suite1, "Default destructor", test_default_destructor) == NULL) ||
         //(CU_add_test(unit_test_suite1, "Free scheduled tasks with allocate", test_free_scheduled_tasks_with_allocate) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_and_free_scheduled_tasks) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_and_free_scheduled_tasks) == NULL) ||
+        (CU_add_test(unit_test_suite1, "david's test", test_retain_release) == NULL) ||
         0
     ) 
     {
