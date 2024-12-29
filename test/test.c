@@ -52,6 +52,20 @@ void test2(void) {
     CU_ASSERT_EQUAL(1 + 1, 2);
 }
 
+void test_retain(void) {
+    char* word = "hej"; //stack allocated
+    ioopm_hash_table_insert(get_memdata_ht(), int_elem(word), ptr_elem(memdata_generate(non_destructor)));
+    memdata_t *memdata = ioopm_hash_table_lookup(get_memdata_ht(), int_elem((int) word)).value.p;
+    // memdata_t *memdata = Get_memdata(word);
+    CU_ASSERT_TRUE(memdata->rc == 0);
+    retain(word);
+    CU_ASSERT_TRUE(memdata->rc == 1);
+    //ioopm_hash_table_destroy(get_memdata_ht());
+    ioopm_hash_table_remove(get_memdata_ht(), int_elem(word));
+    free(memdata);
+    memdata = NULL;
+}
+
 void test_rc(void) {
     struct cell *c = allocate(sizeof(struct cell), cell_destructor); //allocate a cell
     c->i = 5;
@@ -72,7 +86,7 @@ void test_get_schedule_linked_list(){
     CU_ASSERT_TRUE(ioopm_linked_list_is_empty(list));
 
     //add two objects to list
-    obj *object = malloc(sizeof(obj*));
+    obj *object = malloc(sizeof(obj));
     add_to_schedule(object);
     add_to_schedule(object);
     
@@ -472,8 +486,9 @@ int main() {
         // (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Allocate and free array scheduled tasks", test_allocate_array_then_free) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Allocate and free string scheduled tasks", test_allocate_strings_then_free) == NULL) ||
-        (CU_add_test(unit_test_suite1, "rc() ref count function", test_rc) == NULL) ||
+        (CU_add_test(unit_test_suite1, "rc() ref count test", test_rc) == NULL) ||
         // (CU_add_test(unit_test_suite1, "get_schedule_linked_list test", test_get_schedule_linked_list) == NULL) ||
+        (CU_add_test(unit_test_suite1, "retain test 1", test_retain) == NULL) ||
         0
     ) 
     {
