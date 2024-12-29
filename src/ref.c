@@ -11,7 +11,7 @@ bool int_eq(void *a, void *b) {
     return *(int *)a == *(int *)b;
 }
 
-int CASCADE_LIMIT;
+size_t CASCADE_LIMIT;
 
 
 ioopm_list_t *get_schedule_linked_list() 
@@ -58,7 +58,7 @@ void release_destructor(obj *to_remove)
 void free_scheduled_tasks(size_t size) 
 {
     size_t freed_size = 0;
-    int freed_amount = 0;
+    size_t freed_amount = 0;
 
     while ((freed_size < size || freed_amount < CASCADE_LIMIT) && ioopm_linked_list_size(get_schedule_linked_list()) > 0) 
     {

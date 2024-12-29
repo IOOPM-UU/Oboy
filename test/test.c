@@ -200,7 +200,6 @@ void test_rc(void) {
     release(c);
     CU_ASSERT_TRUE(rc(c) == 0);
     release(c);
-    // size_t check = rc(c); //FIXME: pekaren till metadatan finns fortfarande kvar (problem?)
 }
 
 
