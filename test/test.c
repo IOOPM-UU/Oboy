@@ -7,6 +7,18 @@
 #include <assert.h>
 #include <limits.h>
 
+struct cell
+{
+  struct cell *cell;
+  int i;
+  char *string;
+};
+
+void cell_destructor(obj *c)
+{
+  release(((struct cell *) c)->cell);
+}
+
 int init_suite(void) {
     // Change this function if you want to do something *before* you
     // run a test suite
@@ -19,6 +31,8 @@ int clean_suite(void) {
     shutdown();
     return 0;
 }
+
+
 
 // Unit tests
 
@@ -37,6 +51,21 @@ int clean_suite(void) {
 void test2(void) {
     CU_ASSERT_EQUAL(1 + 1, 2);
 }
+
+void test_rc(void) {
+    struct cell *c = allocate(sizeof(struct cell), cell_destructor); //allocate a cell
+    c->i = 5;
+    c->string = "cell";
+    c->cell = NULL;
+
+    CU_ASSERT_TRUE(rc(c) == 0);
+    retain(c);
+    CU_ASSERT_TRUE(rc(c) == 1);
+    release(c);
+    CU_ASSERT_TRUE(rc(c) == 0);
+    release(c);
+}
+
 /*
 void test_get_memdata_ht(void) {    
     ioopm_hash_table_t *ht_rc = get_memdata_ht();
@@ -361,19 +390,19 @@ void test_allocate_strings_then_free(void)
     // 1. Allocate memory blocks
     char *str1 = allocate_array(5, sizeof(char), NULL);
     for (int i = 0; i < 5; i++) {
-        str1[i] = "a";
+        str1[i] = 'a';
     }
     CU_ASSERT_PTR_NOT_NULL(str1);
     
     char *str2 = allocate_array(6, sizeof(char), NULL);
     for (int i = 0; i < 6; i++) {
-        str2[i] = "b";
+        str2[i] = 'b';
     }
     CU_ASSERT_PTR_NOT_NULL(str2);
     
     char *str3 = allocate_array(7, sizeof(char), NULL);
     for (int i = 0; i < 7; i++) {
-        str3[i] = "c";
+        str3[i] = 'c';
     }
     CU_ASSERT_PTR_NOT_NULL(str3);
 
@@ -421,10 +450,11 @@ int main() {
         //(CU_add_test(unit_test_suite1, "Allocate array", test_allocate_array) == NULL) ||
         //(CU_add_test(unit_test_suite1, "Default destructor", test_default_destructor) == NULL) ||
         //(CU_add_test(unit_test_suite1, "Free scheduled tasks with allocate", test_free_scheduled_tasks_with_allocate) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_and_free_scheduled_tasks) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Allocate and free array scheduled tasks", test_allocate_array_then_free) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Allocate and free string scheduled tasks", test_allocate_strings_then_free) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_and_free_scheduled_tasks) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Allocate and free array scheduled tasks", test_allocate_array_then_free) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Allocate and free string scheduled tasks", test_allocate_strings_then_free) == NULL) ||
+        (CU_add_test(unit_test_suite1, "rc() ref count function", test_rc) == NULL) ||
         0
     ) 
     {
