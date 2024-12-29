@@ -209,7 +209,7 @@ void check_allocation(obj *object, function1_t expected_destructor) {
     CU_ASSERT_PTR_NOT_NULL(object); // Ensure object is not null
 
     // Access metadata via pointer arithmetic
-    memdata_t *metadata = GET_METADATA(object);
+    metadata_t *metadata = GET_METADATA(object);
 
     CU_ASSERT_EQUAL(metadata->rc, 0);                      // Verify reference count
     CU_ASSERT_EQUAL(metadata->destructor, expected_destructor); // Verify destructor
