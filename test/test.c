@@ -66,6 +66,25 @@ void test_rc(void) {
     release(c);
 }
 
+void test_get_schedule_linked_list(){
+    //if null, create
+    ioopm_list_t *list = get_schedule_linked_list();
+    CU_ASSERT_TRUE(ioopm_linked_list_is_empty(list));
+
+    //add two objects to list
+    obj *object = malloc(sizeof(obj));
+    add_to_schedule(object);
+    add_to_schedule(object);
+    
+    //if list exists, return it
+    ioopm_list_t *list2 = get_schedule_linked_list();
+    CU_ASSERT_EQUAL(list,list2);
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 2);
+    ioopm_linked_list_clear(list);
+    
+    free(object);
+}
+
 /*
 void test_get_memdata_ht(void) {    
     ioopm_hash_table_t *ht_rc = get_memdata_ht();
@@ -291,6 +310,7 @@ void test_allocate_and_free_scheduled_tasks(void)
     // Otherwise you can do:
     // free_all();
 }
+
 typedef struct link link_t;
 
 struct link
@@ -351,8 +371,6 @@ void test_allocate_links_and_free_scheduled_tasks(void)
     // Otherwise you can do:
     // free_all();
 }
-
-
 
 void test_allocate_array_then_free(void)
 {
@@ -455,6 +473,7 @@ int main() {
         // (CU_add_test(unit_test_suite1, "Allocate and free array scheduled tasks", test_allocate_array_then_free) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Allocate and free string scheduled tasks", test_allocate_strings_then_free) == NULL) ||
         (CU_add_test(unit_test_suite1, "rc() ref count function", test_rc) == NULL) ||
+        (CU_add_test(unit_test_suite1, "get_schedule_linked_list test", test_get_schedule_linked_list) == NULL) ||
         0
     ) 
     {
