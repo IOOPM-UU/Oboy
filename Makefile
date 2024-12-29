@@ -3,6 +3,8 @@ C_COMPILER     = gcc
 C_OPTIONS      = -Wall -pedantic -Wextra -g
 C_LINK_OPTIONS = -lm
 CUNIT_LINK     = -lcunit
+C_COVERAGE 	   = gcov -abcfu --coverage
+R_COVERAGE	   = gcovr -r . --html --html-details -o coverage.html
 
 # Source and object files
 REF            = src/ref.c
@@ -29,6 +31,15 @@ ref_test: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
 
 gdb: ref_test
 	gdb ./ref_test --tui
+
+cov: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
+
+
+coverage: cov
+
+	$(C_COVERAGE) $()
+	gcov -abcfu cov-webstore.gcda
+	gcovr -r . --html --html-details -o coverage.html
 
 # Clean up generated files
 clean:

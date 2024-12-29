@@ -38,6 +38,12 @@ void add_to_schedule(obj *object)
     ioopm_linked_list_append(get_schedule_linked_list(), ptr_elem(object));
 }
 
+size_t rc(obj* object) {
+    memdata_t *metadata = GET_METADATA(object);
+    return metadata->rc;
+
+}
+
 void release_destructor(obj *to_remove) 
 {
     if (!to_remove) {
@@ -52,9 +58,9 @@ void release_destructor(obj *to_remove)
 void free_scheduled_tasks(size_t size) 
 {
     size_t freed_size = 0;
-    size_t freed_amount = 0;
+    int freed_amount = 0;
 
-    while ((freed_size < size || freed_size < CASCADE_LIMIT) && ioopm_linked_list_size(get_schedule_linked_list()) > 0) 
+    while ((freed_size < size || freed_amount < CASCADE_LIMIT) && ioopm_linked_list_size(get_schedule_linked_list()) > 0) 
     {
         bool successful1 = false;
         obj *to_remove = ioopm_linked_list_get(get_schedule_linked_list(), 0, &successful1).p;
@@ -92,6 +98,7 @@ void free_scheduled_tasks(size_t size)
         }
 
         bool successful2 = false;
+        freed_amount++;
         ioopm_linked_list_remove(get_schedule_linked_list(), 0, &successful2);
         if (!successful2) 
         {
