@@ -7,7 +7,7 @@
 #include "inlupp2_DONOTTOUCH/business_logic/common.h"
 
 // Retrieves the metadata for the object, which is stored just before the object on the heap
-#define GET_METADATA(obj) ((memdata_t *)((char *)(obj) - sizeof(memdata_t)))
+#define GET_METADATA(obj) ((metadata_t *)((char *)(obj) - sizeof(metadata_t)))
 
 /// Dummy 'obj' is just a void pointer as far as this manager is concerned
 typedef void obj;
@@ -16,12 +16,12 @@ typedef void obj;
 typedef void(*function1_t)(obj *);
 
 /// The memory header we store immediately before the actual data
-struct memdata {
+struct metadata {
     size_t rc;                      ///< reference count
     function1_t destructor;        ///< function to call before freeing
     size_t size;                   ///< total size of the user allocation
 };
-typedef struct memdata memdata_t;
+typedef struct metadata metadata_t;
 
 // The required functions
 void retain(obj *);
@@ -29,7 +29,7 @@ void release(obj *);
 size_t rc(obj *);
 obj *allocate(size_t bytes, function1_t destructor);
 obj *allocate_array(size_t elements, size_t elem_size, function1_t destructor);
-memdata_t *memdata_generate(function1_t destructor, size_t size);
+metadata_t *memdata_generate(function1_t destructor, size_t size);
 void deallocate(obj *);
 void set_cascade_limit(size_t);
 size_t get_cascade_limit();
