@@ -62,7 +62,7 @@ void free_scheduled_tasks(size_t size)
         if (!successful1 || !to_remove) 
         {
             printf("Null or invalid object encountered during task freeing\n");
-            break; 
+            break;
         }
 
         memdata_t *metadata = GET_METADATA(to_remove);
@@ -156,6 +156,7 @@ void release(obj *object)
     free_scheduled_tasks(0);
 }
 
+// Helper for default destructor
 static bool is_valid_pointer(void *object)
 {
     if (!object) return false;
@@ -166,6 +167,7 @@ static bool is_valid_pointer(void *object)
     return false;
 }
 
+// Uppgiften pratar om att spara alla objekt någonstanns och jämföra med det, vilket v
 void default_destructor(obj* object)
 {
     if(!object)
@@ -212,24 +214,24 @@ void cleanup()
     }
 }
 
-void free_all() 
+void free_all()
 {
     cleanup();
     ioopm_linked_list_destroy(get_schedule_linked_list());
     schedule_linked_list = NULL;
 }
 
-void shutdown() 
+void shutdown()
 {
     free_all();
 }
 
-size_t get_cascade_limit() 
+size_t get_cascade_limit()
 {
     return CASCADE_LIMIT;
 }
 
-void set_cascade_limit(size_t size) 
+void set_cascade_limit(size_t size)
 {
     CASCADE_LIMIT = (int)size; 
 }
