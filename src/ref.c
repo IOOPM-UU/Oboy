@@ -11,7 +11,7 @@ bool int_eq(void *a, void *b) {
     return *(int *)a == *(int *)b;
 }
 
-int CASCADE_LIMIT = 10;
+size_t CASCADE_LIMIT;
 
 
 ioopm_list_t *get_schedule_linked_list() 
@@ -22,20 +22,26 @@ ioopm_list_t *get_schedule_linked_list()
     return schedule_linked_list;
 }
 
-// memdata_t *memdata_generate(function1_t destructor, size_t size) 
-// {
-//     memdata_t *memdata = calloc(1, sizeof(memdata_t));
-//     if (!memdata) return NULL;
+memdata_t *memdata_generate(function1_t destructor, size_t size) 
+{
+    memdata_t *memdata = calloc(1, sizeof(memdata_t));
+    if (!memdata) return NULL;
 
-//     memdata->rc         = 0;
-//     memdata->destructor = destructor;
-//     memdata->size       = size;
-//     return memdata;
-// }
+    memdata->rc         = 0;
+    memdata->destructor = destructor;
+    memdata->size       = size;
+    return memdata;
+}
 
 void add_to_schedule(obj *object) 
 {
     ioopm_linked_list_append(get_schedule_linked_list(), ptr_elem(object));
+}
+
+size_t rc(obj* object) {
+    memdata_t *metadata = GET_METADATA(object);
+    return metadata->rc;
+
 }
 
 void release_destructor(obj *to_remove) 
@@ -49,12 +55,12 @@ void release_destructor(obj *to_remove)
     }
 }
 
-// Calling free_scheduled_tasks(INT_MAX) frees everything
 void free_scheduled_tasks(size_t size) 
 {
     size_t freed_size = 0;
+    size_t freed_amount = 0;
 
-    while (freed_size < size && ioopm_linked_list_size(get_schedule_linked_list()) > 0)
+    while ((freed_size < size || freed_amount < CASCADE_LIMIT) && ioopm_linked_list_size(get_schedule_linked_list()) > 0) 
     {
         bool successful1 = false;
         obj *to_remove = ioopm_linked_list_get(get_schedule_linked_list(), 0, &successful1).p;
@@ -62,7 +68,7 @@ void free_scheduled_tasks(size_t size)
         if (!successful1 || !to_remove) 
         {
             printf("Null or invalid object encountered during task freeing\n");
-            break;
+            break; 
         }
 
         memdata_t *metadata = GET_METADATA(to_remove);
@@ -76,6 +82,7 @@ void free_scheduled_tasks(size_t size)
             }
             continue;
         }
+
        
         if (metadata->rc > 0) 
         {
@@ -91,6 +98,7 @@ void free_scheduled_tasks(size_t size)
         }
 
         bool successful2 = false;
+        freed_amount++;
         ioopm_linked_list_remove(get_schedule_linked_list(), 0, &successful2);
         if (!successful2) 
         {
@@ -153,43 +161,8 @@ void release(obj *object)
     {
         metadata->rc--;
     }
-    free_scheduled_tasks(0);
-}
-
-// Helper for default destructor
-static bool is_valid_pointer(void *object)
-{
-    if (!object) return false;
-    memdata_t *metadata = GET_METADATA(object);
-    if (metadata) {
-        return true;
-    }
-    return false;
-}
-
-// Uppgiften pratar om att spara alla objekt någonstanns och jämföra med det, vilket v
-void default_destructor(obj* object)
-{
-    if(!object)
-    {
-        return;
-    }
-    memdata_t *metadata = GET_METADATA(object);
-    if (!metadata)
-    {
-        return;
-    }
-    size_t object_size = metadata->size;
-
-    for(size_t offset = 0; offset <= object_size - sizeof(void*); offset++)
-    {
-        void **possible_pointer = (void **)((char *)object + offset);
-        if(is_valid_pointer(*possible_pointer))
-        {
-            release(*possible_pointer);
-            offset += sizeof(void*) - 1; // -1 since for loop increments
-        }
-    }
+    size_t size = metadata->size;
+    free_scheduled_tasks(size);
 }
 
 void cleanup() 
@@ -214,24 +187,24 @@ void cleanup()
     }
 }
 
-void free_all()
+void free_all() 
 {
     cleanup();
     ioopm_linked_list_destroy(get_schedule_linked_list());
     schedule_linked_list = NULL;
 }
 
-void shutdown()
+void shutdown() 
 {
     free_all();
 }
 
-size_t get_cascade_limit()
+size_t get_cascade_limit() 
 {
     return CASCADE_LIMIT;
 }
 
-void set_cascade_limit(size_t size)
+void set_cascade_limit(size_t size) 
 {
     CASCADE_LIMIT = (int)size; 
 }
