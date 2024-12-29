@@ -5,6 +5,7 @@
         "functional": "c",
         "common.h": "c",
         "hash_table.h": "c",
-        "linked_list.h": "c"
+        "linked_list.h": "c",
+        "limits.h": "c"
     }
 }

@@ -7,8 +7,8 @@
 
 static ioopm_list_t *schedule_linked_list = NULL;
 
-bool int_eq(void *a, void *b) {
-    return *(int *)a == *(int *)b;
+bool int_eq(elem_t a, elem_t b) {
+    return a.i == b.i;
 }
 
 size_t CASCADE_LIMIT;
