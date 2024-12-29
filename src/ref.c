@@ -130,9 +130,9 @@ void free_scheduled_tasks(size_t size)
         {
             metadata->destructor(to_remove);
         }
+        free(to_remove);
 
         bool successful2 = false;
-        freed_amount++;
         ioopm_linked_list_remove(get_schedule_linked_list(), 0, &successful2);
         if (!successful2) 
         {
@@ -140,7 +140,9 @@ void free_scheduled_tasks(size_t size)
             break;
         }
 
-         ioopm_hash_table_remove(get_metadata_ht, int_elem(key_as_int));
+        ioopm_hash_table_remove(get_metadata_ht(), int_elem(key_as_int));
+        free(metadata);
+        freed_amount++;
     }
 }
 
@@ -188,7 +190,7 @@ void retain(obj *object)
     uintptr_t key_as_int = (uintptr_t)object;
     
     //memdata_t *metadata = GET_METADATA(object);
-    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht,int_elem(key_as_int));
+    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(),int_elem(key_as_int));
 
     if (option.success) {
         metadata_t *metadata = (metadata_t *)(option.value.p);
@@ -205,7 +207,7 @@ void release(obj *object)
     uintptr_t key_as_int = (uintptr_t)object;
     
     //memdata_t *metadata = GET_METADATA(object);
-    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht,int_elem(key_as_int));
+    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(),int_elem(key_as_int));
 
     if (!option.success) return;
      metadata_t *metadata = (metadata_t *)(option.value.p);  
@@ -246,7 +248,7 @@ void default_destructor(obj* object)
     uintptr_t key_as_int = (uintptr_t)object;
     
     //memdata_t *metadata = GET_METADATA(object);
-    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht,int_elem(key_as_int));
+    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(),int_elem(key_as_int));
 
     if (!option.success) return;
      metadata_t *metadata = (metadata_t *)(option.value.p);
@@ -276,7 +278,7 @@ void cleanup()
         if (successful && object) 
         {
              key_as_int = (uintptr_t)object;
-             ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht,int_elem(key_as_int));
+             ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(),int_elem(key_as_int));
 
         if (option.success){
             metadata_t *metadata = (metadata_t *)(option.value.p);  
@@ -297,6 +299,8 @@ void free_all()
     cleanup();
     ioopm_linked_list_destroy(get_schedule_linked_list());
     schedule_linked_list = NULL;
+    ioopm_hash_table_destroy(get_metadata_ht());
+    
 }
 
 void shutdown() 
