@@ -437,6 +437,18 @@ void test_allocate_strings_then_free(void)
     // free_all();
 }
 
+void test_get_and_set_cascade_limit(){
+    // Set cascade limit
+    set_cascade_limit(2);
+    // Check that get_cascade_limit gets the right limit
+    CU_ASSERT_EQUAL(get_cascade_limit(), 2);
+
+    // Set new cascade limit
+    set_cascade_limit(100);
+    // Check that new get_cascade_limit gets the right limit
+    CU_ASSERT_EQUAL(get_cascade_limit(), 100);
+}
+
 
 
 int main() {
@@ -474,6 +486,7 @@ int main() {
         // (CU_add_test(unit_test_suite1, "Allocate and free string scheduled tasks", test_allocate_strings_then_free) == NULL) ||
         (CU_add_test(unit_test_suite1, "rc() ref count function", test_rc) == NULL) ||
         // (CU_add_test(unit_test_suite1, "get_schedule_linked_list test", test_get_schedule_linked_list) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Get and set cascade limit", test_get_and_set_cascade_limit) == NULL) ||
         0
     ) 
     {
