@@ -20,7 +20,7 @@ void cell_destructor(obj *c) //kanske borde returna Size på det vi tagit bort?
 }
 
 void dummy_destructor(obj *object) {
-    release(object);
+    return;
 }
 
 int init_suite(void) {
@@ -223,7 +223,7 @@ void test_free_scheduled_task_empty(){
 void test_free_scheduled_task_one_task(){
     set_cascade_limit(3);
     ioopm_list_t *list = get_schedule_linked_list();
-    obj *object = allocate(sizeof(obj), dummy_destructor);
+    obj *object = allocate(sizeof(obj*), dummy_destructor);
     add_to_schedule(object);
     CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 1);
     free_scheduled_tasks(1);
@@ -516,10 +516,10 @@ int main() {
         (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_and_free_scheduled_tasks) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate links and free scheduled tasks", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate array and free scheduled tasks", test_allocate_array_then_free) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Allocate string and free scheduled tasks", test_allocate_strings_then_free) == NULL) ||
         (CU_add_test(unit_test_suite1, "rc() ref count function", test_rc) == NULL) ||
         (CU_add_test(unit_test_suite1, "get_schedule_linked_list test", test_get_schedule_linked_list) == NULL) ||
         (CU_add_test(unit_test_suite1, "Get and set cascade limit", test_get_and_set_cascade_limit) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Allocate string and free scheduled tasks", test_allocate_strings_then_free) == NULL) ||
         0
     ) 
     {
