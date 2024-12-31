@@ -341,7 +341,7 @@ void test_allocate_and_free_scheduled_tasks(void)
     // 3. Free tasks up to 150 bytes => frees object1(100)
     free_scheduled_tasks(100);
     // => now 2 remain
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(get_schedule_linked_list()), 1);
+    CU_ASSERT_EQUAL(ioopm_linked_list_size(get_schedule_linked_list()), 2);
 
     // 4. Free tasks up to 600 => enough for object2(200) + object3(300)
     free_scheduled_tasks(600);
