@@ -28,7 +28,7 @@ void cell_destructor(obj *c) //kanske borde returna Size på det vi tagit bort?
 }
 
 void dummy_destructor(obj *object) {
-    return object;
+    return;
 }
 
 int init_suite(void) {

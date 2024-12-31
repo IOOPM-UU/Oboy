@@ -272,7 +272,7 @@ void release(obj *object)
     if (metadata->rc == 0) 
     {
         add_to_schedule(object);
-        //TODO: flyttat in destructorer in hit (test)
+        //TODO: flyttat in destructorer in hit (david)
         if (metadata->destructor) // This if else could maybe be extracted to deallocate (probably including the free after, and maybe even free(metadata))
         {
             metadata->destructor(object);
