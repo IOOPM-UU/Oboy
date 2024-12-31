@@ -318,7 +318,7 @@ void check_allocation(obj *object, function1_t expected_destructor) {
 void test_allocate_and_free_scheduled_tasks(void)
 {
     // Set cascade limit
-    set_cascade_limit(3);
+    set_cascade_limit(1);
 
     // 1. Allocate memory blocks
     obj *object1 = allocate(100, NULL);
@@ -339,7 +339,7 @@ void test_allocate_and_free_scheduled_tasks(void)
     CU_ASSERT_EQUAL(ioopm_linked_list_size(get_schedule_linked_list()), 3);
 
     // 3. Free tasks up to 150 bytes => frees object1(100)
-    free_scheduled_tasks(150);
+    free_scheduled_tasks(100);
     // => now 2 remain
     CU_ASSERT_EQUAL(ioopm_linked_list_size(get_schedule_linked_list()), 1);
 
@@ -504,7 +504,7 @@ int main() {
         // (CU_add_test(unit_test_suite1, "Add to schedule", test_add_to_schedule) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Default destructor", test_default_destructor) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_and_free_scheduled_tasks) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_and_free_scheduled_tasks) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Allocate links and free scheduled tasks", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Allocate array and free scheduled tasks", test_allocate_array_then_free) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Allocate string and free scheduled tasks", test_allocate_strings_then_free) == NULL) ||
