@@ -14,13 +14,13 @@ struct cell
   char *string;
 };
 
-void cell_destructor(obj *c)
+void cell_destructor(obj *c) //kanske borde returna Size på det vi tagit bort?
 {
-  release(((struct cell *) c)->cell);
+    release(((struct cell *) c)->cell);
 }
 
 void dummy_destructor(obj *object) {
-    return;
+    release(object);
 }
 
 int init_suite(void) {
@@ -56,72 +56,42 @@ void test2(void) {
     CU_ASSERT_EQUAL(1 + 1, 2);
 }
 
-void test_retain() {
-    char* hej = strdup("hej");
-    size_t size = sizeof(hej);
-    ioopm_hash_table_insert(get_metadata_ht(), 
-                            int_elem((uintptr_t) hej), 
-                            ptr_elem(metadata_generate(dummy_destructor, 
-                                                       size)));
-    metadata_t *metadata = GET_METADATA(hej);
-
+void test_retain_release() {
+    struct cell *c = allocate(sizeof(struct cell), cell_destructor);
+    c->cell = NULL; // otherwise unconditional jump!
+    CU_ASSERT_TRUE(rc(c) == 0);
+    retain(c);
+    CU_ASSERT_TRUE(rc(c) == 1);
+    retain(c);
+    CU_ASSERT_TRUE(rc(c) == 2);
+    release(c);
+    CU_ASSERT_TRUE(rc(c) == 1);
+    release(c);
+    CU_ASSERT_TRUE(rc(c) == 0);
+    release(c);
 }
 
-// void test_retain(void) {
-//     struct cell *c = allocate(sizeof(struct cell), cell_destructor); 
-//     ioopm_hash_table_insert(get_metadata_ht(), int_elem((uintptr_t) c), ptr_elem(metadata_generate(cell_destructor, sizeof(struct cell))));
-//     metadata_t *metadata = ioopm_hash_table_lookup(get_metadata_ht(), int_elem((int) c)).value.p;
-//     CU_ASSERT_TRUE(rc(c) == 0);
-//     retain(c);
-//     CU_ASSERT_TRUE(rc(c) == 1);
-//     //ioopm_hash_table_destroy(get_metadata_ht());
-//     ioopm_hash_table_remove(get_metadata_ht(), int_elem((int) num));
-//     free(metadata);
-//     metadata = NULL;
-// }
-
-// void test_retain_heap(void) {
-//     char* word = allocate( sizeof("hej"), NULL);
-//     ioopm_hash_table_insert(get_metadata_ht(), int_elem((int) word), ptr_elem(metadata_generate(NULL, 4 * sizeof(char))));
-//     metadata_t *metadata = ioopm_hash_table_lookup(get_metadata_ht(), int_elem((int) word)).value.p;
-//     // metadata_t *metadata = Get_metadata(word);
-//     CU_ASSERT_TRUE(metadata->rc == 0);
-//     retain(word);
-//     CU_ASSERT_TRUE(metadata->rc == 1);
-//     release(word);
-//     free(metadata);
-//     metadata = NULL;
-// }
-
-// void test_retain_release() {
-//     set_cascade_limit(100);
-//     struct cell *cell = allocate(sizeof(struct cell), cell_destructor); //allocate a cell
-//     // struct cell *cell2 = allocate(sizeof(struct cell), cell_destructor);
-//     // struct cell *cell3 = allocate(sizeof(struct cell), cell_destructor);
-//     retain(cell);
-//     // retain(cell2);
-//     // retain(cell3);
-
-//     metadata_t *metadata = GET_METADATA(cell);
-//     CU_ASSERT_PTR_NOT_NULL(metadata);
-//     CU_ASSERT_EQUAL(metadata->rc, 1);
+void test_retain_release2() {
+    //create objects
+    set_cascade_limit(100);
+    struct cell *first = allocate(sizeof(struct cell), cell_destructor); //allocate a cell
+    struct cell *second = allocate(sizeof(struct cell), cell_destructor);
+    //chain them together
+    first->cell = second;
+    second->cell = NULL;
+    CU_ASSERT_EQUAL(rc(first), 0);
+    CU_ASSERT_EQUAL(rc(second), 0);
+    // retain(another);
+    retain(first);
+    CU_ASSERT_EQUAL(rc(first), 1);
+    release(first);
+    // release(another);
+    CU_ASSERT_EQUAL(rc(first), 0);
+    CU_ASSERT_EQUAL(rc(second), 0);
     
-//     release(cell);
-//     re
-//     // release(cell2);
-//     // release(cell3);
-
-
-//     // release(cell);
-//     // release(cell2);
-//     // release(cell3);
-
-//     metadata_t *found2 = GET_METADATA(cell2);
-//     CU_ASSERT_PTR_NULL(found2); //FIXME: är ej null? dangling pointer?
-    
-//     metadata_t *found3 = GET_METADATA(cell3);
-//     CU_ASSERT_PTR_NULL(found3);
-// }
+    //remove both cells with one call!
+    release(first);
+}
 
 void test_rc(void) {
     struct cell *c = allocate(sizeof(struct cell), cell_destructor); //allocate a cell
@@ -137,24 +107,24 @@ void test_rc(void) {
     release(c);
 }
 
-void test_get_schedule_linked_list(){
-    //if null, create
-    ioopm_list_t *list = get_schedule_linked_list();
-    CU_ASSERT_TRUE(ioopm_linked_list_is_empty(list));
+// void test_get_schedule_linked_list(){
+//     //if null, create
+//     ioopm_list_t *list = get_schedule_linked_list();
+//     CU_ASSERT_TRUE(ioopm_linked_list_is_empty(list));
 
-    //add two objects to list
-    obj *object = malloc(sizeof(obj));
-    add_to_schedule(object);
-    add_to_schedule(object);
+//     //add two objects to list
+//     obj *object = malloc(sizeof(obj));
+//     add_to_schedule(object);
+//     add_to_schedule(object);
     
-    //if list exists, return it
-    ioopm_list_t *list2 = get_schedule_linked_list();
-    CU_ASSERT_EQUAL(list,list2);
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 2);
-    ioopm_linked_list_clear(list);
+//     //if list exists, return it
+//     ioopm_list_t *list2 = get_schedule_linked_list();
+//     CU_ASSERT_EQUAL(list,list2);
+//     CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 2);
+//     ioopm_linked_list_clear(list);
     
-    free(object);
-}
+//     free(object);
+// }
 
 /*
 void test_get_metadata_ht(void) {    
@@ -177,9 +147,9 @@ void test_get_metadata_ht_retrieve(void) {
     //ioopm_hash_table_destroy(ht_rc); //TODO swap for shutdown later?? //DANGLING POINTERS
 } */
 
-void dummy_destructor(void *ptr) {
-    free(ptr);
-}
+// void dummy_destructor(void *ptr) {
+//     free(ptr);
+// }
 
 void metadata_destructor(void *ptr) {
     free(ptr);
@@ -545,9 +515,9 @@ int main() {
         // (CU_add_test(unit_test_suite1, "Allocate and free string scheduled tasks", test_allocate_strings_then_free) == NULL) ||
         // (CU_add_test(unit_test_suite1, "rc() ref count test", test_rc) == NULL) ||
         // (CU_add_test(unit_test_suite1, "get_schedule_linked_list test", test_get_schedule_linked_list) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "retain test 1", test_retain) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "retain test 2", test_retain_heap) == NULL) ||
-        (CU_add_test(unit_test_suite1, "retain test 2", test_retain_release) == NULL) ||
+    
+        // (CU_add_test(unit_test_suite1, "retain/release test 1", test_retain_release) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "retain/release test 2 (chain)", test_retain_release2) == NULL) ||
         0
     ) 
     {

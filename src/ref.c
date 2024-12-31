@@ -169,14 +169,14 @@ void free_scheduled_tasks(size_t size)
 
         freed_size += metadata->size;
         
-        if (metadata->destructor) // This if else could maybe be extracted to deallocate (probably including the free after, and maybe even free(metadata))
-        {
-            metadata->destructor(to_remove);
-        }
-        else
-        {
-            default_destructor(to_remove);
-        }
+        // if (metadata->destructor) // This if else could maybe be extracted to deallocate (probably including the free after, and maybe even free(metadata))
+        // {
+        //     metadata->destructor(to_remove);
+        // }
+        // else
+        // {
+        //     default_destructor(to_remove);
+        // }
         free(to_remove);
 
         bool successful2 = false;
@@ -262,6 +262,15 @@ void release(obj *object)
     if (metadata->rc == 0) 
     {
         add_to_schedule(object);
+        //TODO: flyttat in destructorer in hit (test)
+        if (metadata->destructor) // This if else could maybe be extracted to deallocate (probably including the free after, and maybe even free(metadata))
+        {
+            metadata->destructor(object);
+        }
+        else
+        {
+            default_destructor(object);
+    }
     } 
     else
     {
