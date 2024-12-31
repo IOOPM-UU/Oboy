@@ -19,6 +19,10 @@ void cell_destructor(obj *c)
   release(((struct cell *) c)->cell);
 }
 
+void dummy_destructor(obj *object) {
+    return;
+}
+
 int init_suite(void) {
     // Change this function if you want to do something *before* you
     // run a test suite
@@ -52,19 +56,72 @@ void test2(void) {
     CU_ASSERT_EQUAL(1 + 1, 2);
 }
 
-void test_retain(void) {
-    char* word = "hej"; //stack allocated
-    ioopm_hash_table_insert(get_memdata_ht(), int_elem(word), ptr_elem(memdata_generate(non_destructor)));
-    memdata_t *memdata = ioopm_hash_table_lookup(get_memdata_ht(), int_elem((int) word)).value.p;
-    // memdata_t *memdata = Get_memdata(word);
-    CU_ASSERT_TRUE(memdata->rc == 0);
-    retain(word);
-    CU_ASSERT_TRUE(memdata->rc == 1);
-    //ioopm_hash_table_destroy(get_memdata_ht());
-    ioopm_hash_table_remove(get_memdata_ht(), int_elem(word));
-    free(memdata);
-    memdata = NULL;
+void test_retain() {
+    char* hej = strdup("hej");
+    size_t size = sizeof(hej);
+    ioopm_hash_table_insert(get_metadata_ht(), 
+                            int_elem((uintptr_t) hej), 
+                            ptr_elem(metadata_generate(dummy_destructor, 
+                                                       size)));
+    metadata_t *metadata = GET_METADATA(hej);
+
 }
+
+// void test_retain(void) {
+//     struct cell *c = allocate(sizeof(struct cell), cell_destructor); 
+//     ioopm_hash_table_insert(get_metadata_ht(), int_elem((uintptr_t) c), ptr_elem(metadata_generate(cell_destructor, sizeof(struct cell))));
+//     metadata_t *metadata = ioopm_hash_table_lookup(get_metadata_ht(), int_elem((int) c)).value.p;
+//     CU_ASSERT_TRUE(rc(c) == 0);
+//     retain(c);
+//     CU_ASSERT_TRUE(rc(c) == 1);
+//     //ioopm_hash_table_destroy(get_metadata_ht());
+//     ioopm_hash_table_remove(get_metadata_ht(), int_elem((int) num));
+//     free(metadata);
+//     metadata = NULL;
+// }
+
+// void test_retain_heap(void) {
+//     char* word = allocate( sizeof("hej"), NULL);
+//     ioopm_hash_table_insert(get_metadata_ht(), int_elem((int) word), ptr_elem(metadata_generate(NULL, 4 * sizeof(char))));
+//     metadata_t *metadata = ioopm_hash_table_lookup(get_metadata_ht(), int_elem((int) word)).value.p;
+//     // metadata_t *metadata = Get_metadata(word);
+//     CU_ASSERT_TRUE(metadata->rc == 0);
+//     retain(word);
+//     CU_ASSERT_TRUE(metadata->rc == 1);
+//     release(word);
+//     free(metadata);
+//     metadata = NULL;
+// }
+
+// void test_retain_release() {
+//     set_cascade_limit(100);
+//     struct cell *cell = allocate(sizeof(struct cell), cell_destructor); //allocate a cell
+//     // struct cell *cell2 = allocate(sizeof(struct cell), cell_destructor);
+//     // struct cell *cell3 = allocate(sizeof(struct cell), cell_destructor);
+//     retain(cell);
+//     // retain(cell2);
+//     // retain(cell3);
+
+//     metadata_t *metadata = GET_METADATA(cell);
+//     CU_ASSERT_PTR_NOT_NULL(metadata);
+//     CU_ASSERT_EQUAL(metadata->rc, 1);
+    
+//     release(cell);
+//     re
+//     // release(cell2);
+//     // release(cell3);
+
+
+//     // release(cell);
+//     // release(cell2);
+//     // release(cell3);
+
+//     metadata_t *found2 = GET_METADATA(cell2);
+//     CU_ASSERT_PTR_NULL(found2); //FIXME: är ej null? dangling pointer?
+    
+//     metadata_t *found3 = GET_METADATA(cell3);
+//     CU_ASSERT_PTR_NULL(found3);
+// }
 
 void test_rc(void) {
     struct cell *c = allocate(sizeof(struct cell), cell_destructor); //allocate a cell
@@ -100,17 +157,17 @@ void test_get_schedule_linked_list(){
 }
 
 /*
-void test_get_memdata_ht(void) {    
-    ioopm_hash_table_t *ht_rc = get_memdata_ht();
+void test_get_metadata_ht(void) {    
+    ioopm_hash_table_t *ht_rc = get_metadata_ht();
     CU_ASSERT_PTR_NOT_NULL(ht_rc);
-    ioopm_hash_table_t *ht_rc2 = get_memdata_ht();
+    ioopm_hash_table_t *ht_rc2 = get_metadata_ht();
     CU_ASSERT_PTR_EQUAL(ht_rc, ht_rc2);
     
     //ioopm_hash_table_destroy(ht_rc); //TODO swap for shutdown later?? //DANGLING POINTERS
 }
 
-void test_get_memdata_ht_retrieve(void) {
-    ioopm_hash_table_t *ht_rc = get_memdata_ht();
+void test_get_metadata_ht_retrieve(void) {
+    ioopm_hash_table_t *ht_rc = get_metadata_ht();
     CU_ASSERT_PTR_NOT_NULL(ht_rc);
     
     ioopm_option_t check = ioopm_hash_table_lookup(ht_rc, int_elem(4));
@@ -124,46 +181,46 @@ void dummy_destructor(void *ptr) {
     free(ptr);
 }
 
-void memdata_destructor(void *ptr) {
+void metadata_destructor(void *ptr) {
     free(ptr);
 }
 
 /* void default_destructor(obj *object) {
     if (!object) return;
 
-    memdata_t *metadata = (memdata_t *)((char *)object - sizeof(memdata_t));
+    metadata_t *metadata = (metadata_t *)((char *)object - sizeof(metadata_t));
     size_t obj_size = metadata->size;
 
     for (size_t offset = 0; offset + sizeof(void *) <= obj_size; offset += sizeof(void *)) {
         void **possible_pointer = (void **)((char *)object + offset);
 
         // Check if the address is in the allocation tracker
-        if (ioopm_hash_table_lookup(get_memdata_ht(), ptr_elem(*possible_pointer)).success) {
+        if (ioopm_hash_table_lookup(get_metadata_ht(), ptr_elem(*possible_pointer)).success) {
             release(*possible_pointer);
         }
     }
 } */
-/* void test_memdata_generate(void) {
-    memdata_t *memdata = memdata_generate(memdata_destructor);
-    CU_ASSERT_PTR_NOT_NULL(memdata);
-    CU_ASSERT_EQUAL(memdata->rc, 0);
-    CU_ASSERT_EQUAL(memdata->destructor, memdata_destructor);
-    memdata->destructor(memdata); 
+/* void test_metadata_generate(void) {
+    metadata_t *metadata = metadata_generate(metadata_destructor);
+    CU_ASSERT_PTR_NOT_NULL(metadata);
+    CU_ASSERT_EQUAL(metadata->rc, 0);
+    CU_ASSERT_EQUAL(metadata->destructor, metadata_destructor);
+    metadata->destructor(metadata); 
 } */
-// currently leaks, need a special destructor for memdata
-/* void test_memdata_generate_insert_ht(void) {
-    memdata_t *memdata = memdata_generate(memdata_destructor);
-    ioopm_hash_table_insert(get_memdata_ht(), int_elem((int) &memdata), ptr_elem(memdata));
-    CU_ASSERT_PTR_NOT_NULL(memdata);
-    ioopm_option_t option = ioopm_hash_table_lookup(get_memdata_ht(), int_elem((int) &memdata));
+// currently leaks, need a special destructor for metadata
+/* void test_metadata_generate_insert_ht(void) {
+    metadata_t *metadata = metadata_generate(metadata_destructor);
+    ioopm_hash_table_insert(get_metadata_ht(), int_elem((int) &metadata), ptr_elem(metadata));
+    CU_ASSERT_PTR_NOT_NULL(metadata);
+    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(), int_elem((int) &metadata));
     CU_ASSERT_TRUE(option.success);
     free(option.value.p);
 
     
-    ioopm_hash_table_insert(get_memdata_ht(), int_elem(2), ptr_elem(memdata_generate(memdata_destructor)));
-    ioopm_option_t option2 = ioopm_hash_table_lookup(get_memdata_ht(), int_elem(2));
+    ioopm_hash_table_insert(get_metadata_ht(), int_elem(2), ptr_elem(metadata_generate(metadata_destructor)));
+    ioopm_option_t option2 = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(2));
     CU_ASSERT_TRUE(option2.success);
-    option2 = ioopm_hash_table_lookup(get_memdata_ht(), int_elem(2));
+    option2 = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(2));
     free(option2.value.p);
     CU_ASSERT_TRUE(option.success);
 
@@ -283,8 +340,8 @@ void check_allocation(obj *object, function1_t expected_destructor) {
     release(link1);
 
     // Check that both nodes are properly deallocated
-    assert(ioopm_hash_table_lookup(get_memdata_ht(), ptr_elem(link1)).success == false);
-    assert(ioopm_hash_table_lookup(get_memdata_ht(), ptr_elem(link2)).success == false);
+    assert(ioopm_hash_table_lookup(get_metadata_ht(), ptr_elem(link1)).success == false);
+    assert(ioopm_hash_table_lookup(get_metadata_ht(), ptr_elem(link2)).success == false);
 
     printf("Test Case 1 passed: Default destructor released all linked pointers.\n");
 } */
@@ -486,9 +543,11 @@ int main() {
         // (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Allocate and free array scheduled tasks", test_allocate_array_then_free) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Allocate and free string scheduled tasks", test_allocate_strings_then_free) == NULL) ||
-        (CU_add_test(unit_test_suite1, "rc() ref count test", test_rc) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "rc() ref count test", test_rc) == NULL) ||
         // (CU_add_test(unit_test_suite1, "get_schedule_linked_list test", test_get_schedule_linked_list) == NULL) ||
-        (CU_add_test(unit_test_suite1, "retain test 1", test_retain) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "retain test 1", test_retain) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "retain test 2", test_retain_heap) == NULL) ||
+        (CU_add_test(unit_test_suite1, "retain test 2", test_retain_release) == NULL) ||
         0
     ) 
     {

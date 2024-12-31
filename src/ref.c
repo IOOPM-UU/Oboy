@@ -62,6 +62,7 @@ size_t rc(obj* object) {
         metadata_t *metadata = (metadata_t *)(option.value.p);
         return metadata->rc;
     } else {
+        printf("object could not be found!");
         return 0; // TODO should just let it crash instead???
     }
 }
@@ -79,6 +80,48 @@ void release_destructor(obj *to_remove)
     if (option.success) {
         metadata_t *metadata = (metadata_t *)(option.value.p);
         metadata->destructor(to_remove);
+    }
+}
+
+static bool is_valid_pointer(void *object)
+{
+    if (!object) return false;
+    //memdata_t *metadata = GET_METADATA(object);
+    // Convert pointer to integer using uintptr_t
+    uintptr_t key_as_int = (uintptr_t)object;
+    
+    //memdata_t *metadata = GET_METADATA(object);
+    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
+
+    if (option.success) return true;
+     
+    return false;
+}
+
+void default_destructor(obj* object)
+{
+    if(!object)
+    {
+        return;
+    }
+    //memdata_t *metadata = GET_METADATA(object);
+    uintptr_t key_as_int = (uintptr_t)object;
+    
+    //memdata_t *metadata = GET_METADATA(object);
+    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(),int_elem(key_as_int));
+
+    if (!option.success) return;
+     metadata_t *metadata = (metadata_t *)(option.value.p);
+    size_t object_size = metadata->size;
+
+    for(size_t offset = 0; offset <= object_size - sizeof(void*); offset++)
+    {
+        void **possible_pointer = (void **)((char *)object + offset);
+        if(is_valid_pointer(*possible_pointer))
+        {
+            release(*possible_pointer);
+            offset += sizeof(void*) - 1; // -1 since for loop increments
+        }
     }
 }
 
@@ -126,9 +169,13 @@ void free_scheduled_tasks(size_t size)
 
         freed_size += metadata->size;
         
-        if (metadata->destructor) 
+        if (metadata->destructor) // This if else could maybe be extracted to deallocate (probably including the free after, and maybe even free(metadata))
         {
             metadata->destructor(to_remove);
+        }
+        else
+        {
+            default_destructor(to_remove);
         }
         free(to_remove);
 
@@ -149,7 +196,7 @@ void free_scheduled_tasks(size_t size)
 obj *allocate(size_t bytes, function1_t destructor) 
 {
     free_scheduled_tasks(bytes); 
-    obj * object = malloc(bytes);
+    obj *object = malloc(bytes);
     if (!object) 
     {
         printf("Memory allocation failed\n");
@@ -221,48 +268,6 @@ void release(obj *object)
         metadata->rc--;
     }
     free_scheduled_tasks(0); // Doesnt need a size since it just works with cascade limit
-}
-
-static bool is_valid_pointer(void *object)
-{
-    if (!object) return false;
-    //memdata_t *metadata = GET_METADATA(object);
-    // Convert pointer to integer using uintptr_t
-    uintptr_t key_as_int = (uintptr_t)object;
-    
-    //memdata_t *metadata = GET_METADATA(object);
-    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
-
-    if (option.success) return true;
-     
-    return false;
-}
-
-void default_destructor(obj* object)
-{
-    if(!object)
-    {
-        return;
-    }
-    //memdata_t *metadata = GET_METADATA(object);
-    uintptr_t key_as_int = (uintptr_t)object;
-    
-    //memdata_t *metadata = GET_METADATA(object);
-    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(),int_elem(key_as_int));
-
-    if (!option.success) return;
-     metadata_t *metadata = (metadata_t *)(option.value.p);
-    size_t object_size = metadata->size;
-
-    for(size_t offset = 0; offset <= object_size - sizeof(void*); offset++)
-    {
-        void **possible_pointer = (void **)((char *)object + offset);
-        if(is_valid_pointer(*possible_pointer))
-        {
-            release(*possible_pointer);
-            offset += sizeof(void*) - 1; // -1 since for loop increments
-        }
-    }
 }
 
 void cleanup() 
