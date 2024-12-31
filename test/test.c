@@ -151,7 +151,7 @@ void test_add_to_schedule(){
     ioopm_list_t *list = get_schedule_linked_list();
     //Check if list doesn´t exist:
     CU_ASSERT_PTR_NOT_NULL(list);
-    obj *object = malloc(sizeof(obj));
+    obj *object = malloc(sizeof(obj*));
 
     CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
     // If list exist, add object to schedule:
