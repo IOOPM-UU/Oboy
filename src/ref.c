@@ -130,7 +130,7 @@ void free_scheduled_tasks(size_t size)
     size_t freed_size = 0;
     size_t freed_amount = 0;
 
-    while ((freed_size < size && freed_amount < CASCADE_LIMIT) && 
+    while ((freed_size < size || freed_amount < CASCADE_LIMIT) && 
         ioopm_linked_list_size(get_schedule_linked_list()) > 0) 
     {
         bool successful1 = false;
@@ -170,11 +170,11 @@ void free_scheduled_tasks(size_t size)
         }
 
         // Check if adding this objects size would exceed `size`:
-        if (freed_size + metadata->size > size)
-        {
-            // We would exceed the free size limit
-            break;
-        }
+        // if (freed_size + metadata->size > size)
+        // {
+        //     // We would exceed the free size limit
+        //     break;
+        // }
         freed_size += metadata->size;
         
         // if (metadata->destructor) // This if else could maybe be extracted to deallocate (probably including the free after, and maybe even free(metadata))
