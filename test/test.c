@@ -113,7 +113,7 @@ void test_get_schedule_linked_list(){
     CU_ASSERT_TRUE(ioopm_linked_list_is_empty(list));
 
     //add two objects to list
-    obj *object = malloc(sizeof(obj));
+    obj *object = malloc(sizeof(obj*));
     add_to_schedule(object);
     add_to_schedule(object);
     
@@ -478,7 +478,17 @@ void test_allocate_strings_then_free(void)
     // free_all();
 }
 
+void test_get_and_set_cascade_limit(){
+    // Set cascade limit
+    set_cascade_limit(2);
+    // Check that get_cascade_limit gets the right limit
+    CU_ASSERT_EQUAL(get_cascade_limit(), 2);
 
+    // Set new cascade limit
+    set_cascade_limit(100);
+    // Check that new get_cascade_limit gets the right limit
+    CU_ASSERT_EQUAL(get_cascade_limit(), 100);
+}
 
 int main() {
     // First we try to set up CUnit, and exit if we fail
