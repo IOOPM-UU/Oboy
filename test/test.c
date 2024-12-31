@@ -197,12 +197,11 @@ void metadata_destructor(void *ptr) {
     // TODO run cleanup at end of every test??
 } */
 
-
-/* void test_add_to_schedule(){
+void test_add_to_schedule(){
     ioopm_list_t *list = get_schedule_linked_list();
     //Check if list doesn´t exist:
     CU_ASSERT_PTR_NOT_NULL(list);
-    obj *object = malloc(sizeof(obj));
+    obj *object = allocate(sizeof(obj*), dummy_destructor);
 
     CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
     // If list exist, add object to schedule:
@@ -214,14 +213,13 @@ void metadata_destructor(void *ptr) {
     free_scheduled_tasks(2*sizeof(object));
     ioopm_linked_list_clear(list);
 }
- */
-/* void test_free_scheduled_task_empty(){
+ 
+void test_free_scheduled_task_empty(){
     set_cascade_limit(3);
     ioopm_list_t *list= get_schedule_linked_list();
     free_scheduled_tasks(5);
     CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
 }
-
 void test_free_scheduled_task_one_task(){
     set_cascade_limit(3);
     ioopm_list_t *list = get_schedule_linked_list();
@@ -233,7 +231,7 @@ void test_free_scheduled_task_one_task(){
     //free(object);
     free_scheduled_tasks(sizeof(object));
 
-} */
+}
 
 /* void test_free_scheduled_tasks_over_cascade(){
     set_cascade_limit(3);
@@ -379,7 +377,7 @@ static link_t *link_create_with_allocate(elem_t value, link_t *previous, link_t 
 void test_allocate_links_and_free_scheduled_tasks(void)
 {
     // Set cascade limit
-    set_cascade_limit(3);
+    set_cascade_limit(1);
 
     // 1. Allocate memory blocks
     link_t *link1 = link_create_with_allocate(null_elem, NULL, NULL);
@@ -444,22 +442,22 @@ void test_allocate_array_then_free(void)
 void test_allocate_strings_then_free(void)
 {
     // Set cascade limit
-    set_cascade_limit(3);
+    set_cascade_limit(1);
 
     // 1. Allocate memory blocks
-    char *str1 = allocate_array(5, sizeof(char), NULL);
+    char *str1 = allocate_array(5, sizeof(char), dummy_destructor);
     for (int i = 0; i < 5; i++) {
         str1[i] = 'a';
     }
     CU_ASSERT_PTR_NOT_NULL(str1);
     
-    char *str2 = allocate_array(6, sizeof(char), NULL);
+    char *str2 = allocate_array(6, sizeof(char), dummy_destructor);
     for (int i = 0; i < 6; i++) {
         str2[i] = 'b';
     }
     CU_ASSERT_PTR_NOT_NULL(str2);
     
-    char *str3 = allocate_array(7, sizeof(char), NULL);
+    char *str3 = allocate_array(7, sizeof(char), dummy_destructor);
     for (int i = 0; i < 7; i++) {
         str3[i] = 'c';
     }
@@ -510,13 +508,14 @@ int main() {
     // the test in question. If you want to add another test, just
     // copy a line below and change the information
     if (
-        // (CU_add_test(unit_test_suite1, "get_schedule_linked_list test", test_get_schedule_linked_list) == NULL) || //needs to be tested first so that the list is empty
-        // (CU_add_test(unit_test_suite1, "Add to schedule", test_add_to_schedule) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
+        (CU_add_test(unit_test_suite1, "get_schedule_linked_list test", test_get_schedule_linked_list) == NULL) || //needs to be tested first so that the list is empty
+        (CU_add_test(unit_test_suite1, "Add to schedule", test_add_to_schedule) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
+        (CU_add_test(unit_test_suite1, "F", test_free_scheduled_task_one_task) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Default destructor", test_default_destructor) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_and_free_scheduled_tasks) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Allocate links and free scheduled tasks", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Allocate array and free scheduled tasks", test_allocate_array_then_free) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Allocate links and free scheduled tasks", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Allocate array and free scheduled tasks", test_allocate_array_then_free) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Allocate string and free scheduled tasks", test_allocate_strings_then_free) == NULL) ||
         (CU_add_test(unit_test_suite1, "rc() ref count function", test_rc) == NULL) ||
         (CU_add_test(unit_test_suite1, "get_schedule_linked_list test", test_get_schedule_linked_list) == NULL) ||
