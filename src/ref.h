@@ -29,7 +29,7 @@ void release(obj *);
 size_t rc(obj *);
 obj *allocate(size_t bytes, function1_t destructor);
 obj *allocate_array(size_t elements, size_t elem_size, function1_t destructor);
-metadata_t *memdata_generate(function1_t destructor, size_t size);
+metadata_t *metadata_generate(function1_t destructor, size_t size);
 void deallocate(obj *);
 void set_cascade_limit(size_t);
 size_t get_cascade_limit();
