@@ -37,7 +37,7 @@ cov: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
 	./cov
 	
 coverage: cov
-	gcov -abcfu cov-test.gcda
+	gcov -abcfu cov-ref.gcda
 	gcovr -r . --html --html-details -o coverage.html
 
 # Clean up generated files
