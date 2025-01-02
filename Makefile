@@ -42,4 +42,4 @@ coverage: cov
 
 # Clean up generated files
 clean:
-	rm -f src/*.o test/*.o ref ref_test cov coverage.* cov-*
+	rm -f src/*.o inlupp2_DONOTTOUCH/generic_data_structures/*.o test/*.o ref* cov* test.c.*

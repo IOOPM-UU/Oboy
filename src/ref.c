@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <limits.h>
+#include <assert.h>
 
 static ioopm_list_t *schedule_linked_list = NULL;
 
@@ -68,8 +69,8 @@ size_t rc(obj* object) {
     if (metadata) {
         return metadata->rc;
     } else {
-        printf("object could not be found!");
-        return 0; // TODO should just let it crash instead???
+        printf("metadata could not be found!");
+        return 0; //TODO: vad ska denna returnera?
     }
 }
 
