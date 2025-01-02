@@ -33,7 +33,7 @@ ioopm_hash_table_t *get_metadata_ht() {
 ioopm_list_t *get_schedule_linked_list() 
 {
     if (!schedule_linked_list) {
-        schedule_linked_list = ioopm_linked_list_create(int_eq); 
+        schedule_linked_list = ioopm_linked_list_create(int_eq); // TODO!!! int_eq, but ptr_elem values
     }
     return schedule_linked_list;
 }
@@ -88,7 +88,7 @@ void release_destructor(obj *to_remove)
 
 static bool is_valid_pointer(void *object)
 {
-    if (!object) return false;
+    if (sizeof(object) != sizeof(void*)) return false;
     //memdata_t *metadata = GET_METADATA(object);
     // Convert pointer to integer using uintptr_t
     uintptr_t key_as_int = (uintptr_t)object;
@@ -105,21 +105,27 @@ void default_destructor(obj* object)
         return;
     }
     //memdata_t *metadata = GET_METADATA(object);
+    // if (sizeof(object) < sizeof(uintptr_t))
+    // {
+    //     return;
+    // }
     uintptr_t key_as_int = (uintptr_t)object;
     
     //memdata_t *metadata = GET_METADATA(object);
-    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(),int_elem(key_as_int));
+    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
 
     if (!option.success) return;
-     metadata_t *metadata = (metadata_t *)(option.value.p);
+    metadata_t *metadata = (metadata_t *)(option.value.p);
     size_t object_size = metadata->size;
 
-    for(size_t offset = 0; offset <= object_size - sizeof(void*); offset++)
+    // if (object_size < sizeof(void*)) return;
+
+    for (size_t offset = 0; offset < object_size - sizeof(void*); offset++)
     {
         void **possible_pointer = (void **)((char *)object + offset);
         if(is_valid_pointer(*possible_pointer))
         {
-            release(*possible_pointer);
+            release((void *)*possible_pointer);
             offset += sizeof(void*) - 1; // -1 since for loop increments
         }
     }
@@ -134,7 +140,7 @@ void free_scheduled_tasks(size_t size)
         ioopm_linked_list_size(get_schedule_linked_list()) > 0) 
     {
         bool successful1 = false;
-        obj *to_remove = ioopm_linked_list_get(get_schedule_linked_list(), 0, &successful1).p;
+        obj *to_remove = ioopm_linked_list_get(get_schedule_linked_list(), 0, &successful1).p;  // TODO!!! int_eq, but ptr_elem values
 
         if (!successful1 || !to_remove) 
         {
@@ -142,9 +148,9 @@ void free_scheduled_tasks(size_t size)
             break; 
         }
 
-       // memdata_t *metadata = GET_METADATA(to_remove);
-       // Convert pointer to integer using uintptr_t
-        uintptr_t key_as_int = (uintptr_t)to_remove;
+        // memdata_t *metadata = GET_METADATA(to_remove);
+        // Convert pointer to integer using uintptr_t
+        uintptr_t key_as_int = (uintptr_t)to_remove;  // TODO!!! int_eq, but ptr_elem values
         
         //memdata_t *metadata = GET_METADATA(object);
         
@@ -269,10 +275,10 @@ void release(obj *object)
     uintptr_t key_as_int = (uintptr_t)object;
     
     //memdata_t *metadata = GET_METADATA(object);
-    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(),int_elem(key_as_int));
+    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
 
     if (!option.success) return;
-     metadata_t *metadata = (metadata_t *)(option.value.p);  
+    metadata_t *metadata = (metadata_t *)(option.value.p);  
 
     if (metadata->rc == 0) 
     {
@@ -286,7 +292,7 @@ void release(obj *object)
 
 void cleanup() 
 {
-     uintptr_t key_as_int;
+    uintptr_t key_as_int;
     free_scheduled_tasks(SIZE_MAX); 
 
     while (ioopm_linked_list_size(get_schedule_linked_list()) > 0) 
@@ -296,8 +302,8 @@ void cleanup()
 
         if (successful && object) 
         {
-             key_as_int = (uintptr_t)object;
-             ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(),int_elem(key_as_int));
+            key_as_int = (uintptr_t)object;
+            ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
 
         if (option.success){
             metadata_t *metadata = (metadata_t *)(option.value.p);  

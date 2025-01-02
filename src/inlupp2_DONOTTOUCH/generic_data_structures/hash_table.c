@@ -70,7 +70,11 @@ void ioopm_hash_table_destroy(ioopm_hash_table_t *ht)
 
 static entry_t *find_previous_entry_for_key(ioopm_hash_table_t *ht, entry_t *e, elem_t key)
 {
-    if (e->next == NULL || ht->key_eq_func(e->next->key, key))
+    if (e->next == NULL)
+    {
+        return e;
+    }
+    else if (ht->key_eq_func(e->next->key, key))
     {
         return e;
     }
