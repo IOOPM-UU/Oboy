@@ -60,10 +60,6 @@ int clean_suite(void) {
 //     CU_ASSERT_PTR_NULL(obj);
 // }
 
-void test2(void) {
-    CU_ASSERT_EQUAL(1 + 1, 2);
-}
-
 void test_retain_release() {
     struct cell *c = allocate(sizeof(struct cell), cell_destructor);
     c->cell = NULL; // otherwise unconditional jump!
@@ -110,6 +106,20 @@ void test_rc(void) {
     CU_ASSERT_TRUE(rc(c) == 0);
     retain(c);
     CU_ASSERT_TRUE(rc(c) == 1);
+    release(c);
+    CU_ASSERT_TRUE(rc(c) == 0);
+    release(c);
+}
+
+void test_rc2(void) {
+    char* hej = "hej";
+    rc(hej);
+    CU_ASSERT_TRUE(rc(hej) == 0);
+
+    struct cell *c = NULL;
+    CU_ASSERT_TRUE(rc(c) == 0);
+    retain(c);
+    CU_ASSERT_TRUE(rc(c) == 0);
     release(c);
     CU_ASSERT_TRUE(rc(c) == 0);
     release(c);
@@ -315,7 +325,6 @@ void test_default_destructor() {
 
     // Call release on the head node
     release(link1);
-
     // Check that both nodes are properly deallocated
     // assert(ioopm_hash_table_lookup(get_metadata_ht(), ptr_elem(link1)).success == false);
     // assert(ioopm_hash_table_lookup(get_metadata_ht(), ptr_elem(link2)).success == false);
@@ -510,6 +519,8 @@ int main() {
     // copy a line below and change the information
     if (
         (CU_add_test(unit_test_suite1, "get_schedule_linked_list test", test_get_schedule_linked_list) == NULL) || //needs to be tested first so that the list is empty
+        (CU_add_test(unit_test_suite1, "retain/release 1st", test_retain_release) == NULL) || //needs to be tested first so that the list is empty
+        (CU_add_test(unit_test_suite1, "retain/release 2nd", test_retain_release2) == NULL) || //needs to be tested first so that the list is empty
         (CU_add_test(unit_test_suite1, "Add to schedule", test_add_to_schedule) == NULL) ||
         (CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
         (CU_add_test(unit_test_suite1, "F", test_free_scheduled_task_one_task) == NULL) ||
@@ -518,6 +529,7 @@ int main() {
         (CU_add_test(unit_test_suite1, "Allocate links and free scheduled tasks", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate array and free scheduled tasks", test_allocate_array_then_free) == NULL) ||
         (CU_add_test(unit_test_suite1, "rc() ref count function", test_rc) == NULL) ||
+        (CU_add_test(unit_test_suite1, "rc() bad allocation", test_rc2) == NULL) ||
         (CU_add_test(unit_test_suite1, "get_schedule_linked_list test", test_get_schedule_linked_list) == NULL) ||
         (CU_add_test(unit_test_suite1, "Get and set cascade limit", test_get_and_set_cascade_limit) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate string and free scheduled tasks", test_allocate_strings_then_free) == NULL) ||

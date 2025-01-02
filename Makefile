@@ -33,14 +33,13 @@ gdb: ref
 	gdb ./ref --tui
 
 cov: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
-
-
+	$(C_COMPILER) $(C_LINK_OPTIONS) $(C_OPTIONS) --coverage $(REF) $(TEST_SRC) $(HASH) $(LIST) -o $@ $(CUNIT_LINK)
+	./cov
+	
 coverage: cov
-
-	$(C_COVERAGE) $()
-	gcov -abcfu cov-webstore.gcda
+	gcov -abcfu cov-ref.gcda
 	gcovr -r . --html --html-details -o coverage.html
 
 # Clean up generated files
 clean:
-	rm -f src/*.o test/*.o ref ref_test
+	rm -f src/*.o inlupp2_DONOTTOUCH/generic_data_structures/*.o test/*.o ref* cov* test.c.*
