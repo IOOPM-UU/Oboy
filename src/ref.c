@@ -62,6 +62,7 @@ size_t rc(obj* object) {
         metadata_t *metadata = (metadata_t *)(option.value.p);
         return metadata->rc;
     } else {
+        printf("object could not be found!");
         return 0; // TODO should just let it crash instead???
     }
 }
@@ -82,12 +83,55 @@ void release_destructor(obj *to_remove)
     }
 }
 
+static bool is_valid_pointer(void *object)
+{
+    if (!object) return false;
+    //memdata_t *metadata = GET_METADATA(object);
+    // Convert pointer to integer using uintptr_t
+    uintptr_t key_as_int = (uintptr_t)object;
+    
+    //memdata_t *metadata = GET_METADATA(object);
+    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
+
+    if (option.success) return true;
+     
+    return false;
+}
+
+void default_destructor(obj* object)
+{
+    if(!object)
+    {
+        return;
+    }
+    //memdata_t *metadata = GET_METADATA(object);
+    uintptr_t key_as_int = (uintptr_t)object;
+    
+    //memdata_t *metadata = GET_METADATA(object);
+    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(),int_elem(key_as_int));
+
+    if (!option.success) return;
+     metadata_t *metadata = (metadata_t *)(option.value.p);
+    size_t object_size = metadata->size;
+
+    for(size_t offset = 0; offset <= object_size - sizeof(void*); offset++)
+    {
+        void **possible_pointer = (void **)((char *)object + offset);
+        if(is_valid_pointer(*possible_pointer))
+        {
+            release(*possible_pointer);
+            offset += sizeof(void*) - 1; // -1 since for loop increments
+        }
+    }
+}
+
 void free_scheduled_tasks(size_t size) 
 {
     size_t freed_size = 0;
     size_t freed_amount = 0;
 
-    while ((freed_size < size || freed_amount < CASCADE_LIMIT) && ioopm_linked_list_size(get_schedule_linked_list()) > 0) 
+    while ((freed_size < size || freed_amount < CASCADE_LIMIT) && 
+        ioopm_linked_list_size(get_schedule_linked_list()) > 0) 
     {
         bool successful1 = false;
         obj *to_remove = ioopm_linked_list_get(get_schedule_linked_list(), 0, &successful1).p;
@@ -103,10 +147,12 @@ void free_scheduled_tasks(size_t size)
     uintptr_t key_as_int = (uintptr_t)to_remove;
     
     //memdata_t *metadata = GET_METADATA(object);
+    
+    // Lookup metadata in the hash table
     ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
-
         if (!option.success)
         {
+            // If no metadata is found, remove the pointer from the schedule
             bool success_remove = false;
             ioopm_linked_list_remove(get_schedule_linked_list(), 0, &success_remove);
             if (!success_remove) 
@@ -115,39 +161,52 @@ void free_scheduled_tasks(size_t size)
             }
             continue;
         }
-        metadata_t *metadata = (metadata_t *)(option.value.p);
- 
-       
+        metadata_t *metadata = (metadata_t *)(option.value.p);       
+        // If reference count is nonzero, skip freeing
         if (metadata->rc > 0) 
         {
             printf("Skipping object with active references (rc=%zu).\n", metadata->rc);
             break;
         }
 
+        // Check if adding this objects size would exceed `size`:
+        // if (freed_size + metadata->size > size)
+        // {
+        //     // We would exceed the free size limit
+        //     break;
+        // }
         freed_size += metadata->size;
         
-        if (metadata->destructor) 
-        {
-            metadata->destructor(to_remove);
-        }
+        // if (metadata->destructor) // This if else could maybe be extracted to deallocate (probably including the free after, and maybe even free(metadata))
+        // {
+        //     metadata->destructor(to_remove);
+        // }
+        // else
+        // {
+        //     default_destructor(to_remove);
+        // }
+        free(to_remove);
 
+        // Remove from the scheduled list
         bool successful2 = false;
-        freed_amount++;
         ioopm_linked_list_remove(get_schedule_linked_list(), 0, &successful2);
         if (!successful2) 
         {
             printf("Failed to remove object from linked list\n");
             break;
         }
-
-         ioopm_hash_table_remove(get_metadata_ht(), int_elem(key_as_int));
+        // Remove from the metadata hash table
+        ioopm_hash_table_remove(get_metadata_ht(), int_elem(key_as_int));
+        // Finally free the metadata
+        free(metadata);
+        freed_amount++;
     }
 }
 
 obj *allocate(size_t bytes, function1_t destructor) 
 {
     free_scheduled_tasks(bytes); 
-    obj * object = malloc(bytes);
+    obj *object = malloc(bytes);
     if (!object) 
     {
         printf("Memory allocation failed\n");
@@ -213,54 +272,21 @@ void release(obj *object)
     if (metadata->rc == 0) 
     {
         add_to_schedule(object);
+        //TODO: flyttat in destructorer in hit (david)
+        if (metadata->destructor) // This if else could maybe be extracted to deallocate (probably including the free after, and maybe even free(metadata))
+        {
+            metadata->destructor(object);
+        }
+        else
+        {
+            default_destructor(object);
+    }
     } 
     else
     {
         metadata->rc--;
     }
     free_scheduled_tasks(0); // Doesnt need a size since it just works with cascade limit
-}
-
-static bool is_valid_pointer(void *object)
-{
-    if (!object) return false;
-    //memdata_t *metadata = GET_METADATA(object);
-    // Convert pointer to integer using uintptr_t
-    uintptr_t key_as_int = (uintptr_t)object;
-    
-    //memdata_t *metadata = GET_METADATA(object);
-    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
-
-    if (option.success) return true;
-     
-    return false;
-}
-
-void default_destructor(obj* object)
-{
-    if(!object)
-    {
-        return;
-    }
-    //memdata_t *metadata = GET_METADATA(object);
-    uintptr_t key_as_int = (uintptr_t)object;
-    
-    //memdata_t *metadata = GET_METADATA(object);
-    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(),int_elem(key_as_int));
-
-    if (!option.success) return;
-     metadata_t *metadata = (metadata_t *)(option.value.p);
-    size_t object_size = metadata->size;
-
-    for(size_t offset = 0; offset <= object_size - sizeof(void*); offset++)
-    {
-        void **possible_pointer = (void **)((char *)object + offset);
-        if(is_valid_pointer(*possible_pointer))
-        {
-            release(*possible_pointer);
-            offset += sizeof(void*) - 1; // -1 since for loop increments
-        }
-    }
 }
 
 void cleanup() 
@@ -297,6 +323,8 @@ void free_all()
     cleanup();
     ioopm_linked_list_destroy(get_schedule_linked_list());
     schedule_linked_list = NULL;
+    ioopm_hash_table_destroy(get_metadata_ht());
+    
 }
 
 void shutdown() 

@@ -3,6 +3,8 @@ C_COMPILER     = gcc
 C_OPTIONS      = -Wall -pedantic -Wextra -g
 C_LINK_OPTIONS = -lm
 CUNIT_LINK     = -lcunit
+C_COVERAGE 	   = gcov -abcfu --coverage
+R_COVERAGE	   = gcovr -r . --html --html-details -o coverage.html
 
 # Source and object files
 REF            = src/ref.c
@@ -19,16 +21,25 @@ LIST_OBJ	   = src/inlupp2_DONOTTOUCH/generic_data_structures/linked_list.o
 	$(C_COMPILER) $(C_OPTIONS) -c $< -o $@
 
 # Target for the reference executable
-ref: $(REF_OBJ)
-	$(C_COMPILER) $(C_LINK_OPTIONS) $(REF_OBJ) -o $@
+ref: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
+	$(C_COMPILER) $(C_LINK_OPTIONS) $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ) -o $@ $(CUNIT_LINK)
 
 # Target for the test executable
 ref_test: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
 	$(C_COMPILER) $(C_LINK_OPTIONS) $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ) -o $@ $(CUNIT_LINK)
-	valgrind --leak-check=full ./ref_test
+	valgrind --leak-check=full --show-leak-kinds=all ./ref_test
 
-gdb: ref_test
-	gdb ./ref_test --tui
+gdb: ref
+	gdb ./ref --tui
+
+cov: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
+
+
+coverage: cov
+
+	$(C_COVERAGE) $()
+	gcov -abcfu cov-webstore.gcda
+	gcovr -r . --html --html-details -o coverage.html
 
 # Clean up generated files
 clean:
