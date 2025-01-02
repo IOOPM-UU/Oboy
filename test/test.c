@@ -315,6 +315,7 @@ void test_default_destructor() {
 
     // Call release on the head node
     release(link1);
+    //release(link2);
 
     // Check that both nodes are properly deallocated
     // assert(ioopm_hash_table_lookup(get_metadata_ht(), ptr_elem(link1)).success == false);
@@ -590,7 +591,7 @@ weird_array_t *weird_array_create(char *i4, weird_array_t *i6, function1_t destr
     arr->i1 = 1;
     arr->i2 = 2;
     arr->i3 = 3;
-    arr->i4 = allocate_array(strlen(i4), sizeof(char*), destructor); // TODO not sure if it should be char or char*
+    arr->i4 = allocate_array(strlen(i4), sizeof(char*), str_non_destructor); // TODO not sure if it should be char or char*
     retain(i4);
     arr->i5 = 5;
     arr->i6 = i6;
@@ -639,7 +640,7 @@ int main() {
         // (CU_add_test(unit_test_suite1, "Add to schedule", test_add_to_schedule) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
         // (CU_add_test(unit_test_suite1, "F", test_free_scheduled_task_one_task) == NULL) ||
-        //(CU_add_test(unit_test_suite1, "Default destructor", test_default_destructor) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Default destructor", test_default_destructor) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_and_free_scheduled_tasks) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Allocate links and free scheduled tasks", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Allocate array and free scheduled tasks", test_allocate_array_then_free) == NULL) ||
@@ -648,8 +649,8 @@ int main() {
         // (CU_add_test(unit_test_suite1, "Get and set cascade limit", test_get_and_set_cascade_limit) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Allocate string and free scheduled tasks", test_allocate_strings_then_free) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Create and destroy a small binary tree with a given destructor", test_binary_tree_given_destructor_one_node) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Create and destroy a small binary tree with the default destructor", test_binary_tree_default_destructor_one_node) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Create and destroy a binary tree with a given destructor", test_binary_tree_given_destructor) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Create and destroy a small binary tree with the default destructor", test_binary_tree_default_destructor_one_node) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Create and destroy a binary tree with a given destructor", test_binary_tree_given_destructor) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Create and destroy a binary tree with the default destructor", test_binary_tree_default_destructor) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Create and destroy a weird array with a given destructor", test_array_struct_given_destructor) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Create and destroy a weird array with the default destructor", test_array_struct_default_destructor) == NULL) ||
