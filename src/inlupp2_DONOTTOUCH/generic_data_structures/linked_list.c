@@ -112,7 +112,7 @@ void ioopm_linked_list_prepend(ioopm_list_t *list, elem_t value)
     list->size++;
 }
 
-void ioopm_linked_list_insert(ioopm_list_t *list, int index, elem_t value)
+void ioopm_linked_list_insert(ioopm_list_t *list, size_t index, elem_t value)
 {
     if (index >= list->size)
     {
@@ -127,7 +127,7 @@ void ioopm_linked_list_insert(ioopm_list_t *list, int index, elem_t value)
     }
 
     link_t *current = list->first;
-    for (int i = 0; i < index && current->next != NULL; i++)
+    for (size_t i = 0; i < index && current->next != NULL; i++)
     {
         current = current->next;
     }
@@ -144,9 +144,9 @@ void ioopm_linked_list_insert(ioopm_list_t *list, int index, elem_t value)
     list->size++;
 }
 
-elem_t ioopm_linked_list_remove(ioopm_list_t *list, int index, bool *success)
+elem_t ioopm_linked_list_remove(ioopm_list_t *list, size_t index, bool *success)
 {
-    if (index < 0 || index >= list->size)
+    if (index >= list->size)
     {
         *success = false;
         return null_elem;
@@ -170,7 +170,7 @@ elem_t ioopm_linked_list_remove(ioopm_list_t *list, int index, bool *success)
         return value_removed;
     }
     link_t *current_link = dummy;
-    for (int i = 0; i < index; i++)
+    for (size_t i = 0; i < index; i++)
     {
         current_link = current_link->next;
     }
@@ -190,9 +190,9 @@ elem_t ioopm_linked_list_remove(ioopm_list_t *list, int index, bool *success)
     return value_removed;
 }
 
-elem_t ioopm_linked_list_get(ioopm_list_t *list, int index, bool *success)
+elem_t ioopm_linked_list_get(ioopm_list_t *list, size_t index, bool *success)
 {
-    if (index < 0 || index >= list->size)
+    if (index >= list->size)
     {
         *success = false;
         return null_elem;
@@ -200,7 +200,7 @@ elem_t ioopm_linked_list_get(ioopm_list_t *list, int index, bool *success)
 
     link_t *current_link = list->first->next;
 
-    for (int i = 0; i < index; i++)
+    for (size_t i = 0; i < index; i++)
     {
         current_link = current_link->next;
     }
@@ -235,7 +235,7 @@ bool ioopm_linked_list_any(ioopm_list_t *list, ioopm_int_predicate *prop, void *
 {
     link_t *current_entry = list->first->next;
 
-    for (int i = 0; i < list->size; i++)
+    for (size_t i = 0; i < list->size; i++)
     {
         if (prop(i, current_entry->value, extra))
         {

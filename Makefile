@@ -33,12 +33,13 @@ gdb: ref
 	gdb ./ref --tui
 
 cov: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
-	$(C_COMPILER) $(C_LINK_OPTIONS) --coverage $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ) -o $@ $(CUNIT_LINK)
-
+	$(C_COMPILER) $(C_LINK_OPTIONS) $(C_OPTIONS) --coverage $(REF) $(TEST_SRC) $(HASH) $(LIST) -o $@ $(CUNIT_LINK)
+	./cov
+	
 coverage: cov
 	gcov -abcfu cov-test.gcda
 	gcovr -r . --html --html-details -o coverage.html
 
 # Clean up generated files
 clean:
-	rm -f src/*.o test/*.o ref ref_test cov coverage.*
+	rm -f src/*.o test/*.o ref ref_test cov coverage.* cov-*
