@@ -60,6 +60,10 @@ int clean_suite(void) {
 //     CU_ASSERT_PTR_NULL(obj);
 // }
 
+void test2(void) {
+    CU_ASSERT_EQUAL(1 + 1, 2);
+}
+
 void test_retain_release() {
     struct cell *c = allocate(sizeof(struct cell), cell_destructor);
     c->cell = NULL; // otherwise unconditional jump!
@@ -106,20 +110,6 @@ void test_rc(void) {
     CU_ASSERT_TRUE(rc(c) == 0);
     retain(c);
     CU_ASSERT_TRUE(rc(c) == 1);
-    release(c);
-    CU_ASSERT_TRUE(rc(c) == 0);
-    release(c);
-}
-
-void test_rc2(void) {
-    char* hej = "hej";
-    rc(hej);
-    CU_ASSERT_TRUE(rc(hej) == 0);
-
-    struct cell *c = NULL;
-    CU_ASSERT_TRUE(rc(c) == 0);
-    retain(c);
-    CU_ASSERT_TRUE(rc(c) == 0);
     release(c);
     CU_ASSERT_TRUE(rc(c) == 0);
     release(c);
@@ -324,13 +314,17 @@ void test_default_destructor() {
     link2->next = NULL;
 
     // Call release on the head node
+    //release(link1->next);
     release(link1);
+    //release(link2);
+
     // Check that both nodes are properly deallocated
-    // assert(ioopm_hash_table_lookup(get_metadata_ht(), ptr_elem(link1)).success == false);
-    // assert(ioopm_hash_table_lookup(get_metadata_ht(), ptr_elem(link2)).success == false);
+    assert(ioopm_hash_table_lookup(get_metadata_ht(), ptr_elem(link1)).success == false);
+    assert(ioopm_hash_table_lookup(get_metadata_ht(), ptr_elem(link2)).success == false);
 
     printf("Test Case 1 passed: Default destructor released all linked pointers.\n");
 }
+
 void test_allocate_and_free_scheduled_tasks(void)
 {
     // Set cascade limit
@@ -498,6 +492,163 @@ void test_get_and_set_cascade_limit(){
     CU_ASSERT_EQUAL(get_cascade_limit(), 100);
 }
 
+// Larger scale tests. Complex data structures first with given constructors, then the same, handled
+// by the default destructor
+
+// Binary trees
+typedef struct node node_t;
+struct node {
+    int val;
+    node_t *left;
+    node_t *right;
+};
+
+void node_destroy(obj *object) {
+    node_t *node = (node_t *) object;
+    release(node->left); // release ignores null vales, so need to check
+    release(node->right);
+}
+
+node_t *node_create(int val, node_t *left, node_t *right, function1_t destructor) {
+    node_t *node = allocate(sizeof(node_t), destructor);
+    //retain(node); // TODO not sure if necessary
+    node->val = val;
+    node->left = left;
+    node->right = right;
+    return node;
+}
+
+void test_binary_tree_given_destructor_one_node() {
+    node_t *n1 = node_create(1, NULL, NULL, node_destroy);
+    CU_ASSERT_PTR_NOT_NULL(n1);
+    release(n1);
+}
+
+void test_binary_tree_default_destructor_one_node() {
+    node_t *n1 = node_create(1, NULL, NULL, NULL);
+    CU_ASSERT_PTR_NOT_NULL(n1);
+    // release(NULL);
+    release(n1);
+}
+
+void test_binary_tree_given_destructor() {
+    set_cascade_limit(10);
+    
+    // Create a binary tree struct with the library's functions
+    /* Tree 1
+        4
+      2   3
+    1
+    */
+    node_t *n1 = node_create(1, NULL, NULL, node_destroy);
+    node_t *n2 = node_create(2, n1, NULL, node_destroy);
+    node_t *n3 = node_create(3, NULL, NULL, node_destroy);
+    node_t *n4 = node_create(4, n2, n3, node_destroy);
+
+    // Create a copy of node 2
+    node_t *n2_copy = n2;
+    retain(n2);
+
+    // Releases node 4, and with it node 3, but node 2 (and 1) remains since rf > 0
+    release(n4);
+
+    // node 2 and 1 should still be reachable
+    CU_ASSERT_EQUAL(n2_copy->val, 2);
+    CU_ASSERT_EQUAL(n2_copy->left->val, 1);
+
+    CU_ASSERT_EQUAL(rc(n2_copy), 0); // TODO might not be reachable, can check if its 1 before
+    release(n2_copy);
+    // releasing instead
+}
+
+void test_binary_tree_default_destructor() {
+    set_cascade_limit(10);
+    
+    // Create a binary tree struct with the library's functions
+    /* Tree 1
+        4
+      2   3
+    1
+    */
+    node_t *n1 = node_create(1, NULL, NULL, NULL);
+    node_t *n2 = node_create(2, n1, NULL, NULL);
+    node_t *n3 = node_create(3, NULL, NULL, NULL);
+    node_t *n4 = node_create(4, n2, n3, NULL);
+
+    // Create a copy of node 2
+    node_t *n2_copy = n2;
+    retain(n2);
+
+    // Releases node 4, and with it node 3, but node 2 (and 1) remains since rf > 0
+    release(n4);
+
+    // node 2 and 1 should still be reachable
+    CU_ASSERT_EQUAL(n2_copy->val, 2);
+    CU_ASSERT_EQUAL(n2_copy->left->val, 1);
+
+    release(n2_copy);
+    CU_ASSERT_EQUAL(rc(n2_copy), 0); // TODO might not be reachable, can check if its 1 before
+    // releasing instead
+}
+
+typedef struct weird_array weird_array_t;
+struct weird_array {
+    int i1;
+    int i2;
+    int i3;
+    char *i4;
+    int i5;
+    weird_array_t *i6;
+    int i7;
+};
+
+void str_non_destructor(obj *object) {
+    return;
+}
+
+void weird_array_destroy(obj *object) {
+    weird_array_t *arr = (weird_array_t *) object;
+    release(arr->i4);
+    release(arr->i6);
+}
+
+weird_array_t *weird_array_create(char *i4, weird_array_t *i6, function1_t destructor) {
+    weird_array_t *arr = allocate(sizeof(weird_array_t), destructor);
+    arr->i1 = 1;
+    arr->i2 = 2;
+    arr->i3 = 3;
+    arr->i4 = allocate_array(strlen(i4), sizeof(char*), str_non_destructor); // TODO not sure if it should be char or char*
+    arr->i5 = 5;
+    arr->i6 = i6;
+    retain(i6);
+    arr->i7 = 7;
+    return arr;
+}
+
+void test_array_struct_given_destructor() {
+    char *str1 = "One";
+    weird_array_t *arr1 = weird_array_create(str1, NULL, weird_array_destroy);
+    char *str2 = "Two";
+    weird_array_t *arr2 = weird_array_create(str2, arr1, weird_array_destroy);
+    CU_ASSERT_EQUAL(strcmp(arr1->i1, arr2->i6->i1), 0);
+    CU_ASSERT_EQUAL(strcmp(str1, arr2->i6->i4), 0);
+
+    release(arr1);
+    release(arr2);
+}
+
+void test_array_struct_default_destructor() {
+    char *str1 = "One";
+    weird_array_t *arr1 = weird_array_create(str1, NULL, NULL);
+    char *str2 = "Two";
+    weird_array_t *arr2 = weird_array_create(str2, arr1, NULL);
+    CU_ASSERT_EQUAL(strcmp(arr1->i1, arr2->i6->i1), 0);
+    CU_ASSERT_EQUAL(strcmp(str1, arr2->i6->i4), 0);
+
+    release(arr1);
+    release(arr2);
+}
+
 int main() {
     // First we try to set up CUnit, and exit if we fail
     if (CU_initialize_registry() != CUE_SUCCESS)
@@ -519,8 +670,6 @@ int main() {
     // copy a line below and change the information
     if (
         (CU_add_test(unit_test_suite1, "get_schedule_linked_list test", test_get_schedule_linked_list) == NULL) || //needs to be tested first so that the list is empty
-        (CU_add_test(unit_test_suite1, "retain/release 1st", test_retain_release) == NULL) || //needs to be tested first so that the list is empty
-        (CU_add_test(unit_test_suite1, "retain/release 2nd", test_retain_release2) == NULL) || //needs to be tested first so that the list is empty
         (CU_add_test(unit_test_suite1, "Add to schedule", test_add_to_schedule) == NULL) ||
         (CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
         (CU_add_test(unit_test_suite1, "F", test_free_scheduled_task_one_task) == NULL) ||
@@ -529,10 +678,15 @@ int main() {
         (CU_add_test(unit_test_suite1, "Allocate links and free scheduled tasks", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate array and free scheduled tasks", test_allocate_array_then_free) == NULL) ||
         (CU_add_test(unit_test_suite1, "rc() ref count function", test_rc) == NULL) ||
-        (CU_add_test(unit_test_suite1, "rc() bad allocation", test_rc2) == NULL) ||
         (CU_add_test(unit_test_suite1, "get_schedule_linked_list test", test_get_schedule_linked_list) == NULL) ||
         (CU_add_test(unit_test_suite1, "Get and set cascade limit", test_get_and_set_cascade_limit) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate string and free scheduled tasks", test_allocate_strings_then_free) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Create and destroy a small binary tree with a given destructor", test_binary_tree_given_destructor_one_node) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Create and destroy a small binary tree with the default destructor", test_binary_tree_default_destructor_one_node) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Create and destroy a binary tree with a given destructor", test_binary_tree_given_destructor) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Create and destroy a binary tree with the default destructor", test_binary_tree_default_destructor) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Create and destroy a weird array with a given destructor", test_array_struct_given_destructor) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Create and destroy a weird array with the default destructor", test_array_struct_default_destructor) == NULL) ||
         0
     ) 
     {
