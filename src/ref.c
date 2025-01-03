@@ -41,17 +41,18 @@ ioopm_list_t *get_schedule_linked_list()
  
 metadata_t *metadata_generate(function1_t destructor, size_t size) 
  {
-     metadata_t *metadata = calloc(1, sizeof(metadata_t));
-     if (!metadata) return NULL;
+    metadata_t *metadata = calloc(1, sizeof(metadata_t));
+    if (!metadata) return NULL;
 
-     metadata->rc         = 0;
-     metadata->destructor = destructor;
-     metadata->size       = size;
-     return metadata;
+    metadata->rc         = 0;
+    metadata->destructor = destructor;
+    metadata->size       = size;
+    return metadata;
  
 }
 
-static metadata_t *get_metadata(obj* object) {
+static metadata_t *get_metadata(obj* object)
+{
     uintptr_t key_as_int = (uintptr_t)object;
     ioopm_option_t found_data = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
 
@@ -64,7 +65,7 @@ void add_to_schedule(obj *object)
     ioopm_linked_list_append(get_schedule_linked_list(), ptr_elem(object));
 }
 
-size_t rc(obj* object) {
+uint8_t rc(obj* object) {
     metadata_t *metadata = get_metadata(object);
     if (metadata) {
         return metadata->rc;
@@ -88,10 +89,10 @@ void release_destructor(obj *to_remove)
 
 static bool is_valid_pointer(void *object)
 {
-    if (sizeof(object) != sizeof(void*)) return false;
+    if (!object) return false;
     //memdata_t *metadata = GET_METADATA(object);
     // Convert pointer to integer using uintptr_t
-    uintptr_t key_as_int = (uintptr_t)object;
+    uintptr_t key_as_int = (uintptr_t) object;
     
     //memdata_t *metadata = GET_METADATA(object);
     ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
@@ -105,7 +106,7 @@ void default_destructor(obj* object)
         return;
     }
 
-    uintptr_t key_as_int = (uintptr_t)object;
+    uintptr_t key_as_int = (uintptr_t) object;
     
     ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
 
@@ -113,29 +114,30 @@ void default_destructor(obj* object)
     metadata_t *metadata = (metadata_t *)(option.value.p);
     size_t object_size = metadata->size;
 
-    for (size_t offset = 0; offset < object_size - sizeof(void*); offset++)
+    for (size_t offset = 1; offset <= object_size - sizeof(void *); offset++)
     {
-        void *possible_pointer = (void *)((char *)object + offset);
-        if(is_valid_pointer(&possible_pointer))
+        void **possible_pointer = (void **)((char *) object + offset);
+        if (is_valid_pointer(*possible_pointer))
         {
-            release((void *)possible_pointer);
+            release(*possible_pointer);
             offset += sizeof(void*) - 1; // -1 since for loop increments
         }
+    
     }
 }
 
-void free_scheduled_tasks(size_t size) 
+void free_scheduled_tasks(size_t size)
 {
     size_t freed_size = 0;
     size_t freed_amount = 0;
 
     while ((freed_size < size || freed_amount < CASCADE_LIMIT) && 
-        ioopm_linked_list_size(get_schedule_linked_list()) > 0) 
+        ioopm_linked_list_size(get_schedule_linked_list()) > 0)
     {
         bool successful1 = false;
         obj *to_remove = ioopm_linked_list_get(get_schedule_linked_list(), 0, &successful1).p;  // TODO!!! int_eq, but ptr_elem values
 
-        if (!successful1 || !to_remove) 
+        if (!successful1 || !to_remove)
         {
             printf("Null or invalid object encountered during task freeing\n");
             break; 
@@ -155,7 +157,7 @@ void free_scheduled_tasks(size_t size)
             // If no metadata is found, remove the pointer from the schedule
             bool success_remove = false;
             ioopm_linked_list_remove(get_schedule_linked_list(), 0, &success_remove);
-            if (!success_remove) 
+            if (!success_remove)
             {
                 printf("Failed to remove invalid object from list.\n");
             }
@@ -165,7 +167,7 @@ void free_scheduled_tasks(size_t size)
         // If reference count is nonzero, skip freeing
         if (metadata->rc > 0) 
         {
-            printf("Skipping object with active references (rc=%zu).\n", metadata->rc);
+            printf("Skipping object with active references (rc=%u).\n", metadata->rc);
             break;
         }
 
@@ -194,7 +196,7 @@ void free_scheduled_tasks(size_t size)
 obj *allocate(size_t bytes, function1_t destructor) 
 {
     free_scheduled_tasks(bytes); 
-    obj *object = malloc(bytes);
+    obj *object = calloc(1, bytes);
     if (!object) 
     {
         printf("Memory allocation failed\n");
@@ -213,9 +215,7 @@ obj *allocate(size_t bytes, function1_t destructor)
 
     //memdata_t *metadata = calloc(1, sizeof(memdata_t) + bytes);
     ioopm_hash_table_insert(get_metadata_ht(), int_elem(key_as_int), ptr_elem(metadata));
-     
-
-     
+    
     return object;
 }
 
@@ -226,7 +226,8 @@ obj *allocate_array(size_t elements, size_t bytes, function1_t destructor)
     return allocate(total_size, destructor);
 }
 
-void deallocate(obj* object) {
+void deallocate(obj* object)
+{
     uintptr_t key_as_int = (uintptr_t)object;
     metadata_t *metadata = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int)).value.p;
     add_to_schedule(object);
