@@ -8,7 +8,7 @@ typedef bool ioopm_predicate(elem_t key, elem_t value, void *extra);
 typedef void ioopm_apply_function(elem_t key, elem_t *value, void *extra);
 
 
-union elem // TODO: Ska den vara här? Användaren kan nog ej göra en eq_func utan att veta struktur på elem
+union elem 
 {
     int i;
     unsigned int u;

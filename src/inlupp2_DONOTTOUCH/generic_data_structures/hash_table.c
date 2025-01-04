@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "linked_list.h"
+#include "../../ref.h"
 
 #define Success(k, v) \
     (ioopm_option_t) { .success = true, .key = k, .value = v }
@@ -42,6 +43,24 @@ static int default_hash_function(elem_t value)
 ioopm_hash_table_t *ioopm_hash_table_create(ioopm_eq_function *key_eq_func, ioopm_eq_function *value_eq_func, ioopm_hash_function *hash_function)
 {
     // Allocate space for a ioopm_hast_table_t = 17 pointers to entry_ts, which are set to NULL due to CALLOC
+    ioopm_hash_table_t *result = allocate(sizeof(ioopm_hash_table_t), NULL);
+    result->size = 0;
+    result->key_eq_func = key_eq_func;
+    result->value_eq_func = value_eq_func;
+    if (hash_function != NULL)
+    {
+        result->hash_function = hash_function;
+    }
+    else
+    {
+        result->hash_function = default_hash_function;
+    }
+    return result;
+}
+
+ioopm_hash_table_t *ioopm_hash_table_create_static(ioopm_eq_function *key_eq_func, ioopm_eq_function *value_eq_func, ioopm_hash_function *hash_function)
+{
+    // Allocate space for a ioopm_hast_table_t = 17 pointers to entry_ts, which are set to NULL due to CALLOC
     ioopm_hash_table_t *result = calloc(1, sizeof(ioopm_hash_table_t));
     result->size = 0;
     result->key_eq_func = key_eq_func;
@@ -59,13 +78,14 @@ ioopm_hash_table_t *ioopm_hash_table_create(ioopm_eq_function *key_eq_func, ioop
 
 static void entry_destroy(entry_t *e)
 {
-    free(e);
+    release(e);
 }
 
 void ioopm_hash_table_destroy(ioopm_hash_table_t *ht)
 {
-    ioopm_hash_table_clear(ht);
-    free(ht);
+    // ioopm_hash_table_clear(ht);
+    // free(ht);
+    release(ht);
 }
 
 static entry_t *find_previous_entry_for_key(ioopm_hash_table_t *ht, entry_t *e, elem_t key)
@@ -101,7 +121,7 @@ static entry_t *find_previous_entry_for_key(ioopm_hash_table_t *ht, entry_t *e, 
 
 static entry_t *entry_create(elem_t key, elem_t value, entry_t *next)
 {
-    entry_t *result = calloc(1, sizeof(entry_t));
+    entry_t *result = allocate(sizeof(entry_t), NULL);
     result->key = key;
     result->value = value;
     result->next = next;
@@ -157,8 +177,8 @@ ioopm_option_t ioopm_hash_table_remove(ioopm_hash_table_t *ht, elem_t key)
     if (to_be_removed != NULL)
     {
         previous_entry->next = to_be_removed->next;
-
         entry_t tmp = *to_be_removed;
+        retain(to_be_removed->next);
 
         entry_destroy(to_be_removed);
 

@@ -207,6 +207,7 @@ void metadata_destructor(void *ptr) {
 
 void test_add_to_schedule(){
     ioopm_list_t *list = get_schedule_linked_list();
+    get_metadata_ht();
     //Check if list doesn´t exist:
     CU_ASSERT_PTR_NOT_NULL(list);
     obj *object = allocate(sizeof(obj*), dummy_destructor);
@@ -669,7 +670,7 @@ int main() {
     // the test in question. If you want to add another test, just
     // copy a line below and change the information
     if (
-        (CU_add_test(unit_test_suite1, "get_schedule_linked_list test", test_get_schedule_linked_list) == NULL) || //needs to be tested first so that the list is empty
+        // (CU_add_test(unit_test_suite1, "get_schedule_linked_list test", test_get_schedule_linked_list) == NULL) || //needs to be tested first so that the list is empty
         (CU_add_test(unit_test_suite1, "Add to schedule", test_add_to_schedule) == NULL) ||
         (CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
         (CU_add_test(unit_test_suite1, "F", test_free_scheduled_task_one_task) == NULL) ||

@@ -115,3 +115,5 @@ void ioopm_linked_list_apply_to_all(ioopm_list_t *list, ioopm_apply_int_function
 /// @param list the list to be iterated over
 /// @return an iteration positioned at the start of list
 ioopm_list_iterator_t *ioopm_list_iterator(ioopm_list_t *list);
+
+void *ioopm_linked_list_initialize(ioopm_list_t *list, ioopm_eq_function *eq_func);

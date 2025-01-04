@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "common.h"
 #include <stddef.h>
+#include "../../ref.h"
 
 #define null_elem \
     (elem_t) { 0 }
@@ -36,7 +37,7 @@ bool ioopm_linked_list_is_empty(ioopm_list_t *list)
 
 static link_t *link_create(elem_t value, link_t *previous, link_t *next)
 {
-    link_t *link = calloc(1, sizeof(link_t));
+    link_t *link = allocate(sizeof(link_t), NULL);
     link->previous = previous;
     link->next = next;
     link->value = value;
@@ -45,11 +46,21 @@ static link_t *link_create(elem_t value, link_t *previous, link_t *next)
 
 ioopm_list_t *ioopm_linked_list_create(ioopm_eq_function *eq_func)
 {
-    ioopm_list_t *result = calloc(1, sizeof(ioopm_list_t));
+    ioopm_list_t *result = allocate(sizeof(ioopm_list_t), NULL);
     result->size = 0;
     result->first = result->last = link_create(null_elem, NULL, NULL);
     result->eq_func = eq_func;
     return result;
+}
+
+void *ioopm_linked_list_initialize(ioopm_list_t *list, ioopm_eq_function *eq_func){
+    
+    list = calloc(1, sizeof(ioopm_list_t));
+    
+    list->first = list->last = NULL;
+    list->size= 0 ;
+    list->eq_func=eq_func;
+
 }
 
 
@@ -78,9 +89,9 @@ ioopm_list_t *ioopm_linked_list_duplicate(ioopm_list_t *list)
 
 void ioopm_linked_list_destroy(ioopm_list_t *list)
 {
-    ioopm_linked_list_clear(list);
-    free(list->first);
-    free(list);
+    // ioopm_linked_list_clear(list);
+    release(list);
+    // free(list);
 }
 
 void ioopm_linked_list_append(ioopm_list_t *list, elem_t value)
@@ -164,7 +175,7 @@ elem_t ioopm_linked_list_remove(ioopm_list_t *list, size_t index, bool *success)
             list->last = dummy;
         }
 
-        free(to_be_removed);
+        release(to_be_removed);
         list->size--;
         *success = true;
         return value_removed;
@@ -184,7 +195,9 @@ elem_t ioopm_linked_list_remove(ioopm_list_t *list, size_t index, bool *success)
     {
         list->last = current_link;
     }
-    free(to_be_removed);
+
+    release(to_be_removed);
+
     list->size--;
     *success = true;
     return value_removed;
@@ -298,7 +311,7 @@ void ioopm_linked_list_clear(ioopm_list_t *list)
     {
         link_t *next_link = current_link->next;
 
-        free(current_link);
+        release(current_link);
 
         current_link = next_link;
     }
@@ -318,7 +331,7 @@ struct iter
 
 ioopm_list_iterator_t *ioopm_list_iterator(ioopm_list_t *list)
 {
-    ioopm_list_iterator_t *iter = calloc(1, sizeof(ioopm_list_iterator_t));
+    ioopm_list_iterator_t *iter = allocate(sizeof(ioopm_list_iterator_t), NULL);
 
     iter->list = list;
     ioopm_iterator_reset(iter);
@@ -378,7 +391,7 @@ elem_t ioopm_iterator_remove(ioopm_list_iterator_t *iter, bool *success)
 
     iter->current = iter->current->next;
 
-    free(to_remove);
+    release(to_remove);
     iter->list->size--;
 
     *success = true;
@@ -435,5 +448,5 @@ elem_t ioopm_iterator_current(ioopm_list_iterator_t *iter, bool *success)
 
 void ioopm_iterator_destroy(ioopm_list_iterator_t *iter)
 {
-    free(iter);
+    release(iter);
 }
