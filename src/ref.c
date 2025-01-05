@@ -21,6 +21,15 @@ static int default_hash_function(elem_t value)
 
 size_t CASCADE_LIMIT = 10;
  
+void initialize_collector() 
+{
+    if(!metadata_ht){
+        metadata_ht = ioopm_hash_table_create(int_eq, NULL, default_hash_function);
+    }
+    if(!schedule_linked_list) {
+        schedule_linked_list = ioopm_linked_list_create(int_eq); // TODO!!! int_eq, but ptr_elem values
+    }
+}
 
 ioopm_hash_table_t *get_metadata_ht() {
     if(metadata_ht == NULL){
@@ -196,31 +205,16 @@ void free_scheduled_tasks(size_t size)
 
 obj *allocate(size_t bytes, function1_t destructor) 
 {
-    static bool allocation_in_progress = false;
-
-    // If an allocation is already in progress, skip free_scheduled_tasks to prevent recursion
-    if (!allocation_in_progress) {
-        allocation_in_progress = true;
-        free_scheduled_tasks(bytes); 
-        allocation_in_progress = false;
-    }
+    //initialize refcount 
+    free_scheduled_tasks(bytes); 
 
     obj *object = calloc(1, bytes);
-    if (!object) 
-    {
-        printf("Memory allocation failed\n");
-        return NULL;
-    }
 
     if(schedule_linked_list && metadata_ht) {
         // Convert pointer to integer using uintptr_t
         uintptr_t key_as_int = (uintptr_t)object;
         metadata_t *metadata = metadata_generate(destructor, bytes);
-        if (!metadata) 
-        {
-            printf("Failed to allocate memory for metadata + object\n");
-            return NULL;
-        }
+    
         //memdata_t *metadata = calloc(1, sizeof(memdata_t) + bytes);
         ioopm_hash_table_insert(get_metadata_ht(), int_elem(key_as_int), ptr_elem(metadata));
     }
@@ -289,7 +283,7 @@ void release(obj *object)
     } 
     else
     {
-        metadata->rc--;
+        metadata->rc--; 
     }
 }
 

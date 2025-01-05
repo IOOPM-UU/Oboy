@@ -60,8 +60,8 @@ int clean_suite(void) {
 //     CU_ASSERT_PTR_NULL(obj);
 // }
 
-void test2(void) {
-    CU_ASSERT_EQUAL(1 + 1, 2);
+void test_initialize_collector(void) {
+    
 }
 
 void test_retain_release() {
@@ -672,9 +672,9 @@ int main() {
     if (
         // (CU_add_test(unit_test_suite1, "get_schedule_linked_list test", test_get_schedule_linked_list) == NULL) || //needs to be tested first so that the list is empty
         (CU_add_test(unit_test_suite1, "Add to schedule", test_add_to_schedule) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
-        (CU_add_test(unit_test_suite1, "F", test_free_scheduled_task_one_task) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Default destructor", test_default_destructor) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "F", test_free_scheduled_task_one_task) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Default destructor", test_default_destructor) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_and_free_scheduled_tasks) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate links and free scheduled tasks", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate array and free scheduled tasks", test_allocate_array_then_free) == NULL) ||

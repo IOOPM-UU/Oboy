@@ -46,3 +46,4 @@ ioopm_list_t *get_schedule_linked_list();
 void free_scheduled_tasks(size_t size);
 void add_to_schedule(obj *object);
 void free_all();
+void initialize_collector();
