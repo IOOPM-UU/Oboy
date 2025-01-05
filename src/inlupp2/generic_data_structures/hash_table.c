@@ -40,28 +40,18 @@ static int default_hash_function(elem_t value)
     return value.i;
 }
 
-ioopm_hash_table_t *ioopm_hash_table_create(ioopm_eq_function *key_eq_func, ioopm_eq_function *value_eq_func, ioopm_hash_function *hash_function)
-{
-    // Allocate space for a ioopm_hast_table_t = 17 pointers to entry_ts, which are set to NULL due to CALLOC
-    ioopm_hash_table_t *result = allocate(sizeof(ioopm_hash_table_t), NULL);
-    result->size = 0;
-    result->key_eq_func = key_eq_func;
-    result->value_eq_func = value_eq_func;
-    if (hash_function != NULL)
-    {
-        result->hash_function = hash_function;
+void hash_table_destructor(obj* object) {
+    if(!object) return;
+
+    for(int i = 0; i < No_Buckets; i++) {
+        release(((ioopm_hash_table_t *) object)->buckets[i].next);
     }
-    else
-    {
-        result->hash_function = default_hash_function;
-    }
-    return result;
 }
 
-ioopm_hash_table_t *ioopm_hash_table_create_static(ioopm_eq_function *key_eq_func, ioopm_eq_function *value_eq_func, ioopm_hash_function *hash_function)
+ioopm_hash_table_t *ioopm_hash_table_create(ioopm_eq_function *key_eq_func, ioopm_eq_function *value_eq_func, ioopm_hash_function *hash_function)
 {
-    // Allocate space for a ioopm_hast_table_t = 17 pointers to entry_ts, which are set to NULL due to CALLOC
-    ioopm_hash_table_t *result = calloc(1, sizeof(ioopm_hash_table_t));
+    // Allocate space for a ioopm_allocatete_t = 17 pointers to entry,NULL_ts, which are set to NULL due to CALLOC
+    ioopm_hash_table_t *result = allocate(sizeof(ioopm_hash_table_t), hash_table_destructor);
     result->size = 0;
     result->key_eq_func = key_eq_func;
     result->value_eq_func = value_eq_func;
@@ -118,6 +108,11 @@ static entry_t *find_previous_entry_for_key(ioopm_hash_table_t *ht, entry_t *e, 
 //     }
 //     return cursor;
 // }
+
+void entry_destructor(obj* object) {
+    if(!object) return;
+    release(((entry_t *) object)->next);
+}
 
 static entry_t *entry_create(elem_t key, elem_t value, entry_t *next)
 {

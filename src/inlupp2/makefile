@@ -1,3 +1,4 @@
+REF = 
 
 clean:
 	rm -f *.o frontend backend_tests *.gcno *.gcda *.gcov backend_tests_coverage
@@ -26,13 +27,13 @@ clean_val_frontend:
 clean_full_val_frontend:
 	make clean; make frontend; make full_val_frontend
 
-backend_tests: business_logic/common.c business_logic/shop.c business_logic/merch.c business_logic/cart.c tests/backend_tests.c generic_utils/utils.c generic_data_structures/linked_list.c generic_data_structures/hash_table.c
-	gcc -g -Wall -pedantic business_logic/common.c business_logic/shop.c business_logic/merch.c business_logic/cart.c tests/backend_tests.c generic_utils/utils.c generic_data_structures/linked_list.c generic_data_structures/hash_table.c -lcunit -o backend_tests
+backend_tests: business_logic/common.c business_logic/shop.c business_logic/merch.c business_logic/cart.c tests/backend_tests.c generic_utils/utils.c generic_data_structures/linked_list.c generic_data_structures/hash_table.c ../ref.c
+	gcc -g -Wall -pedantic business_logic/common.c business_logic/shop.c business_logic/merch.c business_logic/cart.c tests/backend_tests.c generic_utils/utils.c generic_data_structures/linked_list.c generic_data_structures/hash_table.c ../ref.c  ../lib/lib_hash_table.c  ../lib/lib_linked_list.c -lcunit -o backend_tests
 
 run_backend_tests:
 	./backend_tests
 
-val_backend_tests:
+val_backend_tests: 
 	valgrind -s ./backend_tests
 
 full_val_backend_tests:

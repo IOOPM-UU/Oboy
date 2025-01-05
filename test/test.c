@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdint.h>
-#include "../src/inlupp2_DONOTTOUCH/generic_data_structures/linked_list.h"
+#include "../src/lib/lib_linked_list.h"
 #include <assert.h>
 #include <limits.h>
 
@@ -13,13 +13,13 @@ struct cell
   int i;
   char *string;
 };
-typedef struct link link_t;
+typedef struct lib_link lib_link_t;
 
-struct link
+struct lib_link
 {
-    elem_t value;
-    link_t *previous;
-    link_t *next;
+    lib_elem_t value;
+    lib_link_t *previous;
+    lib_link_t *next;
 };
 
 void cell_destructor(obj *c) //kanske borde returna Size på det vi tagit bort?
@@ -117,8 +117,8 @@ void test_rc(void) {
 
 void test_get_schedule_linked_list(){
     //if null, create
-    ioopm_list_t *list = get_schedule_linked_list();
-    CU_ASSERT_TRUE(ioopm_linked_list_is_empty(list));
+    lib_list_t *list = get_schedule_linked_list();
+    CU_ASSERT_TRUE(lib_linked_list_is_empty(list));
 
     //add two objects to list
     obj *object = malloc(sizeof(obj*));
@@ -126,33 +126,33 @@ void test_get_schedule_linked_list(){
     add_to_schedule(object);
     
     //if list exists, return it
-    ioopm_list_t *list2 = get_schedule_linked_list();
+    lib_list_t *list2 = get_schedule_linked_list();
     CU_ASSERT_EQUAL(list,list2);
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 2);
-    ioopm_linked_list_clear(list);
+    CU_ASSERT_EQUAL(lib_linked_list_size(list), 2);
+    lib_linked_list_clear(list);
     
     free(object);
 }
 
 /*
 void test_get_metadata_ht(void) {    
-    ioopm_hash_table_t *ht_rc = get_metadata_ht();
+    lib_hash_table_t *ht_rc = get_metadata_ht();
     CU_ASSERT_PTR_NOT_NULL(ht_rc);
-    ioopm_hash_table_t *ht_rc2 = get_metadata_ht();
+    lib_hash_table_t *ht_rc2 = get_metadata_ht();
     CU_ASSERT_PTR_EQUAL(ht_rc, ht_rc2);
     
-    //ioopm_hash_table_destroy(ht_rc); //TODO swap for shutdown later?? //DANGLING POINTERS
+    //lib_hash_table_destroy(ht_rc); //TODO swap for shutdown later?? //DANGLING POINTERS
 }
 
 void test_get_metadata_ht_retrieve(void) {
-    ioopm_hash_table_t *ht_rc = get_metadata_ht();
+    lib_hash_table_t *ht_rc = get_metadata_ht();
     CU_ASSERT_PTR_NOT_NULL(ht_rc);
     
-    ioopm_option_t check = ioopm_hash_table_lookup(ht_rc, int_elem(4));
+    lib_option_t check = lib_hash_table_lookup(ht_rc, int_elem(4));
     CU_ASSERT_FALSE(check.success);
     
     
-    //ioopm_hash_table_destroy(ht_rc); //TODO swap for shutdown later?? //DANGLING POINTERS
+    //lib_hash_table_destroy(ht_rc); //TODO swap for shutdown later?? //DANGLING POINTERS
 } */
 
 // void dummy_destructor(void *ptr) {
@@ -173,7 +173,7 @@ void metadata_destructor(void *ptr) {
 //         void **possible_pointer = (void **)((char *)object + offset);
 
 //         // Check if the address is in the allocation tracker
-//         if (ioopm_hash_table_lookup(get_metadata_ht(), ptr_elem(*possible_pointer)).success) {
+//         if (lib_hash_table_lookup(get_metadata_ht(), ptr_elem(*possible_pointer)).success) {
 //             release(*possible_pointer);
 //         }
 //     }
@@ -188,17 +188,17 @@ void metadata_destructor(void *ptr) {
 // currently leaks, need a special destructor for metadata
 /* void test_metadata_generate_insert_ht(void) {
     metadata_t *metadata = metadata_generate(metadata_destructor);
-    ioopm_hash_table_insert(get_metadata_ht(), int_elem((int) &metadata), ptr_elem(metadata));
+    lib_hash_table_insert(get_metadata_ht(), int_elem((int) &metadata), ptr_elem(metadata));
     CU_ASSERT_PTR_NOT_NULL(metadata);
-    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(), int_elem((int) &metadata));
+    lib_option_t option = lib_hash_table_lookup(get_metadata_ht(), int_elem((int) &metadata));
     CU_ASSERT_TRUE(option.success);
     free(option.value.p);
 
     
-    ioopm_hash_table_insert(get_metadata_ht(), int_elem(2), ptr_elem(metadata_generate(metadata_destructor)));
-    ioopm_option_t option2 = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(2));
+    lib_hash_table_insert(get_metadata_ht(), int_elem(2), ptr_elem(metadata_generate(metadata_destructor)));
+    lib_option_t option2 = lib_hash_table_lookup(get_metadata_ht(), int_elem(2));
     CU_ASSERT_TRUE(option2.success);
-    option2 = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(2));
+    option2 = lib_hash_table_lookup(get_metadata_ht(), int_elem(2));
     free(option2.value.p);
     CU_ASSERT_TRUE(option.success);
 
@@ -206,37 +206,37 @@ void metadata_destructor(void *ptr) {
 } */
 
 void test_add_to_schedule(){
-    ioopm_list_t *list = get_schedule_linked_list();
+    lib_list_t *list = get_schedule_linked_list();
     get_metadata_ht();
     //Check if list doesn´t exist:
     CU_ASSERT_PTR_NOT_NULL(list);
     obj *object = allocate(sizeof(obj*), dummy_destructor);
 
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
+    CU_ASSERT_EQUAL(lib_linked_list_size(list), 0);
     // If list exist, add object to schedule:
     add_to_schedule(object);
     //Check if object was added
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 1);
+    CU_ASSERT_EQUAL(lib_linked_list_size(list), 1);
     add_to_schedule(object);
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 2);
+    CU_ASSERT_EQUAL(lib_linked_list_size(list), 2);
     free_scheduled_tasks(2*sizeof(object));
-    ioopm_linked_list_clear(list);
+    lib_linked_list_clear(list);
 }
  
 void test_free_scheduled_task_empty(){
     set_cascade_limit(3);
-    ioopm_list_t *list= get_schedule_linked_list();
+    lib_list_t *list= get_schedule_linked_list();
     free_scheduled_tasks(5);
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
+    CU_ASSERT_EQUAL(lib_linked_list_size(list), 0);
 }
 void test_free_scheduled_task_one_task(){
     set_cascade_limit(3);
-    ioopm_list_t *list = get_schedule_linked_list();
+    lib_list_t *list = get_schedule_linked_list();
     obj *object = allocate(sizeof(obj*), dummy_destructor);
     add_to_schedule(object);
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 1);
+    CU_ASSERT_EQUAL(lib_linked_list_size(list), 1);
     free_scheduled_tasks(1);
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
+    CU_ASSERT_EQUAL(lib_linked_list_size(list), 0);
     //free(object);
     free_scheduled_tasks(sizeof(object));
 
@@ -244,29 +244,29 @@ void test_free_scheduled_task_one_task(){
 
 /* void test_free_scheduled_tasks_over_cascade(){
     set_cascade_limit(3);
-    ioopm_list_t *list = get_schedule_linked_list();
+    lib_list_t *list = get_schedule_linked_list();
     obj *object = malloc(sizeof(obj));
     add_to_schedule(object);
     add_to_schedule(object);
     add_to_schedule(object);
     add_to_schedule(object);
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 4);
+    CU_ASSERT_EQUAL(lib_linked_list_size(list), 4);
     free_scheduled_tasks(4*sizeof(object));
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 0);
+    CU_ASSERT_EQUAL(lib_linked_list_size(list), 0);
 }
 
 void test_free_scheduled_tasks_until_size(){
 
     set_cascade_limit(100);
-    ioopm_list_t *list = get_schedule_linked_list();
+    lib_list_t *list = get_schedule_linked_list();
     obj *object = malloc(sizeof(obj));
     add_to_schedule(object);
     add_to_schedule(object);
     add_to_schedule(object);
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 3);
+    CU_ASSERT_EQUAL(lib_linked_list_size(list), 3);
     free_scheduled_tasks(2*sizeof(object));
   
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(list), 1);
+    CU_ASSERT_EQUAL(lib_linked_list_size(list), 1);
     //free(object);
     
 }
@@ -307,8 +307,8 @@ void test_default_destructor() {
     set_cascade_limit(10);
 
     // Create nodes
-    link_t *link1 = allocate(sizeof(link_t), NULL);
-    link_t *link2 = allocate(sizeof(link_t), NULL);
+    lib_link_t *link1 = allocate(sizeof(lib_link_t), NULL);
+    lib_link_t *link2 = allocate(sizeof(lib_link_t), NULL);
 
     // Link nodes
     link1->next = link2;
@@ -320,8 +320,8 @@ void test_default_destructor() {
     //release(link2);
 
     // Check that both nodes are properly deallocated
-    assert(ioopm_hash_table_lookup(get_metadata_ht(), ptr_elem(link1)).success == false);
-    assert(ioopm_hash_table_lookup(get_metadata_ht(), ptr_elem(link2)).success == false);
+    assert(lib_hash_table_lookup(get_metadata_ht(), ptr_elem(link1)).success == false);
+    assert(lib_hash_table_lookup(get_metadata_ht(), ptr_elem(link2)).success == false);
 
     printf("Test Case 1 passed: Default destructor released all linked pointers.\n");
 }
@@ -347,16 +347,16 @@ void test_allocate_and_free_scheduled_tasks(void)
     add_to_schedule(object3);
 
     // We should have 3
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(get_schedule_linked_list()), 3);
+    CU_ASSERT_EQUAL(lib_linked_list_size(get_schedule_linked_list()), 3);
 
     // 3. Free tasks up to 150 bytes => frees object1(100)
     free_scheduled_tasks(100);
     // => now 2 remain
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(get_schedule_linked_list()), 2);
+    CU_ASSERT_EQUAL(lib_linked_list_size(get_schedule_linked_list()), 2);
 
     // 4. Free tasks up to 600 => enough for object2(200) + object3(300)
     free_scheduled_tasks(600);
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(get_schedule_linked_list()), 0);
+    CU_ASSERT_EQUAL(lib_linked_list_size(get_schedule_linked_list()), 0);
 
     // NOTE: no call to free_all() here if your suite or test teardown calls it.
     // Otherwise you can do:
@@ -366,12 +366,12 @@ void test_allocate_and_free_scheduled_tasks(void)
 
 
 #define null_elem \
-    (elem_t) { 0 }
+    (lib_elem_t) { 0 }
 
 // Helper function for testing on links
-static link_t *link_create_with_allocate(elem_t value, link_t *previous, link_t *next)
+static lib_link_t *link_create_with_allocate(lib_elem_t value, lib_link_t *previous, lib_link_t *next)
 {
-    link_t *link = allocate(sizeof(link_t), NULL);
+    lib_link_t *link = allocate(sizeof(lib_link_t), NULL);
     link->previous = previous;
     link->next = next;
     link->value = value;
@@ -385,13 +385,13 @@ void test_allocate_links_and_free_scheduled_tasks(void)
     set_cascade_limit(1);
 
     // 1. Allocate memory blocks
-    link_t *link1 = link_create_with_allocate(null_elem, NULL, NULL);
+    lib_link_t *link1 = link_create_with_allocate(null_elem, NULL, NULL);
     CU_ASSERT_PTR_NOT_NULL(link1);
 
-    link_t *link2 = link_create_with_allocate(null_elem, NULL, NULL);
+    lib_link_t *link2 = link_create_with_allocate(null_elem, NULL, NULL);
     CU_ASSERT_PTR_NOT_NULL(link2);
 
-    link_t *link3 = link_create_with_allocate(null_elem, NULL, NULL);
+    lib_link_t *link3 = link_create_with_allocate(null_elem, NULL, NULL);
     CU_ASSERT_PTR_NOT_NULL(link3);
 
     // 2. Add all to schedule
@@ -400,16 +400,16 @@ void test_allocate_links_and_free_scheduled_tasks(void)
     add_to_schedule(link3);
 
     // We should have 3
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(get_schedule_linked_list()), 3);
+    CU_ASSERT_EQUAL(lib_linked_list_size(get_schedule_linked_list()), 3);
 
     // 3. Free tasks up to 150 bytes => frees object1(100)
-    free_scheduled_tasks(sizeof(link_t));
+    free_scheduled_tasks(sizeof(lib_link_t));
     // => now 2 remain
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(get_schedule_linked_list()), 2);
+    CU_ASSERT_EQUAL(lib_linked_list_size(get_schedule_linked_list()), 2);
 
     // 4. Free tasks up to 600 => enough for object2(200) + object3(300)
-    free_scheduled_tasks(2 * sizeof(link_t));
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(get_schedule_linked_list()), 0);
+    free_scheduled_tasks(2 * sizeof(lib_link_t));
+    CU_ASSERT_EQUAL(lib_linked_list_size(get_schedule_linked_list()), 0);
 
     // NOTE: no call to free_all() here if your suite or test teardown calls it.
     // Otherwise you can do:
@@ -437,7 +437,7 @@ void test_allocate_array_then_free(void)
     add_to_schedule(object3);
 
     free_scheduled_tasks(INT_MAX);
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(get_schedule_linked_list()), 0);
+    CU_ASSERT_EQUAL(lib_linked_list_size(get_schedule_linked_list()), 0);
 
     // NOTE: no call to free_all() here if your suite or test teardown calls it.
     // Otherwise you can do:
@@ -474,7 +474,7 @@ void test_allocate_strings_then_free(void)
     release(str3);
 
     free_scheduled_tasks(INT_MAX);
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(get_schedule_linked_list()), 0);
+    CU_ASSERT_EQUAL(lib_linked_list_size(get_schedule_linked_list()), 0);
 
     // NOTE: no call to free_all() here if your suite or test teardown calls it.
     // Otherwise you can do:
@@ -672,14 +672,13 @@ int main() {
     if (
         // (CU_add_test(unit_test_suite1, "get_schedule_linked_list test", test_get_schedule_linked_list) == NULL) || //needs to be tested first so that the list is empty
         (CU_add_test(unit_test_suite1, "Add to schedule", test_add_to_schedule) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "F", test_free_scheduled_task_one_task) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
+        (CU_add_test(unit_test_suite1, "F", test_free_scheduled_task_one_task) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Default destructor", test_default_destructor) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_and_free_scheduled_tasks) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate links and free scheduled tasks", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate array and free scheduled tasks", test_allocate_array_then_free) == NULL) ||
         (CU_add_test(unit_test_suite1, "rc() ref count function", test_rc) == NULL) ||
-        (CU_add_test(unit_test_suite1, "get_schedule_linked_list test", test_get_schedule_linked_list) == NULL) ||
         (CU_add_test(unit_test_suite1, "Get and set cascade limit", test_get_and_set_cascade_limit) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate string and free scheduled tasks", test_allocate_strings_then_free) == NULL) ||
         (CU_add_test(unit_test_suite1, "Create and destroy a small binary tree with a given destructor", test_binary_tree_given_destructor_one_node) == NULL) ||

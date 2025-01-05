@@ -30,6 +30,18 @@ struct link
     link_t *next;
 };
 
+void link_destructor(obj* object) {
+    if(!object) return;
+    release(((link_t *)object)->next); //TODO: should we release previous?
+} 
+
+void linked_list_destructor(obj* object){
+    if(!object) return;
+    release(((ioopm_list_t *)object)->first); //TODO: should we release last?
+}
+
+
+
 bool ioopm_linked_list_is_empty(ioopm_list_t *list)
 {
     return list->size == 0;
@@ -37,7 +49,7 @@ bool ioopm_linked_list_is_empty(ioopm_list_t *list)
 
 static link_t *link_create(elem_t value, link_t *previous, link_t *next)
 {
-    link_t *link = allocate(sizeof(link_t), NULL);
+    link_t *link = allocate( sizeof(link_t), link_destructor);
     link->previous = previous;
     link->next = next;
     link->value = value;
@@ -46,21 +58,11 @@ static link_t *link_create(elem_t value, link_t *previous, link_t *next)
 
 ioopm_list_t *ioopm_linked_list_create(ioopm_eq_function *eq_func)
 {
-    ioopm_list_t *result = allocate(sizeof(ioopm_list_t), NULL);
+    ioopm_list_t *result = allocate(sizeof(ioopm_list_t), linked_list_destructor);
     result->size = 0;
     result->first = result->last = link_create(null_elem, NULL, NULL);
     result->eq_func = eq_func;
     return result;
-}
-
-void *ioopm_linked_list_initialize(ioopm_list_t *list, ioopm_eq_function *eq_func){
-    
-    list = calloc(1, sizeof(ioopm_list_t));
-    
-    list->first = list->last = NULL;
-    list->size= 0 ;
-    list->eq_func=eq_func;
-
 }
 
 
@@ -89,9 +91,7 @@ ioopm_list_t *ioopm_linked_list_duplicate(ioopm_list_t *list)
 
 void ioopm_linked_list_destroy(ioopm_list_t *list)
 {
-    // ioopm_linked_list_clear(list);
     release(list);
-    // free(list);
 }
 
 void ioopm_linked_list_append(ioopm_list_t *list, elem_t value)
@@ -123,7 +123,7 @@ void ioopm_linked_list_prepend(ioopm_list_t *list, elem_t value)
     list->size++;
 }
 
-void ioopm_linked_list_insert(ioopm_list_t *list, size_t index, elem_t value)
+void ioopm_linked_list_insert(ioopm_list_t *list, int index, elem_t value)
 {
     if (index >= list->size)
     {
@@ -138,7 +138,7 @@ void ioopm_linked_list_insert(ioopm_list_t *list, size_t index, elem_t value)
     }
 
     link_t *current = list->first;
-    for (size_t i = 0; i < index && current->next != NULL; i++)
+    for (int i = 0; i < index && current->next != NULL; i++)
     {
         current = current->next;
     }
@@ -155,9 +155,9 @@ void ioopm_linked_list_insert(ioopm_list_t *list, size_t index, elem_t value)
     list->size++;
 }
 
-elem_t ioopm_linked_list_remove(ioopm_list_t *list, size_t index, bool *success)
+elem_t ioopm_linked_list_remove(ioopm_list_t *list, int index, bool *success)
 {
-    if (index >= list->size)
+    if (index < 0 || index >= list->size)
     {
         *success = false;
         return null_elem;
@@ -175,13 +175,14 @@ elem_t ioopm_linked_list_remove(ioopm_list_t *list, size_t index, bool *success)
             list->last = dummy;
         }
 
+        // free(to_be_removed);
         release(to_be_removed);
         list->size--;
         *success = true;
         return value_removed;
     }
     link_t *current_link = dummy;
-    for (size_t i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
     {
         current_link = current_link->next;
     }
@@ -195,17 +196,16 @@ elem_t ioopm_linked_list_remove(ioopm_list_t *list, size_t index, bool *success)
     {
         list->last = current_link;
     }
-
+    // free(to_be_removed);
     release(to_be_removed);
-
     list->size--;
     *success = true;
     return value_removed;
 }
 
-elem_t ioopm_linked_list_get(ioopm_list_t *list, size_t index, bool *success)
+elem_t ioopm_linked_list_get(ioopm_list_t *list, int index, bool *success)
 {
-    if (index >= list->size)
+    if (index < 0 || index >= list->size)
     {
         *success = false;
         return null_elem;
@@ -213,7 +213,7 @@ elem_t ioopm_linked_list_get(ioopm_list_t *list, size_t index, bool *success)
 
     link_t *current_link = list->first->next;
 
-    for (size_t i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
     {
         current_link = current_link->next;
     }
@@ -248,7 +248,7 @@ bool ioopm_linked_list_any(ioopm_list_t *list, ioopm_int_predicate *prop, void *
 {
     link_t *current_entry = list->first->next;
 
-    for (size_t i = 0; i < list->size; i++)
+    for (int i = 0; i < list->size; i++)
     {
         if (prop(i, current_entry->value, extra))
         {
@@ -311,6 +311,7 @@ void ioopm_linked_list_clear(ioopm_list_t *list)
     {
         link_t *next_link = current_link->next;
 
+        // free(current_link);
         release(current_link);
 
         current_link = next_link;
@@ -329,9 +330,15 @@ struct iter
     ioopm_list_t *list;
 };
 
+void iter_destructor(obj* object){
+    if(!object) return;
+    release(((ioopm_list_iterator_t*)object)->current); //TODO: should we release list?
+
+}
+
 ioopm_list_iterator_t *ioopm_list_iterator(ioopm_list_t *list)
 {
-    ioopm_list_iterator_t *iter = allocate(sizeof(ioopm_list_iterator_t), NULL);
+    ioopm_list_iterator_t *iter = allocate(sizeof(ioopm_list_iterator_t), iter_destructor);
 
     iter->list = list;
     ioopm_iterator_reset(iter);
@@ -391,6 +398,7 @@ elem_t ioopm_iterator_remove(ioopm_list_iterator_t *iter, bool *success)
 
     iter->current = iter->current->next;
 
+    // free(to_remove);
     release(to_remove);
     iter->list->size--;
 
@@ -448,5 +456,6 @@ elem_t ioopm_iterator_current(ioopm_list_iterator_t *iter, bool *success)
 
 void ioopm_iterator_destroy(ioopm_list_iterator_t *iter)
 {
+    // free(iter);
     release(iter);
 }

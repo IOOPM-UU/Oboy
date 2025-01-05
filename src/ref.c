@@ -6,15 +6,15 @@
 #include <limits.h>
 #include <assert.h>
 
-static ioopm_list_t *schedule_linked_list = NULL;
-static ioopm_hash_table_t *metadata_ht = NULL;
+static lib_list_t *schedule_linked_list = NULL;
+static lib_hash_table_t *metadata_ht = NULL;
 
-bool int_eq(elem_t a, elem_t b) {
+bool int_equal(lib_elem_t a, lib_elem_t b) {
     return a.i == b.i;
 }
 
  
-static int default_hash_function(elem_t value)
+static int default_hash_function(lib_elem_t value)
 {
     return value.i;
 } 
@@ -24,25 +24,25 @@ size_t CASCADE_LIMIT = 10;
 void initialize_collector() 
 {
     if(!metadata_ht){
-        metadata_ht = ioopm_hash_table_create(int_eq, NULL, default_hash_function);
+        metadata_ht = lib_hash_table_create(int_equal, NULL, default_hash_function);
     }
     if(!schedule_linked_list) {
-        schedule_linked_list = ioopm_linked_list_create(int_eq); // TODO!!! int_eq, but ptr_elem values
+        schedule_linked_list = lib_linked_list_create(int_equal); // TODO!!! int_equal, but ptr_elem values
     }
 }
 
-ioopm_hash_table_t *get_metadata_ht() {
+lib_hash_table_t *get_metadata_ht() {
     if(metadata_ht == NULL){
-        metadata_ht = ioopm_hash_table_create(int_eq, NULL, default_hash_function);
+        metadata_ht = lib_hash_table_create(int_equal, NULL, default_hash_function);
     }
     return metadata_ht;
 }
 
 
-ioopm_list_t *get_schedule_linked_list() 
+lib_list_t *get_schedule_linked_list() 
 {
     if (!schedule_linked_list) {
-        schedule_linked_list = ioopm_linked_list_create(int_eq); // TODO!!! int_eq, but ptr_elem values
+        schedule_linked_list = lib_linked_list_create(int_equal); // TODO!!! int_equal, but ptr_elem values
     }
     return schedule_linked_list;
 }
@@ -63,7 +63,7 @@ metadata_t *metadata_generate(function1_t destructor, size_t size)
 static metadata_t *get_metadata(obj* object)
 {
     uintptr_t key_as_int = (uintptr_t)object;
-    ioopm_option_t found_data = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
+    lib_option_t found_data = lib_hash_table_lookup(get_metadata_ht(), lib_int_elem(key_as_int));
 
     if(!found_data.success) return NULL;
     return (metadata_t*) found_data.value.p;
@@ -71,7 +71,7 @@ static metadata_t *get_metadata(obj* object)
 
 void add_to_schedule(obj *object) 
 {
-    ioopm_linked_list_append(get_schedule_linked_list(), ptr_elem(object));
+    lib_linked_list_append(get_schedule_linked_list(), lib_ptr_elem(object));
 }
 
 uint8_t rc(obj* object) {
@@ -104,7 +104,7 @@ static bool is_valid_pointer(void *object)
     uintptr_t key_as_int = (uintptr_t) object;
     
     //memdata_t *metadata = GET_METADATA(object);
-    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
+    lib_option_t option = lib_hash_table_lookup(get_metadata_ht(), lib_int_elem(key_as_int));
     return option.success;
 }
 
@@ -117,7 +117,7 @@ void default_destructor(obj* object)
 
     uintptr_t key_as_int = (uintptr_t) object;
     
-    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
+    lib_option_t option = lib_hash_table_lookup(get_metadata_ht(), lib_int_elem(key_as_int));
 
     if (!option.success) return;
     metadata_t *metadata = (metadata_t *)(option.value.p);
@@ -142,10 +142,10 @@ void free_scheduled_tasks(size_t size)
     if(!schedule_linked_list || !metadata_ht) return; //are they initialized?
 
     while ((freed_size < size || freed_amount < CASCADE_LIMIT) && 
-        ioopm_linked_list_size(get_schedule_linked_list()) > 0)
+        lib_linked_list_size(get_schedule_linked_list()) > 0)
     {
         bool successful1 = false;
-        obj *to_remove = ioopm_linked_list_get(get_schedule_linked_list(), 0, &successful1).p;  // TODO!!! int_eq, but ptr_elem values
+        obj *to_remove = lib_linked_list_get(get_schedule_linked_list(), 0, &successful1).p;  // TODO!!! int_equal, but ptr_elem values
 
         if (!successful1 || !to_remove)
         {
@@ -155,18 +155,18 @@ void free_scheduled_tasks(size_t size)
 
         // memdata_t *metadata = GET_METADATA(to_remove);
         // Convert pointer to integer using uintptr_t
-        uintptr_t key_as_int = (uintptr_t)to_remove;  // TODO!!! int_eq, but ptr_elem values
+        uintptr_t key_as_int = (uintptr_t)to_remove;  // TODO!!! int_equal, but ptr_elem values
         
         //memdata_t *metadata = GET_METADATA(object);
         
         // Lookup metadata in the hash table
-        // ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
+        // lib_option_t option = lib_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
         metadata_t *metadata = get_metadata(to_remove);
         if (!metadata)
         {
             // If no metadata is found, remove the pointer from the schedule
             bool success_remove = false;
-            ioopm_linked_list_remove(get_schedule_linked_list(), 0, &success_remove);
+            lib_linked_list_remove(get_schedule_linked_list(), 0, &success_remove);
             if (!success_remove)
             {
                 printf("Failed to remove invalid object from list.\n");
@@ -189,14 +189,14 @@ void free_scheduled_tasks(size_t size)
 
         // Remove from the scheduled list
         bool successful2 = false;
-        ioopm_linked_list_remove(get_schedule_linked_list(), 0, &successful2);
+        lib_linked_list_remove(get_schedule_linked_list(), 0, &successful2);
         if (!successful2) 
         {
             printf("Failed to remove object from linked list\n");
             break;
         }
         // Remove from the metadata hash table
-        ioopm_hash_table_remove(get_metadata_ht(), int_elem(key_as_int));
+        lib_hash_table_remove(get_metadata_ht(), lib_int_elem(key_as_int));
         // Finally free the metadata
         free(metadata);
         freed_amount++;
@@ -216,7 +216,7 @@ obj *allocate(size_t bytes, function1_t destructor)
         metadata_t *metadata = metadata_generate(destructor, bytes);
     
         //memdata_t *metadata = calloc(1, sizeof(memdata_t) + bytes);
-        ioopm_hash_table_insert(get_metadata_ht(), int_elem(key_as_int), ptr_elem(metadata));
+        lib_hash_table_insert(get_metadata_ht(), lib_int_elem(key_as_int), lib_ptr_elem(metadata));
     }
     
     return object;
@@ -232,7 +232,7 @@ obj *allocate_array(size_t elements, size_t bytes, function1_t destructor)
 void deallocate(obj* object)
 {
     uintptr_t key_as_int = (uintptr_t)object;
-    metadata_t *metadata = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int)).value.p;
+    metadata_t *metadata = lib_hash_table_lookup(get_metadata_ht(), lib_int_elem(key_as_int)).value.p;
     add_to_schedule(object);
     //TODO: flyttat in destructorer in hit (david)
     if (metadata->destructor) // This if else could maybe be extracted to deallocate (probably including the free after, and maybe even free(metadata))
@@ -255,7 +255,7 @@ void retain(obj *object)
     uintptr_t key_as_int = (uintptr_t)object;
     
     //memdata_t *metadata = GET_METADATA(object);
-    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(),int_elem(key_as_int));
+    lib_option_t option = lib_hash_table_lookup(get_metadata_ht(), lib_int_elem(key_as_int));
 
     if (option.success) {
         metadata_t *metadata = (metadata_t *)(option.value.p);
@@ -272,7 +272,7 @@ void release(obj *object)
     uintptr_t key_as_int = (uintptr_t)object;
     
     //memdata_t *metadata = GET_METADATA(object);
-    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
+    lib_option_t option = lib_hash_table_lookup(get_metadata_ht(), lib_int_elem(key_as_int));
 
     if (!option.success) return;
     metadata_t *metadata = (metadata_t *)(option.value.p);  
@@ -292,36 +292,36 @@ void cleanup()
     uintptr_t key_as_int;
     free_scheduled_tasks(SIZE_MAX); 
 
-    while (ioopm_linked_list_size(get_schedule_linked_list()) > 0) 
+    while (lib_linked_list_size(get_schedule_linked_list()) > 0) 
     {
         bool successful = false;
-        obj *object = ioopm_linked_list_get(get_schedule_linked_list(), 0, &successful).p;
+        obj *object = lib_linked_list_get(get_schedule_linked_list(), 0, &successful).p;
 
         if (successful && object) 
         {
             key_as_int = (uintptr_t)object;
-            ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
+            lib_option_t option = lib_hash_table_lookup(get_metadata_ht(), lib_int_elem(key_as_int));
 
         if (option.success){
             metadata_t *metadata = (metadata_t *)(option.value.p);  
             if (metadata->rc == 0) 
             {
                 release_destructor(object);
-                ioopm_hash_table_remove(get_metadata_ht(), int_elem(key_as_int));
+                lib_hash_table_remove(get_metadata_ht(), lib_int_elem(key_as_int));
             }
         }
              
         }
-        ioopm_linked_list_remove(get_schedule_linked_list(), 0, &successful);
+        lib_linked_list_remove(get_schedule_linked_list(), 0, &successful);
     }
 }
 
 void free_all() 
 {
     cleanup();
-    ioopm_linked_list_destroy(get_schedule_linked_list());
+    lib_linked_list_destroy(get_schedule_linked_list());
     schedule_linked_list = NULL;
-    ioopm_hash_table_destroy(get_metadata_ht());
+    lib_hash_table_destroy(get_metadata_ht());
     
 }
 

@@ -3,9 +3,9 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include "inlupp2_DONOTTOUCH/generic_data_structures/hash_table.h"
-#include "inlupp2_DONOTTOUCH/generic_data_structures/linked_list.h"
-#include "inlupp2_DONOTTOUCH/business_logic/common.h"
+#include "lib/lib_hash_table.h"
+#include "lib/lib_linked_list.h"
+#include "lib/lib_common.h"
 
 // #include "lib/hash_table.h"
 // #include "lib/linked_list.h"
@@ -13,7 +13,7 @@
 
 
 // Retrieves the metadata for the object, which is stored just before the object on the heap
-#define GET_METADATA(obj) ((metadata_t *)((char *)(obj) - sizeof(metadata_t)))
+// #define GET_METADATA(obj) ((metadata_t *)((char *)(obj) - sizeof(metadata_t)))
 
 /// Dummy 'obj' is just a void pointer as far as this manager is concerned
 typedef void obj;
@@ -41,8 +41,8 @@ void set_cascade_limit(size_t);
 size_t get_cascade_limit();
 void cleanup();
 void shutdown();
-ioopm_hash_table_t *get_metadata_ht();
-ioopm_list_t *get_schedule_linked_list();
+lib_hash_table_t *get_metadata_ht();
+lib_list_t *get_schedule_linked_list();
 void free_scheduled_tasks(size_t size);
 void add_to_schedule(obj *object);
 void free_all();

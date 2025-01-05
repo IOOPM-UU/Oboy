@@ -43,7 +43,7 @@ void ioopm_linked_list_prepend(ioopm_list_t *list, elem_t value);
 /// @param list the linked list that will be extended
 /// @param index the position in the list
 /// @param value the value to be inserted
-void ioopm_linked_list_insert(ioopm_list_t *list, size_t index, elem_t value);
+void ioopm_linked_list_insert(ioopm_list_t *list, int index, elem_t value);
 
 /// @brief Remove an element from a linked list in O(n) time.
 /// The valid values of index are [0,n-1] for a list of n elements,
@@ -52,7 +52,7 @@ void ioopm_linked_list_insert(ioopm_list_t *list, size_t index, elem_t value);
 /// @param index the position in the list
 /// @param success a stack variable pointer to indicate success or failure
 /// @return the value removed
-elem_t ioopm_linked_list_remove(ioopm_list_t *list, size_t index, bool *success);
+elem_t ioopm_linked_list_remove(ioopm_list_t *list, int index, bool *success);
 
 /// @brief Retrieve an element from a linked list in O(n) time.
 /// The valid values of index are [0,n-1] for a list of n elements,
@@ -61,7 +61,7 @@ elem_t ioopm_linked_list_remove(ioopm_list_t *list, size_t index, bool *success)
 /// @param index the position in the list
 /// @param success a stack variable pointer to indicate success or failure
 /// @return the value at the given position
-elem_t ioopm_linked_list_get(ioopm_list_t *list, size_t index, bool *success);
+elem_t ioopm_linked_list_get(ioopm_list_t *list, int index, bool *success);
 
 /// @brief Returns element if found in list
 /// @param list the linked list
@@ -115,5 +115,3 @@ void ioopm_linked_list_apply_to_all(ioopm_list_t *list, ioopm_apply_int_function
 /// @param list the list to be iterated over
 /// @return an iteration positioned at the start of list
 ioopm_list_iterator_t *ioopm_list_iterator(ioopm_list_t *list);
-
-void *ioopm_linked_list_initialize(ioopm_list_t *list, ioopm_eq_function *eq_func);
