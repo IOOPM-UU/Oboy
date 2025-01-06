@@ -10,6 +10,7 @@
 #include "../generic_data_structures/hash_table.h"
 #include "../generic_data_structures/iterator.h"
 #include "../generic_utils/utils.h"
+#include "../../ref.h"
 
 #define Successful(o) (o.success == true)
 #define Unsuccessful(o) (o.success == false)
@@ -109,7 +110,8 @@ static unsigned int quantity_in_stock(ioopm_shop_t *shop, ioopm_merch_t *merch)
 
 shopping_carts_t *create_shopping_cart()
 {
-    shopping_carts_t *shopping_carts = calloc(1, sizeof(shopping_carts_t));
+    shopping_carts_t *shopping_carts = allocate(sizeof(shopping_carts_t), NULL);
+    //shopping_carts_t *shopping_carts = calloc(1, sizeof(shopping_carts_t));
     assert(!pointer_is_null(shopping_carts));
     shopping_carts->cart_index = 0;
     shopping_carts->carts = ioopm_hash_table_create(int_eq, cart_item_eq, NULL);

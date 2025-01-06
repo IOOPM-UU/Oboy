@@ -10,10 +10,12 @@
 #include "../generic_data_structures/hash_table.h"
 #include "../generic_data_structures/iterator.h"
 #include "../generic_utils/utils.h"
+#include "../../ref.h"
 
 ioopm_shop_t *ioopm_create_shop()
 {
-    ioopm_shop_t *shop = calloc(1, sizeof(ioopm_shop_t));
+    ioopm_shop_t *shop = allocate(sizeof(ioopm_shop_t), NULL);
+    //ioopm_shop_t *shop = calloc(1, sizeof(ioopm_shop_t));
     if (shop == NULL)
     {
         printf("Failed to allocate memory");
