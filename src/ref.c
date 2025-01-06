@@ -188,15 +188,16 @@ void free_scheduled_tasks(size_t size){
 
 obj *allocate(size_t bytes, function1_t destructor) {
     //initialize refcount 
-    //free_scheduled_tasks(bytes); 
+    // 
 
     obj *object = calloc(1, bytes);
     // Convert pointer to integer using uintptr_t
     uintptr_t key_as_int = (uintptr_t)object;
     metadata_t *metadata = metadata_generate(destructor, bytes);
-
+//free_scheduled_tasks(bytes);
     lib_hash_table_insert(get_metadata_ht(), lib_int_elem(key_as_int), lib_ptr_elem(metadata));
         return object;
+    
 }
 
 // Allocate array
@@ -208,7 +209,6 @@ obj *allocate_array(size_t elements, size_t bytes, function1_t destructor) {
 void deallocate(obj* object){
     uintptr_t key_as_int = (uintptr_t)object;
     metadata_t *metadata = lib_hash_table_lookup(get_metadata_ht(), lib_int_elem(key_as_int)).value.p;
-    add_to_schedule(object);
     //TODO: flyttat in destructorer in hit (david)
     if (metadata->destructor){ // This if else could maybe be extracted to deallocate (probably including the free after, and maybe even free(metadata))
         metadata->destructor(object);
@@ -216,6 +216,7 @@ void deallocate(obj* object){
     else{
         default_destructor(object);
     }
+    add_to_schedule(object);
     //free_scheduled_tasks(0); // Doesnt need a size since it just works with cascade limit
 }
 

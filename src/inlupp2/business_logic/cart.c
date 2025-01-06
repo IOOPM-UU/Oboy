@@ -120,18 +120,15 @@ shopping_carts_t *create_shopping_cart()
 void destroy_cart(cart_t *cart)
 {
     ioopm_list_iterator_t *iter = ioopm_list_iterator(cart->items);
-
-    bool success = true;
-    while (ioopm_iterator_has_next(iter) || success)
+    bool success = false;
+    while (ioopm_iterator_has_next(iter))
     {
-        cart_item_t *cart_item = ioopm_iterator_current(iter, &success).p;
+        cart_item_t *cart_item = ioopm_iterator_next(iter, &success).p;
         if (success)
         {
-            destroy_cart_item(cart_item);
+            destroy_cart_item(cart_item); 
         }
-        ioopm_iterator_next(iter, &success);
     }
-
     ioopm_iterator_destroy(iter);
     ioopm_linked_list_destroy(cart->items);
     release(cart);

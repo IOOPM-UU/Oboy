@@ -10,7 +10,7 @@
 #include "../generic_data_structures/hash_table.h"
 #include "../generic_data_structures/iterator.h"
 #include "../generic_utils/utils.h"
-
+#include "../../ref.h"
 bool pointer_is_null(void *ptr)
 {
     if (ptr == NULL)
@@ -65,6 +65,6 @@ int string_sum_hash(elem_t e)
 
 void destroy_cart_item(cart_item_t *cart_item)
 {
-    free(cart_item->name);
-    free(cart_item);
+    release(cart_item->name);
+    release(cart_item);
 }
