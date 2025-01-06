@@ -21,4 +21,6 @@ jobs:
 
       - name: Run tests
         run: |
-          make ref_test
+          make ref
+          valgrind --leak-check=full --show-leak-kinds=all ./ref_test
+
