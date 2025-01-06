@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdint.h>
 #include "../src/lib/lib_linked_list.h"
+// #include "../src/inlupp2/generic_data_structures/linked_list.h"
 #include <assert.h>
 #include <limits.h>
 
@@ -99,6 +100,10 @@ void test_retain_release2() {
     
     //remove both cells with one call!
     release(first);
+}
+
+void test_retain_complex() {
+    set_cascade_limit(100);
 }
 
 void test_rc(void) {
@@ -210,8 +215,8 @@ void test_add_to_schedule(){
     get_metadata_ht();
     //Check if list doesn´t exist:
     CU_ASSERT_PTR_NOT_NULL(list);
-    obj *object = allocate(sizeof(obj*), dummy_destructor);
-
+    obj *object = allocate(sizeof(obj*), NULL);
+    release(object);
     CU_ASSERT_EQUAL(lib_linked_list_size(list), 0);
     // If list exist, add object to schedule:
     add_to_schedule(object);
@@ -272,16 +277,16 @@ void test_free_scheduled_tasks_until_size(){
 }
 
  */
-void check_allocation(obj *object, function1_t expected_destructor) {
-    CU_ASSERT_PTR_NOT_NULL(object); // Ensure object is not null
+// void check_allocation(obj *object, function1_t expected_destructor) {
+//     CU_ASSERT_PTR_NOT_NULL(object); // Ensure object is not null
 
-    // Access metadata via pointer arithmetic
-    metadata_t *metadata = GET_METADATA(object);
+//     // Access metadata via pointer arithmetic
+//     metadata_t *metadata = GET_METADATA(object);
 
-    CU_ASSERT_EQUAL(metadata->rc, 0);                      // Verify reference count
-    CU_ASSERT_EQUAL(metadata->destructor, expected_destructor); // Verify destructor
-    CU_ASSERT(metadata->size > 0);                         // Ensure valid size
-}
+//     CU_ASSERT_EQUAL(metadata->rc, 0);                      // Verify reference count
+//     CU_ASSERT_EQUAL(metadata->destructor, expected_destructor); // Verify destructor
+//     CU_ASSERT(metadata->size > 0);                         // Ensure valid size
+// }
 
 // void test_allocate() {
 //     // Test 1: Allocate memory with no destructor
@@ -318,10 +323,10 @@ void test_default_destructor() {
     //release(link1->next);
     release(link1);
     //release(link2);
-
+    free_scheduled_tasks(INT_MAX);
     // Check that both nodes are properly deallocated
-    assert(lib_hash_table_lookup(get_metadata_ht(), ptr_elem(link1)).success == false);
-    assert(lib_hash_table_lookup(get_metadata_ht(), ptr_elem(link2)).success == false);
+    CU_ASSERT_FALSE(lib_hash_table_lookup(get_metadata_ht(), lib_ptr_elem(link1)).success);
+    CU_ASSERT_FALSE(lib_hash_table_lookup(get_metadata_ht(), lib_ptr_elem(link2)).success);
 
     printf("Test Case 1 passed: Default destructor released all linked pointers.\n");
 }
@@ -674,7 +679,7 @@ int main() {
         (CU_add_test(unit_test_suite1, "Add to schedule", test_add_to_schedule) == NULL) ||
         (CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
         (CU_add_test(unit_test_suite1, "F", test_free_scheduled_task_one_task) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Default destructor", test_default_destructor) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Default destructor", test_default_destructor) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_and_free_scheduled_tasks) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate links and free scheduled tasks", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate array and free scheduled tasks", test_allocate_array_then_free) == NULL) ||

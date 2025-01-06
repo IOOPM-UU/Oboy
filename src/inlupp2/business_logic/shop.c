@@ -15,7 +15,6 @@
 ioopm_shop_t *ioopm_create_shop()
 {
     ioopm_shop_t *shop = allocate(sizeof(ioopm_shop_t), NULL);
-    //ioopm_shop_t *shop = calloc(1, sizeof(ioopm_shop_t));
     if (shop == NULL)
     {
         printf("Failed to allocate memory");
@@ -31,6 +30,6 @@ void ioopm_shop_destroy(ioopm_shop_t *shop)
 {
     destroy_shopping_cart(shop->shopping_carts);
     destroy_all_merch(shop);
-    free(shop);
+    release(shop);
 }
 

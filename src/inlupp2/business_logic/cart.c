@@ -111,7 +111,6 @@ static unsigned int quantity_in_stock(ioopm_shop_t *shop, ioopm_merch_t *merch)
 shopping_carts_t *create_shopping_cart()
 {
     shopping_carts_t *shopping_carts = allocate(sizeof(shopping_carts_t), NULL);
-    //shopping_carts_t *shopping_carts = calloc(1, sizeof(shopping_carts_t));
     assert(!pointer_is_null(shopping_carts));
     shopping_carts->cart_index = 0;
     shopping_carts->carts = ioopm_hash_table_create(int_eq, cart_item_eq, NULL);
@@ -135,7 +134,7 @@ void destroy_cart(cart_t *cart)
 
     ioopm_iterator_destroy(iter);
     ioopm_linked_list_destroy(cart->items);
-    free(cart);
+    release(cart);
 }
 
 void destroy_shopping_cart(shopping_carts_t *shopping_carts)
@@ -158,14 +157,14 @@ void destroy_shopping_cart(shopping_carts_t *shopping_carts)
 
     ioopm_linked_list_destroy(carts);
     ioopm_iterator_destroy(iter);
-    free(shopping_carts);
+    release(shopping_carts);
 }
 
 unsigned int ioopm_shop_create_cart(ioopm_shop_t *shop)
 {
     unsigned int index = shop->shopping_carts->cart_index;
 
-    cart_t *cart = calloc(1, sizeof(cart_t));
+    cart_t *cart = allocate(sizeof(cart_t), NULL);
     assert(!pointer_is_null(cart));
 
     cart->items = ioopm_linked_list_create(cart_item_eq);
@@ -190,10 +189,10 @@ bool ioopm_shop_remove_cart(ioopm_shop_t *shop, unsigned int index)
 
 cart_item_t *create_cart_item(char *name, unsigned int quantity)
 {
-    cart_item_t *cart = calloc(1, sizeof(cart_item_t));
+    cart_item_t *cart = allocate(sizeof(cart_item_t), NULL);
     assert(!pointer_is_null(cart));
 
-    cart->name = strdup(name);
+    cart->name = rc_strdup(name); //new strdup function that uses allocate()
     cart->quantity = quantity;
     return cart;
 }
@@ -368,8 +367,8 @@ void destroy_shelf_in_locs_ht(ioopm_shop_t *shop, ioopm_shelf_t *shelf)
 {
     ioopm_option_t shelf_option = ioopm_hash_table_remove(shop->locs_ht, ptr_elem(shelf->name));
     assert(Successful(shelf_option));
-    free(shelf_option.key.p);
-    free(shelf_option.value.p);
+    release(shelf_option.key.p);
+    release(shelf_option.value.p);
 }
 
 /// @brief
@@ -392,8 +391,8 @@ void decrease_merch(ioopm_shop_t *shop, ioopm_merch_t *merch, unsigned int amoun
             if (quantity_left_in_shelf <= 0)
             {
                 destroy_shelf_in_locs_ht(shop, shelf);
-                free(shelf->name);
-                free(shelf);
+                release(shelf->name);
+                release(shelf);
                 ioopm_linked_list_remove(locs, i, &success);
                 i--;
                 amount -= shelf_quantity;

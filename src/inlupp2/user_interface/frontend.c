@@ -9,6 +9,7 @@
 #include "../generic_data_structures/hash_table.h"
 #include "../generic_data_structures/iterator.h"
 #include "../generic_utils/utils.h"
+#include "../../ref.h"
 
 #define ValidOptions "AaLlDdEeSsPpCcRr+-=OoQq"
 
@@ -69,7 +70,7 @@ bool vaild_option(char *input)
 
 char *ask_question_menu_option(char *question)
 {
-    return ask_question(question, vaild_option, (convert_func *)strdup).string_value;
+    return ask_question(question, vaild_option, (convert_func *)rc_strdup).string_value;
 }
 
 void process_input(char *input, ioopm_shop_t *shop, bool *is_running)
@@ -197,7 +198,7 @@ void list_merchendice(ioopm_shop_t *shop)
 
         if (counter == 20 && ioopm_iterator_has_next(iter))
         {
-            char *input = ask_question("\nPress N to stop printing: ", everything_allowed, (convert_func *)strdup).string_value;
+            char *input = ask_question("\nPress N to stop printing: ", everything_allowed, (convert_func *)rc_strdup).string_value;
             if ((strlen(input) == 1) && char_eq_ignore_case(input, "n"))
             {
                 free(input);
@@ -458,6 +459,7 @@ void quit_shop(bool *is_running)
     {
         printf("\nQuitting.\n");
         *is_running = false;
+        shutdown();
     }
     else
     {
@@ -467,7 +469,7 @@ void quit_shop(bool *is_running)
 
 bool user_confirmation()
 {
-    char *confirmation = ask_question("\nAre you sure? (Y/y): ", everything_allowed, (convert_func *)strdup).string_value;
+    char *confirmation = ask_question("\nAre you sure? (Y/y): ", everything_allowed, (convert_func *)rc_strdup).string_value;
     if (char_eq_ignore_case(confirmation, "y"))
     {
         free(confirmation);
