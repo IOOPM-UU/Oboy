@@ -55,9 +55,9 @@ Vi har automatiserat våra tester med GitHub Actions. Detta gör att de körs vi
 
 Här är de sex allvarligaste buggarna som vi har stött på under projektets gång, samt länk till deras github-issues:
 
-#### Bug 1 - ?
+#### Bug 1 - evighets loop?? gamla inluppen gav problem 
 
-#### Bug 2 - ?
+#### Bug 2 - Stack overflow
 
 #### Bug 3 - ?
 
@@ -65,7 +65,7 @@ Här är de sex allvarligaste buggarna som vi har stött på under projektets g�
 
 #### Bug 5 - ?
 
-#### Bug 6 - ?
+#### Bug 6 - Tester i main https://github.com/IOOPM-UU/Oboy/issues/19
 
 ## Slutsats
 
