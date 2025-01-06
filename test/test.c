@@ -271,16 +271,16 @@ void test_free_scheduled_tasks_until_size(){
 }
 
  */
-void check_allocation(obj *object, function1_t expected_destructor) {
-    CU_ASSERT_PTR_NOT_NULL(object); // Ensure object is not null
+// void check_allocation(obj *object, function1_t expected_destructor) {
+//     CU_ASSERT_PTR_NOT_NULL(object); // Ensure object is not null
 
-    // Access metadata via pointer arithmetic
-    metadata_t *metadata = GET_METADATA(object);
+//     // Access metadata via pointer arithmetic
+//     metadata_t *metadata = GET_METADATA(object);
 
-    CU_ASSERT_EQUAL(metadata->rc, 0);                      // Verify reference count
-    CU_ASSERT_EQUAL(metadata->destructor, expected_destructor); // Verify destructor
-    CU_ASSERT(metadata->size > 0);                         // Ensure valid size
-}
+//     CU_ASSERT_EQUAL(metadata->rc, 0);                      // Verify reference count
+//     CU_ASSERT_EQUAL(metadata->destructor, expected_destructor); // Verify destructor
+//     CU_ASSERT(metadata->size > 0);                         // Ensure valid size
+// }
 
 // void test_allocate() {
 //     // Test 1: Allocate memory with no destructor
