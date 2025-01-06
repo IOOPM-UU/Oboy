@@ -25,7 +25,7 @@ ref: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
 	$(C_COMPILER) $(C_LINK_OPTIONS) $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ) -o $@ $(CUNIT_LINK)
 
 run: ref
-	valgrind --leak-check=full --show-leak-kinds=all ./ref
+	./ref
 
 # Target for the test executable
 ref_test: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
