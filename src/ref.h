@@ -47,3 +47,4 @@ void free_scheduled_tasks(size_t size);
 void add_to_schedule(obj *object);
 void free_all();
 void initialize_collector();
+char *rc_strdup(char *src);

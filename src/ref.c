@@ -113,13 +113,13 @@ void default_destructor(obj* object){
     metadata_t *metadata = (metadata_t *)(option.value.p);
     size_t object_size = metadata->size;
 
-    for (size_t offset = 1; offset <= object_size - sizeof(void *); offset++){
-        void **possible_pointer = (void **)((char *) object + offset);
-        if (is_valid_pointer(*possible_pointer)){
+    for (size_t offset = 0; offset + sizeof(void *) <= object_size; offset += sizeof(void *))
+    {
+        void **possible_pointer = (void **)((char *)object + offset);
+        if (is_valid_pointer(*possible_pointer))
+        {
             release(*possible_pointer);
-            offset += sizeof(void*) - 1; // -1 since for loop increments
         }
-    
     }
 }
 
@@ -162,7 +162,7 @@ void free_scheduled_tasks(size_t size){
         // If reference count is nonzero, skip freeing
         if (metadata->rc > 0) {
             printf("Skipping object with active references (rc=%u).\n", metadata->rc);
-            break;
+            continue;
         }
 
         freed_size += metadata->size;
@@ -188,7 +188,7 @@ void free_scheduled_tasks(size_t size){
 
 obj *allocate(size_t bytes, function1_t destructor) {
     //initialize refcount 
-    free_scheduled_tasks(bytes); 
+    //free_scheduled_tasks(bytes); 
 
     obj *object = calloc(1, bytes);
     // Convert pointer to integer using uintptr_t
@@ -196,8 +196,7 @@ obj *allocate(size_t bytes, function1_t destructor) {
     metadata_t *metadata = metadata_generate(destructor, bytes);
 
     lib_hash_table_insert(get_metadata_ht(), lib_int_elem(key_as_int), lib_ptr_elem(metadata));
-    retain(object);
-    return object;
+        return object;
 }
 
 // Allocate array
@@ -217,7 +216,7 @@ void deallocate(obj* object){
     else{
         default_destructor(object);
     }
-    free_scheduled_tasks(0); // Doesnt need a size since it just works with cascade limit
+    //free_scheduled_tasks(0); // Doesnt need a size since it just works with cascade limit
 }
 
 // Increase reference count
@@ -324,7 +323,3 @@ char *rc_strdup(char *src)
     return str;
 }
 
-char *rc_string(char* word) {
-    size_t size = strlen(word) + 1;
-    
-}

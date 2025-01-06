@@ -63,7 +63,6 @@ ioopm_hash_table_t *ioopm_hash_table_create(ioopm_eq_function *key_eq_func, ioop
     {
         result->hash_function = default_hash_function;
     }
-    retain(result);
     return result;
 }
 
@@ -119,7 +118,6 @@ static entry_t *entry_create(elem_t key, elem_t value, entry_t *next)
     result->key = key;
     result->value = value;
     result->next = next; 
-    retain(next);
     return result;
 }
 
@@ -141,7 +139,6 @@ void ioopm_hash_table_insert(ioopm_hash_table_t *ht, elem_t key, elem_t value) /
     }
 
     previous_entry->next = entry_create(key, value, next);
-    release(next);
     ht->size += 1;
 }
 
