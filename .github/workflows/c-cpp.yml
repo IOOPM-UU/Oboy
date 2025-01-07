@@ -1,8 +1,6 @@
 name: C CI
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -15,9 +13,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: |
+        run: | 
           sudo apt-get update
-          sudo apt-get install -y build-essential libtool autoconf pkg-config libcunit1 libcunit1-doc libcunit1-dev
+          sudo apt-get install -y build-essential libtool autoconf pkg-config libcunit1 libcunit1-doc libcunit1-dev gcovr lcov valgrind
 
       - name: Run tests
         run: |
