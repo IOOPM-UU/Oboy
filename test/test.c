@@ -217,13 +217,14 @@ void test_add_to_schedule(){
     CU_ASSERT_PTR_NOT_NULL(list);
     obj *object = allocate(sizeof(obj*), NULL);
     release(object);
-    CU_ASSERT_EQUAL(lib_linked_list_size(list), 0);
+
+    CU_ASSERT_EQUAL(lib_linked_list_size(list), 1);
     // If list exist, add object to schedule:
     add_to_schedule(object);
     //Check if object was added
-    CU_ASSERT_EQUAL(lib_linked_list_size(list), 1);
-    add_to_schedule(object);
     CU_ASSERT_EQUAL(lib_linked_list_size(list), 2);
+    add_to_schedule(object);
+    CU_ASSERT_EQUAL(lib_linked_list_size(list), 3);
     free_scheduled_tasks(2*sizeof(object));
     lib_linked_list_clear(list);
 }

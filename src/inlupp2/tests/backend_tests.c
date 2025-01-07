@@ -644,7 +644,7 @@ int main()
 
         (CU_add_test(my_test_suite, "test process word insert new", test_create_shop) == NULL) ||
         (CU_add_test(my_test_suite, "test add merch", test_add_merch) == NULL) ||
-        /* (CU_add_test(my_test_suite, "test add already existing merch", test_add_already_existing_merch) == NULL) ||
+        (CU_add_test(my_test_suite, "test add already existing merch", test_add_already_existing_merch) == NULL) ||
         (CU_add_test(my_test_suite, "test edit a non existing merch", test_edit_nonexisting_merch) == NULL) ||
         (CU_add_test(my_test_suite, "test remove merch", test_remove_merch) == NULL) ||
         (CU_add_test(my_test_suite, "test edit merch name", test_edit_merch_name) == NULL) ||
@@ -666,7 +666,6 @@ int main()
         (CU_add_test(my_test_suite, "test calculate cost non existing cart", test_calculate_cost_non_existing_cart) == NULL) ||
         (CU_add_test(my_test_suite, "test calculate cost multiple items cart", test_calculate_cost_multiple_items_cart) == NULL) ||
         (CU_add_test(my_test_suite, "test calculate cost single item cart", test_calculate_cost_single_item_cart) == NULL) ||
- */
         0)
     {
         // If adding any of the tests fails, we tear down CUnit and exit

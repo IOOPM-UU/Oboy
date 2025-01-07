@@ -62,6 +62,7 @@ ioopm_list_t *ioopm_linked_list_create(ioopm_eq_function *eq_func)
     result->size = 0;
     result->first = result->last = link_create(null_elem, NULL, NULL);
     result->eq_func = eq_func;
+    retain(result);
     return result;
 }
 

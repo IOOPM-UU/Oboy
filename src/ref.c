@@ -162,7 +162,7 @@ void free_scheduled_tasks(size_t size){
         // If reference count is nonzero, skip freeing
         if (metadata->rc > 0) {
             printf("Skipping object with active references (rc=%u).\n", metadata->rc);
-            continue;
+            bool success_remove = false;
         }
 
         freed_size += metadata->size;
@@ -196,7 +196,7 @@ obj *allocate(size_t bytes, function1_t destructor) {
     metadata_t *metadata = metadata_generate(destructor, bytes);
 
     lib_hash_table_insert(get_metadata_ht(), lib_int_elem(key_as_int), lib_ptr_elem(metadata));
-        return object;
+    return object;
 }
 
 // Allocate array
@@ -256,7 +256,6 @@ void release(obj *object) {
     if(metadata->rc == 0) {
       deallocate(object);
     }
-
 }
 
 void cleanup() {
