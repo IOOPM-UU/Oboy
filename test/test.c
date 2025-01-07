@@ -325,10 +325,12 @@ void test_default_destructor() {
     //release(link2);
     free_scheduled_tasks(INT_MAX);
     // Check that both nodes are properly deallocated
-    CU_ASSERT_FALSE(lib_hash_table_lookup(get_metadata_ht(), lib_ptr_elem(link1)).success);
-    CU_ASSERT_FALSE(lib_hash_table_lookup(get_metadata_ht(), lib_ptr_elem(link2)).success);
 
-    printf("Test Case 1 passed: Default destructor released all linked pointers.\n");
+    CU_ASSERT_FALSE(ioopm_hash_table_lookup(get_metadata_ht(), ptr_elem(link1)).success);
+    CU_ASSERT_FALSE(ioopm_hash_table_lookup(get_metadata_ht(), ptr_elem(link2)).success);
+ 
+
+    //printf("Test Case 1 passed: Default destructor released all linked pointers.\n");
 }
 
 void test_allocate_and_free_scheduled_tasks(void)

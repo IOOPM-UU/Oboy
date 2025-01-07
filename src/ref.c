@@ -78,7 +78,8 @@ uint8_t rc(obj* object) {
     }
 }
 
-void release_destructor(obj *to_remove) {
+void release_destructor(obj *to_remove) 
+{   
     if (!to_remove) {
         return;
     }
@@ -89,7 +90,81 @@ void release_destructor(obj *to_remove) {
     }
 }
 
-static bool is_valid_pointer(void *object){
+ 
+ 
+ 
+/*
+>>>>>>> eaf95e4 (fixade dedault destrctor)
+void default_destructor(obj* object)
+{
+    if(!object)
+    {
+        return;
+    }
+
+    uintptr_t key_as_int = (uintptr_t) object;
+    
+    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
+
+    if (!option.success) return;
+    metadata_t *metadata = (metadata_t *)(option.value.p);
+    size_t object_size = metadata->size;
+
+ 
+    for(size_t offset = 0; offset < object_size - sizeof(void*); offset++)
+    {
+        void *possible_pointer = *(void **)((char *)object + offset);
+        
+            if(possible_pointer && is_valid_pointer(possible_pointer))
+            {
+                release(possible_pointer);
+                offset += sizeof(obj*) - 1; // -1 since for loop increments
+            }
+        
+         
+         
+    }
+    }
+    */
+
+ 
+ 
+ 
+/*
+void default_destructor(obj* object)
+{
+    if(!object)
+    {
+        return;
+    }
+
+    uintptr_t key_as_int = (uintptr_t) object;
+    
+    ioopm_option_t option = ioopm_hash_table_lookup(get_metadata_ht(), int_elem(key_as_int));
+
+    if (!option.success) return;
+    metadata_t *metadata = (metadata_t *)(option.value.p);
+    size_t object_size = metadata->size;
+
+ 
+    for(size_t offset = 0; offset < object_size - sizeof(void*); offset++)
+    {
+        void *possible_pointer = *(void **)((char *)object + offset);
+        
+            if(possible_pointer && is_valid_pointer(possible_pointer))
+            {
+                release(possible_pointer);
+                offset += sizeof(obj*) - 1; // -1 since for loop increments
+            }
+        
+         
+         
+    }
+    }
+    */
+
+   static bool is_valid_pointer(void *object)
+{
     if (!object) return false;
     //memdata_t *metadata = GET_METADATA(object);
     // Convert pointer to integer using uintptr_t
@@ -115,13 +190,17 @@ void default_destructor(obj* object){
 
     for (size_t offset = 0; offset + sizeof(void *) <= object_size; offset += sizeof(void *))
     {
-        void **possible_pointer = (void **)((char *)object + offset);
+ 
+        void **possible_pointer = (void **)((char *) object + offset);
         if (is_valid_pointer(*possible_pointer))
         {
             release(*possible_pointer);
         }
     }
 }
+     
+     
+
 
 void free_scheduled_tasks(size_t size){
     
