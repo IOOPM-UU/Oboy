@@ -216,7 +216,7 @@ void test_add_to_schedule(){
     //Check if list doesn´t exist:
     CU_ASSERT_PTR_NOT_NULL(list);
     obj *object = allocate(sizeof(obj*), NULL);
-    release(object);
+    // release(object);
     CU_ASSERT_EQUAL(lib_linked_list_size(list), 0);
     // If list exist, add object to schedule:
     add_to_schedule(object);
@@ -326,8 +326,8 @@ void test_default_destructor() {
     free_scheduled_tasks(INT_MAX);
     // Check that both nodes are properly deallocated
 
-    CU_ASSERT_FALSE(ioopm_hash_table_lookup(get_metadata_ht(), ptr_elem(link1)).success);
-    CU_ASSERT_FALSE(ioopm_hash_table_lookup(get_metadata_ht(), ptr_elem(link2)).success);
+    CU_ASSERT_FALSE(lib_hash_table_lookup(get_metadata_ht(), lib_ptr_elem(link1)).success);
+    CU_ASSERT_FALSE(lib_hash_table_lookup(get_metadata_ht(), lib_ptr_elem(link2)).success);
  
 
     //printf("Test Case 1 passed: Default destructor released all linked pointers.\n");
@@ -636,11 +636,18 @@ weird_array_t *weird_array_create(char *i4, weird_array_t *i6, function1_t destr
 void test_array_struct_given_destructor() {
     char *str1 = "One";
     weird_array_t *arr1 = weird_array_create(str1, NULL, weird_array_destroy);
+    arr1->i4[0] = 'O';
+    arr1->i4[1] = 'n';
+    arr1->i4[2] = 'e';
     char *str2 = "Two";
     weird_array_t *arr2 = weird_array_create(str2, arr1, weird_array_destroy);
-    CU_ASSERT_EQUAL(strcmp(arr1->i1, arr2->i6->i1), 0);
+    arr2->i4[0] = 'T';
+    arr2->i4[1] = 'w';
+    arr2->i4[2] = 'o';
+    CU_ASSERT_EQUAL(arr1->i1, arr2->i6->i1);
     CU_ASSERT_EQUAL(strcmp(str1, arr2->i6->i4), 0);
 
+    // CU_ASSERT_EQUAL(rc(arr1), 1);
     release(arr1);
     release(arr2);
 }
@@ -648,11 +655,18 @@ void test_array_struct_given_destructor() {
 void test_array_struct_default_destructor() {
     char *str1 = "One";
     weird_array_t *arr1 = weird_array_create(str1, NULL, NULL);
+    arr1->i4[0] = 'O';
+    arr1->i4[1] = 'n';
+    arr1->i4[2] = 'e';
     char *str2 = "Two";
     weird_array_t *arr2 = weird_array_create(str2, arr1, NULL);
-    CU_ASSERT_EQUAL(strcmp(arr1->i1, arr2->i6->i1), 0);
+    arr2->i4[0] = 'T';
+    arr2->i4[1] = 'w';
+    arr2->i4[2] = 'o';
+    CU_ASSERT_EQUAL(arr1->i1, arr2->i6->i1);
     CU_ASSERT_EQUAL(strcmp(str1, arr2->i6->i4), 0);
 
+    // CU_ASSERT_EQUAL(rc(arr1), 1);
     release(arr1);
     release(arr2);
 }
@@ -690,9 +704,9 @@ int main() {
         (CU_add_test(unit_test_suite1, "Allocate string and free scheduled tasks", test_allocate_strings_then_free) == NULL) ||
         (CU_add_test(unit_test_suite1, "Create and destroy a small binary tree with a given destructor", test_binary_tree_given_destructor_one_node) == NULL) ||
         (CU_add_test(unit_test_suite1, "Create and destroy a small binary tree with the default destructor", test_binary_tree_default_destructor_one_node) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Create and destroy a binary tree with a given destructor", test_binary_tree_given_destructor) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Create and destroy a binary tree with the default destructor", test_binary_tree_default_destructor) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Create and destroy a weird array with a given destructor", test_array_struct_given_destructor) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Create and destroy a binary tree with a given destructor", test_binary_tree_given_destructor) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Create and destroy a binary tree with the default destructor", test_binary_tree_default_destructor) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Create and destroy a weird array with a given destructor", test_array_struct_given_destructor) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Create and destroy a weird array with the default destructor", test_array_struct_default_destructor) == NULL) ||
         0
     ) 

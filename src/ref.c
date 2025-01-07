@@ -188,7 +188,7 @@ void default_destructor(obj* object){
     metadata_t *metadata = (metadata_t *)(option.value.p);
     size_t object_size = metadata->size;
 
-    for (size_t offset = 0; offset + sizeof(void *) <= object_size; offset += sizeof(void *))
+    for (size_t offset = 0; offset + sizeof(void *) <= object_size; offset ++)
     {
  
         void **possible_pointer = (void **)((char *) object + offset);
@@ -269,11 +269,11 @@ obj *allocate(size_t bytes, function1_t destructor) {
     //initialize refcount 
     // 
 
+    free_scheduled_tasks(bytes);
     obj *object = calloc(1, bytes);
     // Convert pointer to integer using uintptr_t
     uintptr_t key_as_int = (uintptr_t)object;
     metadata_t *metadata = metadata_generate(destructor, bytes);
-//free_scheduled_tasks(bytes);
     lib_hash_table_insert(get_metadata_ht(), lib_int_elem(key_as_int), lib_ptr_elem(metadata));
         return object;
     
@@ -296,7 +296,7 @@ void deallocate(obj* object){
         default_destructor(object);
     }
     add_to_schedule(object);
-    //free_scheduled_tasks(0); // Doesnt need a size since it just works with cascade limit
+    free_scheduled_tasks(0); // Doesnt need a size since it just works with cascade limit
 }
 
 // Increase reference count
