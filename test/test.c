@@ -555,18 +555,25 @@ void test_binary_tree_given_destructor() {
 
     // Create a copy of node 2
     node_t *n2_copy = n2;
+    CU_ASSERT_EQUAL(rc(n2_copy), 0);
     retain(n2);
+    CU_ASSERT_EQUAL(rc(n2_copy), 1);
+    CU_ASSERT_EQUAL(n2, n2_copy);
 
     // Releases node 4, and with it node 3, but node 2 (and 1) remains since rf > 0
     release(n4);
 
+    CU_ASSERT_EQUAL(rc(n1), 0);
+
+    CU_ASSERT_EQUAL(rc(n2_copy), 0);
     // node 2 and 1 should still be reachable
     CU_ASSERT_EQUAL(n2_copy->val, 2);
     CU_ASSERT_EQUAL(n2_copy->left->val, 1);
+    CU_ASSERT_EQUAL(n2_copy->left->val, n1->val);
 
     CU_ASSERT_EQUAL(rc(n2_copy), 0); // TODO might not be reachable, can check if its 1 before
     release(n2_copy);
-    // releasing instead
+    
 }
 
 void test_binary_tree_default_destructor() {

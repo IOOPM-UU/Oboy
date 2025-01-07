@@ -275,7 +275,7 @@ obj *allocate(size_t bytes, function1_t destructor) {
     uintptr_t key_as_int = (uintptr_t)object;
     metadata_t *metadata = metadata_generate(destructor, bytes);
     lib_hash_table_insert(get_metadata_ht(), lib_int_elem(key_as_int), lib_ptr_elem(metadata));
-        return object;
+    return object;
     
 }
 
