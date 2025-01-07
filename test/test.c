@@ -714,7 +714,11 @@ int main() {
         (CU_add_test(unit_test_suite1, "Create and destroy a binary tree with a given destructor", test_binary_tree_given_destructor) == NULL) ||
         (CU_add_test(unit_test_suite1, "Create and destroy a binary tree with the default destructor", test_binary_tree_default_destructor) == NULL) ||
         (CU_add_test(unit_test_suite1, "Create and destroy a weird array with a given destructor", test_array_struct_given_destructor) == NULL) ||
+<<<<<<< Updated upstream
         // (CU_add_test(unit_test_suite1, "Create and destroy a weird array with the default destructor", test_array_struct_default_destructor) == NULL) ||
+=======
+        (CU_add_test(unit_test_suite1, "Create and destroy a weird array with the default destructor", test_array_struct_default_destructor) == NULL) ||
+>>>>>>> Stashed changes
         0
     ) 
     {
