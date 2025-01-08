@@ -41,10 +41,7 @@ void set_cascade_limit(size_t);
 size_t get_cascade_limit();
 void cleanup();
 void shutdown();
+
 lib_hash_table_t *get_metadata_ht();
 lib_list_t *get_schedule_linked_list();
-void free_scheduled_tasks(size_t size);
-void add_to_schedule(obj *object);
-void free_all();
-void initialize_collector();
 char *rc_strdup(char *src);

@@ -9,6 +9,8 @@
 static lib_list_t *schedule_linked_list = NULL;
 static lib_hash_table_t *metadata_ht = NULL;
 static bool release_in_progress = false; 
+static const size_t STANDARD_CASCADE_LIMIT = 100;
+static size_t CASCADE_LIMIT = STANDARD_CASCADE_LIMIT;
 
 bool int_equal(lib_elem_t a, lib_elem_t b) {
     return a.i == b.i;
@@ -19,7 +21,6 @@ static int default_hash_function(lib_elem_t value){
     return value.i;
 } 
 
-size_t CASCADE_LIMIT = 10;
  
 void initialize_collector() {
     if(!metadata_ht){
@@ -223,7 +224,8 @@ void schedule_task_manager(obj *object, size_t size) {
             add_to_schedule(object);
         }
     }
-    
+    //if function is called with allocate, object is NULL, skipping first part!
+
     size_t freed_size = 0;
     size_t cascade_amount = 0;
 
@@ -232,6 +234,7 @@ void schedule_task_manager(obj *object, size_t size) {
     {
         bool successful1 = false;
         obj *to_remove = lib_linked_list_get(get_schedule_linked_list(), 0, &successful1).p;
+        //free's our object and removes from list and hashtable
         deallocate(to_remove);
         cascade_amount++;
     }
@@ -240,7 +243,7 @@ void schedule_task_manager(obj *object, size_t size) {
 
 void cleanup() {
     uintptr_t key_as_int;
-    free_scheduled_tasks(SIZE_MAX); 
+    schedule_task_manager(NULL, SIZE_MAX); 
 
     while (lib_linked_list_size(get_schedule_linked_list()) > 0) {
         bool successful = false;
@@ -271,6 +274,7 @@ void free_all() {
 }
 
 void shutdown() {
+    set_cascade_limit(STANDARD_CASCADE_LIMIT);
     free_all();
 }
 
@@ -279,7 +283,7 @@ size_t get_cascade_limit() {
 }
 
 void set_cascade_limit(size_t size) {
-    CASCADE_LIMIT = (int)size; 
+    CASCADE_LIMIT = size; 
 }
 
 static void string_dummy_destructor(obj *o) {

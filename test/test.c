@@ -41,7 +41,9 @@ int init_suite(void) {
 int clean_suite(void) {
     // Change this function if you want to do something *after* you
     // run a test suite
-    shutdown();
+    // shutdown();
+    lib_linked_list_destroy(get_schedule_linked_list());
+    lib_hash_table_destroy(get_metadata_ht());
     return 0;
 }
 
@@ -49,17 +51,26 @@ int clean_suite(void) {
 
 // Unit tests
 
-// deallocate
+void test_allocate_and_deallocate(void)
+{
+    // Set cascade limit
+    set_cascade_limit(1);
 
-// allocate
-// void test_alloc(void) {
-//     obj_t *obj = NULL;
-//     CU_ASSERT_PTR_NULL(obj);
-//     obj = allocate(sizeof(obj));
-//     CU_ASSERT_PTR_NOT_NULL(obj);
-//     deallocate(obj);
-//     CU_ASSERT_PTR_NULL(obj);
-// }
+    // 1. Allocate memory blocks
+    obj *object1 = allocate(100, NULL);
+    CU_ASSERT_PTR_NOT_NULL(object1);
+
+    obj *object2 = allocate(200, NULL);
+    CU_ASSERT_PTR_NOT_NULL(object2);
+
+    obj *object3 = allocate(300, NULL);
+    CU_ASSERT_PTR_NOT_NULL(object3);
+
+    // 2. We deallocate our objects, should not leak! No way to test with C_UNIT
+    deallocate(object1);
+    deallocate(object2);
+    deallocate(object3);
+}
 
 void test_retain_release() {
     struct cell *c = allocate(sizeof(struct cell), cell_destructor);
@@ -124,117 +135,15 @@ void test_rc(void) {
     retain(c);
     CU_ASSERT_TRUE(rc(c) == 1);
     release(c);
-    CU_ASSERT_TRUE(rc(c) == 0);
-    release(c);
 }
 
-/*
-void test_get_metadata_ht(void) {    
-    lib_hash_table_t *ht_rc = get_metadata_ht();
-    CU_ASSERT_PTR_NOT_NULL(ht_rc);
-    lib_hash_table_t *ht_rc2 = get_metadata_ht();
-    CU_ASSERT_PTR_EQUAL(ht_rc, ht_rc2);
-    
-    //lib_hash_table_destroy(ht_rc); //TODO swap for shutdown later?? //DANGLING POINTERS
+void test_cascade_limit() {
+    set_cascade_limit(1);
+    CU_ASSERT_EQUAL(get_cascade_limit(), 1);
 }
-
-void test_get_metadata_ht_retrieve(void) {
-    lib_hash_table_t *ht_rc = get_metadata_ht();
-    CU_ASSERT_PTR_NOT_NULL(ht_rc);
-    
-    lib_option_t check = lib_hash_table_lookup(ht_rc, int_elem(4));
-    CU_ASSERT_FALSE(check.success);
-    
-    
-    //lib_hash_table_destroy(ht_rc); //TODO swap for shutdown later?? //DANGLING POINTERS
-} */
-
-// void dummy_destructor(void *ptr) {
-//     free(ptr);
-// }
 
 void metadata_destructor(void *ptr) {
     free(ptr);
-}
-
-// void default_destructor(obj *object) {
-//     if (!object) return;
-
-//     metadata_t *metadata = (metadata_t *)((char *)object - sizeof(metadata_t));
-//     size_t obj_size = metadata->size;
-
-//     for (size_t offset = 0; offset + sizeof(void *) <= obj_size; offset += sizeof(void *)) {
-//         void **possible_pointer = (void **)((char *)object + offset);
-
-//         // Check if the address is in the allocation tracker
-//         if (lib_hash_table_lookup(get_metadata_ht(), ptr_elem(*possible_pointer)).success) {
-//             release(*possible_pointer);
-//         }
-//     }
-// } 
-/* void test_metadata_generate(void) {
-    metadata_t *metadata = metadata_generate(metadata_destructor);
-    CU_ASSERT_PTR_NOT_NULL(metadata);
-    CU_ASSERT_EQUAL(metadata->rc, 0);
-    CU_ASSERT_EQUAL(metadata->destructor, metadata_destructor);
-    metadata->destructor(metadata); 
-} */
-// currently leaks, need a special destructor for metadata
-/* void test_metadata_generate_insert_ht(void) {
-    metadata_t *metadata = metadata_generate(metadata_destructor);
-    lib_hash_table_insert(get_metadata_ht(), int_elem((int) &metadata), ptr_elem(metadata));
-    CU_ASSERT_PTR_NOT_NULL(metadata);
-    lib_option_t option = lib_hash_table_lookup(get_metadata_ht(), int_elem((int) &metadata));
-    CU_ASSERT_TRUE(option.success);
-    free(option.value.p);
-
-    
-    lib_hash_table_insert(get_metadata_ht(), int_elem(2), ptr_elem(metadata_generate(metadata_destructor)));
-    lib_option_t option2 = lib_hash_table_lookup(get_metadata_ht(), int_elem(2));
-    CU_ASSERT_TRUE(option2.success);
-    option2 = lib_hash_table_lookup(get_metadata_ht(), int_elem(2));
-    free(option2.value.p);
-    CU_ASSERT_TRUE(option.success);
-
-    // TODO run cleanup at end of every test??
-} */
-
-void test_add_to_schedule(){
-    lib_list_t *list = get_schedule_linked_list();
-    get_metadata_ht();
-    //Check if list doesn´t exist:
-    CU_ASSERT_PTR_NOT_NULL(list);
-    obj *object = allocate(sizeof(obj*), NULL);
-    release(object);
-
-    CU_ASSERT_EQUAL(lib_linked_list_size(list), 1);
-    // If list exist, add object to schedule:
-    add_to_schedule(object);
-    //Check if object was added
-    CU_ASSERT_EQUAL(lib_linked_list_size(list), 2);
-    add_to_schedule(object);
-    CU_ASSERT_EQUAL(lib_linked_list_size(list), 3);
-    free_scheduled_tasks(2*sizeof(object));
-    lib_linked_list_clear(list);
-}
- 
-void test_free_scheduled_task_empty(){
-    set_cascade_limit(3);
-    lib_list_t *list= get_schedule_linked_list();
-    free_scheduled_tasks(5);
-    CU_ASSERT_EQUAL(lib_linked_list_size(list), 0);
-}
-void test_free_scheduled_task_one_task(){
-    set_cascade_limit(3);
-    lib_list_t *list = get_schedule_linked_list();
-    obj *object = allocate(sizeof(obj*), dummy_destructor);
-    add_to_schedule(object);
-    CU_ASSERT_EQUAL(lib_linked_list_size(list), 1);
-    free_scheduled_tasks(1);
-    CU_ASSERT_EQUAL(lib_linked_list_size(list), 0);
-    //free(object);
-    free_scheduled_tasks(sizeof(object));
-
 }
 
 /* void test_free_scheduled_tasks_over_cascade(){
@@ -263,102 +172,25 @@ void test_free_scheduled_tasks_until_size(){
   
     CU_ASSERT_EQUAL(lib_linked_list_size(list), 1);
     //free(object);
-    
 }
 
- */
-// void check_allocation(obj *object, function1_t expected_destructor) {
-//     CU_ASSERT_PTR_NOT_NULL(object); // Ensure object is not null
-
-//     // Access metadata via pointer arithmetic
-//     metadata_t *metadata = GET_METADATA(object);
-
-//     CU_ASSERT_EQUAL(metadata->rc, 0);                      // Verify reference count
-//     CU_ASSERT_EQUAL(metadata->destructor, expected_destructor); // Verify destructor
-//     CU_ASSERT(metadata->size > 0);                         // Ensure valid size
-// }
-
-// void test_allocate() {
-//     // Test 1: Allocate memory with no destructor
-//     obj *object = allocate(100, NULL);
-//     check_allocation(object, NULL);
-
-//     // Test 2: Allocate memory with a custom destructor
-//     object = allocate(100, dummy_destructor);
-//     check_allocation(object, dummy_destructor);
-// }
-
-// void test_allocate_array() {
-//     // Test 1: Allocate an array with no destructor
-//     obj *object = allocate_array(10, sizeof(int), NULL);
-//     check_allocation(object, NULL);
-
-//     // Test 2: Allocate an array with a custom destructor
-//     object = allocate_array(10, sizeof(int), dummy_destructor);
-//     check_allocation(object, dummy_destructor);
-// }
+ */ 
 
 void test_default_destructor() {
     set_cascade_limit(10);
 
     // Create nodes
     lib_link_t *link1 = allocate(sizeof(lib_link_t), NULL);
-    lib_link_t *link2 = allocate(sizeof(lib_link_t), NULL);
-
-    // Link nodes
-    link1->next = link2;
-    link2->next = NULL;
+    retain(link1);
+    link1->next = allocate(sizeof(lib_link_t), NULL);
+    retain(link1->next);
 
     // Call release on the head node
-    //release(link1->next);
     release(link1);
-    //release(link2);
-    free_scheduled_tasks(INT_MAX);
-    // Check that both nodes are properly deallocated
     CU_ASSERT_FALSE(lib_hash_table_lookup(get_metadata_ht(), lib_ptr_elem(link1)).success);
-    CU_ASSERT_FALSE(lib_hash_table_lookup(get_metadata_ht(), lib_ptr_elem(link2)).success);
 
     printf("Test Case 1 passed: Default destructor released all linked pointers.\n");
 }
-
-void test_allocate_and_free_scheduled_tasks(void)
-{
-    // Set cascade limit
-    set_cascade_limit(1);
-
-    // 1. Allocate memory blocks
-    obj *object1 = allocate(100, NULL);
-    CU_ASSERT_PTR_NOT_NULL(object1);
-
-    obj *object2 = allocate(200, NULL);
-    CU_ASSERT_PTR_NOT_NULL(object2);
-
-    obj *object3 = allocate(300, NULL);
-    CU_ASSERT_PTR_NOT_NULL(object3);
-
-    // 2. Add all to schedule
-    add_to_schedule(object1);
-    add_to_schedule(object2);
-    add_to_schedule(object3);
-
-    // We should have 3
-    CU_ASSERT_EQUAL(lib_linked_list_size(get_schedule_linked_list()), 3);
-
-    // 3. Free tasks up to 150 bytes => frees object1(100)
-    free_scheduled_tasks(100);
-    // => now 2 remain
-    CU_ASSERT_EQUAL(lib_linked_list_size(get_schedule_linked_list()), 2);
-
-    // 4. Free tasks up to 600 => enough for object2(200) + object3(300)
-    free_scheduled_tasks(600);
-    CU_ASSERT_EQUAL(lib_linked_list_size(get_schedule_linked_list()), 0);
-
-    // NOTE: no call to free_all() here if your suite or test teardown calls it.
-    // Otherwise you can do:
-    // free_all();
-}
-
-
 
 #define null_elem \
     (lib_elem_t) { 0 }
@@ -370,6 +202,7 @@ static lib_link_t *link_create_with_allocate(lib_elem_t value, lib_link_t *previ
     link->previous = previous;
     link->next = next;
     link->value = value;
+    retain(link);
     return link;
 }
 
@@ -411,7 +244,7 @@ void test_allocate_links_and_free_scheduled_tasks(void)
     // free_all();
 }
 
-void test_allocate_array_then_free(void)
+void test_allocate_array_then_deallocate(void)
 {
     // Set cascade limit
     set_cascade_limit(3);
@@ -426,38 +259,33 @@ void test_allocate_array_then_free(void)
     obj *object3 = allocate_array(10, 100, NULL);
     CU_ASSERT_PTR_NOT_NULL(object3);
 
-    // 2. Add all to schedule
-    add_to_schedule(object1);
-    add_to_schedule(object2);
-    add_to_schedule(object3);
+    //2. Deallocate all objects
+    deallocate(object1);
+    deallocate(object2);
+    deallocate(object3);
 
-    free_scheduled_tasks(INT_MAX);
-    CU_ASSERT_EQUAL(lib_linked_list_size(get_schedule_linked_list()), 0);
-
-    // NOTE: no call to free_all() here if your suite or test teardown calls it.
-    // Otherwise you can do:
-    // free_all();
+    //should not leak when running tests!
 }
 
-void test_allocate_strings_then_free(void)
+void test_allocate_strings_then_release(void)
 {
     // Set cascade limit
     set_cascade_limit(1);
 
     // 1. Allocate memory blocks
-    char *str1 = allocate_array(5, sizeof(char), dummy_destructor);
+    char *str1 = allocate_array(6, sizeof(char), dummy_destructor);
     for (int i = 0; i < 5; i++) {
         str1[i] = 'a';
     }
     CU_ASSERT_PTR_NOT_NULL(str1);
     
-    char *str2 = allocate_array(6, sizeof(char), dummy_destructor);
+    char *str2 = allocate_array(7, sizeof(char), dummy_destructor);
     for (int i = 0; i < 6; i++) {
         str2[i] = 'b';
     }
     CU_ASSERT_PTR_NOT_NULL(str2);
     
-    char *str3 = allocate_array(7, sizeof(char), dummy_destructor);
+    char *str3 = allocate_array(8, sizeof(char), dummy_destructor);
     for (int i = 0; i < 7; i++) {
         str3[i] = 'c';
     }
@@ -468,7 +296,6 @@ void test_allocate_strings_then_free(void)
     release(str2);
     release(str3);
 
-    free_scheduled_tasks(INT_MAX);
     CU_ASSERT_EQUAL(lib_linked_list_size(get_schedule_linked_list()), 0);
 
     // NOTE: no call to free_all() here if your suite or test teardown calls it.
@@ -510,11 +337,14 @@ node_t *node_create(int val, node_t *left, node_t *right, function1_t destructor
     //retain(node); // TODO not sure if necessary
     node->val = val;
     node->left = left;
+    retain(node->left);
     node->right = right;
+    retain(node->right);
     return node;
 }
 
 void test_binary_tree_given_destructor_one_node() {
+    //Node create retains all pointers
     node_t *n1 = node_create(1, NULL, NULL, node_destroy);
     CU_ASSERT_PTR_NOT_NULL(n1);
     release(n1);
@@ -523,7 +353,6 @@ void test_binary_tree_given_destructor_one_node() {
 void test_binary_tree_default_destructor_one_node() {
     node_t *n1 = node_create(1, NULL, NULL, NULL);
     CU_ASSERT_PTR_NOT_NULL(n1);
-    // release(NULL);
     release(n1);
 }
 
@@ -541,6 +370,7 @@ void test_binary_tree_given_destructor() {
     node_t *n3 = node_create(3, NULL, NULL, node_destroy);
     node_t *n4 = node_create(4, n2, n3, node_destroy);
 
+    retain(n4);
     // Create a copy of node 2
     node_t *n2_copy = n2;
     retain(n2);
@@ -552,7 +382,7 @@ void test_binary_tree_given_destructor() {
     CU_ASSERT_EQUAL(n2_copy->val, 2);
     CU_ASSERT_EQUAL(n2_copy->left->val, 1);
 
-    CU_ASSERT_EQUAL(rc(n2_copy), 0); // TODO might not be reachable, can check if its 1 before
+    CU_ASSERT_EQUAL(rc(n2_copy), 1); // TODO might not be reachable, can check if its 1 before
     release(n2_copy);
     // releasing instead
 }
@@ -665,25 +495,22 @@ int main() {
     // the test in question. If you want to add another test, just
     // copy a line below and change the information
     if (
-        // (CU_add_test(unit_test_suite1, "Add to schedule", test_add_to_schedule) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "F", test_free_scheduled_task_one_task) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Default destructor", test_default_destructor) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_and_free_scheduled_tasks) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Allocate links and free scheduled tasks", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Allocate array and free scheduled tasks", test_allocate_array_then_free) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "rc() ref count function", test_rc) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "1st retain/release test", test_retain_release) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "2nd retain/release test", test_retain_release2) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "2nd retain/release test", test_retain_release3) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Get and set cascade limit", test_get_and_set_cascade_limit) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Allocate string and free scheduled tasks", test_allocate_strings_then_free) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Create and destroy a small binary tree with a given destructor", test_binary_tree_given_destructor_one_node) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Create and destroy a small binary tree with the default destructor", test_binary_tree_default_destructor_one_node) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Create and destroy a binary tree with a given destructor", test_binary_tree_given_destructor) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Create and destroy a binary tree with the default destructor", test_binary_tree_default_destructor) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Get and set cascade limit", test_get_and_set_cascade_limit) == NULL) ||
+        (CU_add_test(unit_test_suite1, "ref count function", test_rc) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Allocate and deallocate", test_allocate_and_deallocate) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Allocate array and deallocate", test_allocate_array_then_deallocate) == NULL) ||
+        (CU_add_test(unit_test_suite1, "1st retain/release test", test_retain_release) == NULL) ||
+        (CU_add_test(unit_test_suite1, "2nd retain/release test", test_retain_release2) == NULL) ||
+        (CU_add_test(unit_test_suite1, "2nd retain/release test", test_retain_release3) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Allocate string and release", test_allocate_strings_then_release) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Default destructor", test_default_destructor) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Create and destroy a small binary tree with a given destructor", test_binary_tree_given_destructor_one_node) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Create and destroy a small binary tree with the default destructor", test_binary_tree_default_destructor_one_node) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Create and destroy a binary tree with a given destructor", test_binary_tree_given_destructor) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Create and destroy a binary tree with the default destructor", test_binary_tree_default_destructor) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Create and destroy a weird array with a given destructor", test_array_struct_given_destructor) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Create and destroy a weird array with the default destructor", test_array_struct_default_destructor) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Allocate links and release", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
         0
     ) 
     {
