@@ -56,3 +56,6 @@ cov_run:
 
 gcov:
 	gcov -b -c backend_tests_coverage-backend_tests.gcda > coverage.txt
+
+old_hash: 
+	gcc -g 	gcc -g -Wall -pedantic generic_data_structures/hash_table.c generic_data_structures/linked_list.c generic_data_structures/hash_table_tests.c

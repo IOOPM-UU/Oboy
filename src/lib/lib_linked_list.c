@@ -261,19 +261,21 @@ lib_list_option_t lib_linked_list_lookup(lib_list_t *list, lib_elem_t element)
     return (lib_list_option_t){.success = false};
 }
 
-bool lib_linked_list_contains(lib_list_t *list, lib_elem_t element)
+lib_list_option_t lib_linked_list_contains(lib_list_t *list, lib_elem_t element)
 {
    lib_link_t *cursor = list->first->next;
+   int index = 0;
 
     while (cursor != NULL)
     {
         if (list->eq_func(cursor->value, element))
         {
-            return true;
+            return (lib_list_option_t){.value.i = index, .success = true};
         }
         cursor = cursor->next;
+        index++;
     }
-    return false;
+    return (lib_list_option_t){.success = false};
 }
 
 void lib_linked_list_apply_to_all(lib_list_t *list, lib_apply_int_function *fun, void *extra)

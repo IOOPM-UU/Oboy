@@ -7,6 +7,8 @@
         "hash_table.h": "c",
         "linked_list.h": "c",
         "limits.h": "c",
-        "lib_linked_list.h": "c"
+        "lib_linked_list.h": "c",
+        "*.tcc": "c",
+        "memory_resource": "c"
     }
 }

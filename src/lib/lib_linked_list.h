@@ -73,7 +73,7 @@ lib_list_option_t lib_linked_list_lookup(lib_list_t *list, lib_elem_t element);
 /// @param list the linked list
 /// @param element the element sought
 /// @return true if element is in the list, else false
-bool lib_linked_list_contains(lib_list_t *list,lib_elem_t element);
+lib_list_option_t lib_linked_list_contains(lib_list_t *list,lib_elem_t element);
 
 /// @brief Lookup the number of elements in the linked list in O(1) time
 /// @param list the linked list

@@ -275,7 +275,7 @@ ioopm_list_option_t ioopm_linked_list_lookup(ioopm_list_t *list, elem_t element)
     return (ioopm_list_option_t){.success = false};
 }
 
-bool ioopm_linked_list_contains(ioopm_list_t *list, elem_t element)
+ioopm_linked_list_contains(ioopm_list_t *list, elem_t element)
 {
     link_t *cursor = list->first->next;
 

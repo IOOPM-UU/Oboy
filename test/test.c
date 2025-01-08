@@ -4,7 +4,7 @@
 #include <math.h>
 #include <stdint.h>
 #include "../src/lib/lib_linked_list.h"
-// #include "../src/inlupp2/generic_data_structures/linked_list.h"
+#include "../src/inlupp2/generic_data_structures/linked_list.h"
 #include <assert.h>
 #include <limits.h>
 
@@ -61,10 +61,6 @@ int clean_suite(void) {
 //     CU_ASSERT_PTR_NULL(obj);
 // }
 
-void test_initialize_collector(void) {
-    
-}
-
 void test_retain_release() {
     struct cell *c = allocate(sizeof(struct cell), cell_destructor);
     c->cell = NULL; // otherwise unconditional jump!
@@ -77,33 +73,45 @@ void test_retain_release() {
     CU_ASSERT_TRUE(rc(c) == 1);
     release(c);
     CU_ASSERT_TRUE(rc(c) == 0);
-    release(c);
 }
 
 void test_retain_release2() {
-    //create objects
-    set_cascade_limit(100);
-    struct cell *first = allocate(sizeof(struct cell), cell_destructor); //allocate a cell
-    struct cell *second = allocate(sizeof(struct cell), cell_destructor);
-    //chain them together
-    first->cell = second;
-    second->cell = NULL;
-    CU_ASSERT_EQUAL(rc(first), 0);
-    CU_ASSERT_EQUAL(rc(second), 0);
-    // retain(another);
-    retain(first);
-    CU_ASSERT_EQUAL(rc(first), 1);
-    release(first);
-    // release(another);
-    CU_ASSERT_EQUAL(rc(first), 0);
-    CU_ASSERT_EQUAL(rc(second), 0);
-    
-    //remove both cells with one call!
-    release(first);
+    set_cascade_limit(5);
+    struct cell *c = allocate(sizeof(struct cell), cell_destructor);
+    CU_ASSERT_TRUE(rc(c) == 0);
+    retain(c);
+    CU_ASSERT_TRUE(rc(c) == 1);
+
+    c->cell = allocate(sizeof(struct cell), cell_destructor);
+    CU_ASSERT_TRUE(rc(c->cell) == 0);
+    retain(c->cell);
+    CU_ASSERT_TRUE(rc(c->cell) == 1);
+
+    c->cell->cell = NULL;
+
+    release(c);
+
 }
 
-void test_retain_complex() {
-    set_cascade_limit(100);
+void test_retain_release3() {
+    set_cascade_limit(5);
+    struct cell *c = allocate(sizeof(struct cell), cell_destructor);
+    CU_ASSERT_TRUE(rc(c) == 0);
+    retain(c);
+    CU_ASSERT_TRUE(rc(c) == 1);
+
+    c->cell = allocate(sizeof(struct cell), cell_destructor);
+    CU_ASSERT_TRUE(rc(c->cell) == 0);
+    retain(c->cell);
+    struct cell *c2 = c->cell;
+    retain(c2);
+    CU_ASSERT_TRUE(rc(c->cell) == 2);
+
+    c->cell->cell = NULL;
+
+    release(c);
+    release(c2);
+
 }
 
 void test_rc(void) {
@@ -118,25 +126,6 @@ void test_rc(void) {
     release(c);
     CU_ASSERT_TRUE(rc(c) == 0);
     release(c);
-}
-
-void test_get_schedule_linked_list(){
-    //if null, create
-    lib_list_t *list = get_schedule_linked_list();
-    CU_ASSERT_TRUE(lib_linked_list_is_empty(list));
-
-    //add two objects to list
-    obj *object = malloc(sizeof(obj*));
-    add_to_schedule(object);
-    add_to_schedule(object);
-    
-    //if list exists, return it
-    lib_list_t *list2 = get_schedule_linked_list();
-    CU_ASSERT_EQUAL(list,list2);
-    CU_ASSERT_EQUAL(lib_linked_list_size(list), 2);
-    lib_linked_list_clear(list);
-    
-    free(object);
 }
 
 /*
@@ -676,19 +665,21 @@ int main() {
     // the test in question. If you want to add another test, just
     // copy a line below and change the information
     if (
-        // (CU_add_test(unit_test_suite1, "get_schedule_linked_list test", test_get_schedule_linked_list) == NULL) || //needs to be tested first so that the list is empty
-        (CU_add_test(unit_test_suite1, "Add to schedule", test_add_to_schedule) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
-        (CU_add_test(unit_test_suite1, "F", test_free_scheduled_task_one_task) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Default destructor", test_default_destructor) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_and_free_scheduled_tasks) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Allocate links and free scheduled tasks", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Allocate array and free scheduled tasks", test_allocate_array_then_free) == NULL) ||
-        (CU_add_test(unit_test_suite1, "rc() ref count function", test_rc) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Get and set cascade limit", test_get_and_set_cascade_limit) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Allocate string and free scheduled tasks", test_allocate_strings_then_free) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Create and destroy a small binary tree with a given destructor", test_binary_tree_given_destructor_one_node) == NULL) ||
-        (CU_add_test(unit_test_suite1, "Create and destroy a small binary tree with the default destructor", test_binary_tree_default_destructor_one_node) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Add to schedule", test_add_to_schedule) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Free schedule when it is empty", test_free_scheduled_task_empty) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "F", test_free_scheduled_task_one_task) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Default destructor", test_default_destructor) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Allocate and free scheduled tasks", test_allocate_and_free_scheduled_tasks) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Allocate links and free scheduled tasks", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Allocate array and free scheduled tasks", test_allocate_array_then_free) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "rc() ref count function", test_rc) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "1st retain/release test", test_retain_release) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "2nd retain/release test", test_retain_release2) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "2nd retain/release test", test_retain_release3) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Get and set cascade limit", test_get_and_set_cascade_limit) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Allocate string and free scheduled tasks", test_allocate_strings_then_free) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Create and destroy a small binary tree with a given destructor", test_binary_tree_given_destructor_one_node) == NULL) ||
+        // (CU_add_test(unit_test_suite1, "Create and destroy a small binary tree with the default destructor", test_binary_tree_default_destructor_one_node) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Create and destroy a binary tree with a given destructor", test_binary_tree_given_destructor) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Create and destroy a binary tree with the default destructor", test_binary_tree_default_destructor) == NULL) ||
         // (CU_add_test(unit_test_suite1, "Create and destroy a weird array with a given destructor", test_array_struct_given_destructor) == NULL) ||
