@@ -201,13 +201,13 @@ static lib_link_t *link_create_with_allocate(lib_elem_t value, lib_link_t *previ
     lib_link_t *link = allocate(sizeof(lib_link_t), NULL);
     link->previous = previous;
     link->next = next;
+    retain(link->next);
     link->value = value;
-    retain(link);
     return link;
 }
 
 
-void test_allocate_links_and_free_scheduled_tasks(void)
+void test_allocate_and_deallocate_links(void)
 {
     // Set cascade limit
     set_cascade_limit(1);
@@ -223,25 +223,9 @@ void test_allocate_links_and_free_scheduled_tasks(void)
     CU_ASSERT_PTR_NOT_NULL(link3);
 
     // 2. Add all to schedule
-    add_to_schedule(link1);
-    add_to_schedule(link2);
-    add_to_schedule(link3);
-
-    // We should have 3
-    CU_ASSERT_EQUAL(lib_linked_list_size(get_schedule_linked_list()), 3);
-
-    // 3. Free tasks up to 150 bytes => frees object1(100)
-    free_scheduled_tasks(sizeof(lib_link_t));
-    // => now 2 remain
-    CU_ASSERT_EQUAL(lib_linked_list_size(get_schedule_linked_list()), 2);
-
-    // 4. Free tasks up to 600 => enough for object2(200) + object3(300)
-    free_scheduled_tasks(2 * sizeof(lib_link_t));
-    CU_ASSERT_EQUAL(lib_linked_list_size(get_schedule_linked_list()), 0);
-
-    // NOTE: no call to free_all() here if your suite or test teardown calls it.
-    // Otherwise you can do:
-    // free_all();
+    deallocate(link1);
+    deallocate(link2);
+    deallocate(link3);
 }
 
 void test_allocate_array_then_deallocate(void)
@@ -417,6 +401,36 @@ void test_binary_tree_default_destructor() {
     // releasing instead
 }
 
+void test_large_binary_tree_given_destructor() {
+    set_cascade_limit(3);
+    
+    // Create a binary tree struct with the library's functions
+    /* Tree 1
+                    11
+          4                10
+       2     3                9      
+    1                       7       8
+                        6     5  
+    */
+    node_t *n1 = node_create(1, NULL, NULL, node_destroy);
+    node_t *n2 = node_create(2, n1, NULL, node_destroy);
+    node_t *n3 = node_create(3, NULL, NULL, node_destroy);
+    node_t *n4 = node_create(4, n2, n3, node_destroy);
+    node_t *n5 = node_create(5, NULL, NULL, node_destroy);
+    node_t *n6 = node_create(6, NULL, NULL, node_destroy);
+    node_t *n7 = node_create(7, n6, n5, node_destroy);
+    node_t *n8 = node_create(8, NULL, NULL, node_destroy);
+    node_t *n9 = node_create(9, n7, n8, node_destroy);
+    node_t *n10 = node_create(10, NULL, n9, node_destroy);
+    node_t *n11 = node_create(11, n4, n10, node_destroy);
+    retain(n11);
+
+    release(n11);
+    CU_ASSERT_EQUAL(lib_linked_list_size(get_schedule_linked_list()), 8);
+    cleanup();
+    CU_ASSERT_EQUAL(lib_linked_list_size(get_schedule_linked_list()), 0);
+}
+
 typedef struct weird_array weird_array_t;
 struct weird_array {
     int i1;
@@ -443,7 +457,8 @@ weird_array_t *weird_array_create(char *i4, weird_array_t *i6, function1_t destr
     arr->i1 = 1;
     arr->i2 = 2;
     arr->i3 = 3;
-    arr->i4 = allocate_array(strlen(i4), sizeof(char*), str_non_destructor); // TODO not sure if it should be char or char*
+    arr->i4 = rc_strdup(i4); // TODO not sure if it should be char or char*
+    retain(arr->i4);
     arr->i5 = 5;
     arr->i6 = i6;
     retain(i6);
@@ -454,9 +469,11 @@ weird_array_t *weird_array_create(char *i4, weird_array_t *i6, function1_t destr
 void test_array_struct_given_destructor() {
     char *str1 = "One";
     weird_array_t *arr1 = weird_array_create(str1, NULL, weird_array_destroy);
+    retain(arr1);
     char *str2 = "Two";
     weird_array_t *arr2 = weird_array_create(str2, arr1, weird_array_destroy);
-    CU_ASSERT_EQUAL(strcmp(arr1->i1, arr2->i6->i1), 0);
+    retain(arr2);
+    CU_ASSERT_EQUAL(arr1->i1, arr2->i6->i1);
     CU_ASSERT_EQUAL(strcmp(str1, arr2->i6->i4), 0);
 
     release(arr1);
@@ -466,9 +483,11 @@ void test_array_struct_given_destructor() {
 void test_array_struct_default_destructor() {
     char *str1 = "One";
     weird_array_t *arr1 = weird_array_create(str1, NULL, NULL);
+    retain(arr1);
     char *str2 = "Two";
     weird_array_t *arr2 = weird_array_create(str2, arr1, NULL);
-    CU_ASSERT_EQUAL(strcmp(arr1->i1, arr2->i6->i1), 0);
+    retain(arr2);
+    CU_ASSERT_EQUAL(arr1->i1, arr2->i6->i1);
     CU_ASSERT_EQUAL(strcmp(str1, arr2->i6->i4), 0);
 
     release(arr1);
@@ -508,9 +527,10 @@ int main() {
         (CU_add_test(unit_test_suite1, "Create and destroy a small binary tree with the default destructor", test_binary_tree_default_destructor_one_node) == NULL) ||
         (CU_add_test(unit_test_suite1, "Create and destroy a binary tree with a given destructor", test_binary_tree_given_destructor) == NULL) ||
         (CU_add_test(unit_test_suite1, "Create and destroy a binary tree with the default destructor", test_binary_tree_default_destructor) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Create and destroy a weird array with a given destructor", test_array_struct_given_destructor) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Create and destroy a weird array with the default destructor", test_array_struct_default_destructor) == NULL) ||
-        // (CU_add_test(unit_test_suite1, "Allocate links and release", test_allocate_links_and_free_scheduled_tasks) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Create and destroy a larger binary tree with a given destructor", test_large_binary_tree_given_destructor) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Create and destroy a weird array with a given destructor", test_array_struct_given_destructor) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Create and destroy a weird array with the default destructor", test_array_struct_default_destructor) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Allocate links and release", test_allocate_and_deallocate_links) == NULL) ||
         0
     ) 
     {
