@@ -1,7 +1,5 @@
-REF = 
-
 clean:
-	rm -f *.o frontend backend_tests *.gcno *.gcda *.gcov backend_tests_coverage
+	rm -f *.o frontend backend_tests old_hash old_list *.gcno *.gcda *.gcov backend_tests_coverage
 
 frontend: user_interface/frontend.c generic_utils/utils.c generic_data_structures/linked_list.c generic_data_structures/hash_table.c business_logic/shop.c business_logic/merch.c business_logic/cart.c business_logic/common.c
 	gcc -g -Wall -pedantic user_interface/frontend.c generic_utils/utils.c generic_data_structures/linked_list.c generic_data_structures/hash_table.c business_logic/shop.c business_logic/merch.c business_logic/cart.c business_logic/common.c ../ref.c  ../lib/lib_hash_table.c  ../lib/lib_linked_list.c -o frontend
@@ -58,4 +56,9 @@ gcov:
 	gcov -b -c backend_tests_coverage-backend_tests.gcda > coverage.txt
 
 old_hash: 
-	gcc -g 	gcc -g -Wall -pedantic generic_data_structures/hash_table.c generic_data_structures/linked_list.c generic_data_structures/hash_table_tests.c
+	gcc -g -Wall -pedantic generic_data_structures/hash_table.c generic_data_structures/linked_list.c generic_data_structures/hash_table_tests.c ../ref.c ../lib/lib_hash_table.c ../lib/lib_linked_list.c -lcunit -o old_hash
+	valgrind -s --leak-check=full ./old_hash
+
+old_list:
+	gcc -g -Wall -pedantic generic_data_structures/linked_list.c generic_data_structures/linked_list_tests.c ../ref.c ../lib/lib_hash_table.c ../lib/lib_linked_list.c -lcunit -o old_list
+	valgrind -s --leak-check=full ./old_list

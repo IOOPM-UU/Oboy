@@ -118,6 +118,7 @@ static entry_t *entry_create(elem_t key, elem_t value, entry_t *next)
     result->key = key;
     result->value = value;
     result->next = next; 
+    retain(result->next);
     return result;
 }
 
@@ -139,6 +140,7 @@ void ioopm_hash_table_insert(ioopm_hash_table_t *ht, elem_t key, elem_t value) /
     }
 
     previous_entry->next = entry_create(key, value, next);
+    retain(previous_entry->next);
     ht->size += 1;
 }
 
@@ -149,7 +151,7 @@ ioopm_option_t ioopm_hash_table_lookup(ioopm_hash_table_t *ht, elem_t key)
     entry_t *previous_entry = find_previous_entry_for_key(ht, &ht->buckets[bucket], key);
 
     entry_t *next_entry = previous_entry->next;
-    if (next_entry != NULL) //TODO: borde denna bli retained?
+    if (next_entry != NULL)
     {
         return Success(next_entry->key, next_entry->value);
     }
@@ -204,14 +206,18 @@ void ioopm_hash_table_clear(ioopm_hash_table_t *ht)
 
     for (int i = 0; i < No_Buckets; i++) // Loopar över alla buckets
     {
-        entry_t *first_entry = ht->buckets[i].next; // Första entryn i bucketen är en dummy entry, så den faktiskt första ges av detta uttryck
-        entry_t *current_entry = first_entry;
-        while (current_entry != NULL) // Vi måste ta oss till den sista entryn innan vi börjar ta bort, för att undvika danling pointers och memory leaks
-        {
-            entry_t *next_entry = current_entry->next;
-            ioopm_hash_table_remove(ht, current_entry->key);
-            current_entry = next_entry;
-        }
+        // entry_t *first_entry = ht->buckets[i].next; // Första entryn i bucketen är en dummy entry, så den faktiskt första ges av detta uttryck
+        // entry_t *current_entry = first_entry;
+        // while (current_entry != NULL) // Vi måste ta oss till den sista entryn innan vi börjar ta bort, för att undvika danling pointers och memory leaks
+        // {
+        //     entry_t *next_entry = current_entry->next;
+        //     ioopm_hash_table_remove(ht, current_entry->key);
+        //     current_entry = next_entry;
+        // }
+        entry_t *first_entry = ht->buckets[i].next;
+        release(first_entry);
+        ht->buckets[i].next = NULL;
+
     }
     ht->size = 0;
 }

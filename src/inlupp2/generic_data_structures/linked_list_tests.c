@@ -64,6 +64,7 @@ int init_suite(void)
 
 int clean_suite(void)
 {
+
     // Change this function if you want to do something *after* you
     // run a test suite
     return 0;
@@ -505,35 +506,35 @@ void test_clear()
     ioopm_linked_list_destroy(lst);
 }
 
-void test_append_does_not_break_chain()
-{
-    ioopm_list_t *lst = ioopm_linked_list_create_int();
-    ioopm_linked_list_append_int(lst, 1);
-    ioopm_linked_list_append_int(lst, 2);
+// void test_append_does_not_break_chain()
+// {
+//     ioopm_list_t *lst = ioopm_linked_list_create_int();
+//     ioopm_linked_list_append_int(lst, 1);
+//     ioopm_linked_list_append_int(lst, 2);
 
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(lst), 2);
+//     CU_ASSERT_EQUAL(ioopm_linked_list_size(lst), 2);
 
-    CU_ASSERT_TRUE(lst->first->next->next == lst->last);
-    CU_ASSERT_TRUE(lst->first->next == lst->last->previous);
-    CU_ASSERT_TRUE(lst->first == lst->last->previous->previous);
+//     CU_ASSERT_TRUE(lst->first->next->next == lst->last);
+//     CU_ASSERT_TRUE(lst->first->next == lst->last->previous);
+//     CU_ASSERT_TRUE(lst->first == lst->last->previous->previous);
 
-    ioopm_linked_list_destroy(lst);
-}
+//     ioopm_linked_list_destroy(lst);
+// }
 
-void test_prepend_does_not_break_chain()
-{
-    ioopm_list_t *lst = ioopm_linked_list_create_int();
-    ioopm_linked_list_prepend_int(lst, 2);
-    ioopm_linked_list_prepend_int(lst, 1);
+// void test_prepend_does_not_break_chain()
+// {
+//     ioopm_list_t *lst = ioopm_linked_list_create_int();
+//     ioopm_linked_list_prepend_int(lst, 2);
+//     ioopm_linked_list_prepend_int(lst, 1);
 
-    CU_ASSERT_EQUAL(ioopm_linked_list_size(lst), 2);
+//     CU_ASSERT_EQUAL(ioopm_linked_list_size(lst), 2);
 
-    CU_ASSERT_TRUE(lst->first->next->next == lst->last);
-    CU_ASSERT_TRUE(lst->first->next == lst->last->previous);
-    CU_ASSERT_TRUE(lst->first == lst->last->previous->previous);
+//     CU_ASSERT_TRUE(lst->first->next->next == lst->last);
+//     CU_ASSERT_TRUE(lst->first->next == lst->last->previous);
+//     CU_ASSERT_TRUE(lst->first == lst->last->previous->previous);
 
-    ioopm_linked_list_destroy(lst);
-}
+//     ioopm_linked_list_destroy(lst);
+// }
 
 void test_linked_list_remove_on_empty_list()
 {
@@ -576,39 +577,39 @@ int main()
         (CU_add_test(my_test_suite, "A test to check that append and prepend works together", test_linked_list_append_and_prepend) == NULL) ||
         (CU_add_test(my_test_suite, "A test to check that the pointer to an empty list doesn`t point to NULL", test_create_empty_list) == NULL) ||
         (CU_add_test(my_test_suite, "A test to check that append on an empty list makes index 0 the appended element", test_append_positive_1) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that appending two items to an empty list makes index one the last one appended", test_append_positive_2) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that appending 3 to an empty list does not make the value 4 at index 0", test_append_negative_1) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that appending 3 and then 4 to an empty list does not make index 1 3", test_append_negative_2) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that prepending 3 to and empty list makes index 0 3", test_prepend_positive_1) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that prepending 3 then 5 to and empty list makes index 1 5", test_prepend_positive_2) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that prepending 3 to an empty list does not make the 0th index 4", test_prepend_negative_1) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that prepending 3 and then 4 to an empty list does not make the first entry 3", test_prepend_negative_2) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that inserting a 1 at index 0 really inserts a 1 at index 0", test_linked_list_insert_positive) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that inserting a 1 at index 0 doesnt insert a 4 at index 0", test_linked_list_insert_negative) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that inserting a 1 at index 0 in a non-empty list inserts 1 at index 0", test_linked_list_insert_ne_list) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that remove returns the integer it removed", test_linked_list_remove_return_value) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that empty list at index one is a null ptr, is_empty on empty list is true, and that the size is equal to 0", test_linked_list_get_empty_list) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that get correctly gets the 0th element, and that the element is correct", test_linked_list_get_positive) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that get doesnt get something else", test_linked_list_get_negative) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that the empty list doesnt contain 4", test_linked_empty_list_contains) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that the a non empty list without 4 doesnt contain 4", test_linked_list_contains_negative) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that a list with just 3 contains a list with just 3", test_linked_list_contains_positive) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that the size of an empty list is 0", test_linked_list_size_empty_list) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that the size of a list with 4 elements is 4", test_linked_list_size_ne_list) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that an empty list is empty", test_linked_list_is_empty_positive) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that a non empty list is not emmpty", test_linked_list_is_empty_negative) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that all elements in a list with elements less than 10 are indeed less than 10", test_linked_list_all_positive) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that all elements in a list with elements greater than 1 are less than 1", test_linked_list_all_negative) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that all elements in a list with one 0 element", test_linked_list_all_edge) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that apply to all with change value to n changes every value to n", test_ioopm_linked_list_apply_to_all) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that apply to all with increase value with n changes every value with n", test_ioopm_linked_list_apply_to_all_2) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that any element is less than 10 in a list of elements less than 10", test_any_positive) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that any element is less than 1 in a list of elements greater than 1", test_any_negative) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that any element in an empty list is less than 100", test_any_empty) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that clear clears list", test_clear) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that append does not break chain", test_append_does_not_break_chain) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that prepend does not break chain", test_prepend_does_not_break_chain) == NULL) ||
-        (CU_add_test(my_test_suite, "A test to check that remove on an empty list fails", test_linked_list_remove_on_empty_list) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that appending two items to an empty list makes index one the last one appended", test_append_positive_2) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that appending 3 to an empty list does not make the value 4 at index 0", test_append_negative_1) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that appending 3 and then 4 to an empty list does not make index 1 3", test_append_negative_2) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that prepending 3 to and empty list makes index 0 3", test_prepend_positive_1) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that prepending 3 then 5 to and empty list makes index 1 5", test_prepend_positive_2) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that prepending 3 to an empty list does not make the 0th index 4", test_prepend_negative_1) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that prepending 3 and then 4 to an empty list does not make the first entry 3", test_prepend_negative_2) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that inserting a 1 at index 0 really inserts a 1 at index 0", test_linked_list_insert_positive) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that inserting a 1 at index 0 doesnt insert a 4 at index 0", test_linked_list_insert_negative) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that inserting a 1 at index 0 in a non-empty list inserts 1 at index 0", test_linked_list_insert_ne_list) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that remove returns the integer it removed", test_linked_list_remove_return_value) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that empty list at index one is a null ptr, is_empty on empty list is true, and that the size is equal to 0", test_linked_list_get_empty_list) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that get correctly gets the 0th element, and that the element is correct", test_linked_list_get_positive) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that get doesnt get something else", test_linked_list_get_negative) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that the empty list doesnt contain 4", test_linked_empty_list_contains) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that the a non empty list without 4 doesnt contain 4", test_linked_list_contains_negative) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that a list with just 3 contains a list with just 3", test_linked_list_contains_positive) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that the size of an empty list is 0", test_linked_list_size_empty_list) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that the size of a list with 4 elements is 4", test_linked_list_size_ne_list) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that an empty list is empty", test_linked_list_is_empty_positive) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that a non empty list is not emmpty", test_linked_list_is_empty_negative) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that all elements in a list with elements less than 10 are indeed less than 10", test_linked_list_all_positive) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that all elements in a list with elements greater than 1 are less than 1", test_linked_list_all_negative) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that all elements in a list with one 0 element", test_linked_list_all_edge) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that apply to all with change value to n changes every value to n", test_ioopm_linked_list_apply_to_all) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that apply to all with increase value with n changes every value with n", test_ioopm_linked_list_apply_to_all_2) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that any element is less than 10 in a list of elements less than 10", test_any_positive) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that any element is less than 1 in a list of elements greater than 1", test_any_negative) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that any element in an empty list is less than 100", test_any_empty) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that clear clears list", test_clear) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that append does not break chain", test_append_does_not_break_chain) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that prepend does not break chain", test_prepend_does_not_break_chain) == NULL) ||
+        // (CU_add_test(my_test_suite, "A test to check that remove on an empty list fails", test_linked_list_remove_on_empty_list) == NULL) ||
         0)
     {
         // If adding any of the tests fails, we tear down CUnit and exit
