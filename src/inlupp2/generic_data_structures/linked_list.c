@@ -50,7 +50,7 @@ bool ioopm_linked_list_is_empty(ioopm_list_t *list)
 
 static link_t *link_create(elem_t value, link_t *previous, link_t *next)
 {
-    link_t *link = allocate( sizeof(link_t), link_destructor);
+    link_t *link = allocate(sizeof(link_t), link_destructor);
     link->previous = previous;
     link->next = next;
     retain(link->next);
@@ -100,20 +100,21 @@ void ioopm_linked_list_destroy(ioopm_list_t *list)
 
 void ioopm_linked_list_append(ioopm_list_t *list, elem_t value)
 {
-    link_t *new_link = link_create(value, list->last, NULL);
+    link_t *new_link = link_create(value, list->last, NULL); // +0 (0) doesnt retain previous
 
     list->last->next = new_link;
-    retain(new_link);
-    release(list->last);
+    retain(new_link); // +1 (1)
+    release(list->last); // -1 (0) only -1 since we just retained list->last->next
     list->last = new_link;
-    retain(new_link);
+    retain(new_link); // +1 (1)
     list->size++;
 }
 
 void ioopm_linked_list_prepend(ioopm_list_t *list, elem_t value)
 {
     link_t *dummy = list->first;
-    link_t *new_link = link_create(value, dummy, dummy->next);
+    link_t *new_link = link_create(value, dummy, dummy->next); // +1 (1)
+    release(dummy->next); // -1 (0) only -1 since we just retained dummy->next
 
     if (dummy->next != NULL)
     {
@@ -121,13 +122,13 @@ void ioopm_linked_list_prepend(ioopm_list_t *list, elem_t value)
     }
 
     dummy->next = new_link;
-    retain(dummy->next);
+    retain(dummy->next); // +1 (1)
 
     if (list->last == dummy)
     {
-        release(dummy);
+        release(dummy); // -1 (0)
         list->last = new_link;
-        retain(list->last);
+        retain(list->last); // +1 (1)
     }
 
     list->size++;
@@ -187,11 +188,14 @@ elem_t ioopm_linked_list_remove(ioopm_list_t *list, int index, bool *success)
 
         if (list->last == to_be_removed)
         {
+
+            release(to_be_removed); // -1 (-1) only -1 since it has the last pointer
             list->last = dummy;
+            retain(list->last); // +1 (0)
         }
 
         to_be_removed->next = NULL;
-        release(to_be_removed);
+        release(to_be_removed); // -1 (-1) (returns after this so its not counted for the later count)
         list->size--;
         *success = true;
         return value_removed;
@@ -206,16 +210,17 @@ elem_t ioopm_linked_list_remove(ioopm_list_t *list, int index, bool *success)
     elem_t value_removed = to_be_removed->value;
 
     current_link->next = to_be_removed->next;
-    retain(current_link->next);
+    //retain(current_link->next);
 
     if (to_be_removed == list->last)
     {
-        release(to_be_removed);
+        to_be_removed->next = NULL;
+        release(to_be_removed); // -1 (-1) should only release one since next == NULL
         list->last = current_link;
-        retain(current_link);
+        retain(current_link); // +1 (0)
     }
     // free(to_be_removed);
-    release(to_be_removed);
+    release(to_be_removed); // -1 (-1)
     list->size--;
     *success = true;
     return value_removed;
@@ -336,6 +341,9 @@ void ioopm_linked_list_clear(ioopm_list_t *list)
     //     current_link = next_link;
     // }
 
+
+    retain(dummy);
+    release(list->last);
     dummy->next = NULL;
     list->last = dummy;
     list->size = 0;

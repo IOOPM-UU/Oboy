@@ -10,7 +10,8 @@ static lib_list_t *schedule_linked_list = NULL;
 static lib_hash_table_t *metadata_ht = NULL;
 static bool release_in_progress = false; 
 static const size_t STANDARD_CASCADE_LIMIT = 100;
-static size_t CASCADE_LIMIT = STANDARD_CASCADE_LIMIT;
+//static size_t CASCADE_LIMIT = STANDARD_CASCADE_LIMIT;
+static size_t CASCADE_LIMIT = 100;
 
 bool int_equal(lib_elem_t a, lib_elem_t b) {
     return a.i == b.i;

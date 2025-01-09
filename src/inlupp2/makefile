@@ -62,3 +62,7 @@ old_hash:
 old_list:
 	gcc -g -Wall -pedantic generic_data_structures/linked_list.c generic_data_structures/linked_list_tests.c ../ref.c ../lib/lib_hash_table.c ../lib/lib_linked_list.c -lcunit -o old_list
 	valgrind -s --leak-check=full ./old_list
+
+old_list_full:
+	gcc -g -Wall -pedantic generic_data_structures/linked_list.c generic_data_structures/linked_list_tests.c ../ref.c ../lib/lib_hash_table.c ../lib/lib_linked_list.c -lcunit -o old_list
+	valgrind -s --leak-check=full --show-leak-kinds=all ./old_list
