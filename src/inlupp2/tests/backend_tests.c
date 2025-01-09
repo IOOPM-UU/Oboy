@@ -81,6 +81,7 @@ void test_create_shop()
 void test_add_merch()
 {
     ioopm_shop_t *shop = ioopm_create_shop();
+    retain(shop);
     char *name = "apple";
     char *description = "red";
     unsigned int price = 3;
@@ -91,6 +92,9 @@ void test_add_merch()
 
     CU_ASSERT_TRUE(ioopm_linked_list_contains(merch_list, ptr_elem(name)));
 
+    //ioopm_linked_list_apply_to_all()
+
+    ioopm_free_string_values(merch_list);
     ioopm_linked_list_destroy(merch_list);
     ioopm_shop_destroy(shop);
 }
@@ -137,6 +141,7 @@ void test_remove_merch()
 void test_edit_merch_name()
 {
     ioopm_shop_t *shop = ioopm_create_shop();
+    retain(shop);
     unsigned int x = 3;
     ioopm_shop_add_merch(shop, "car", "vroom", x);
     bool success = ioopm_shop_edit_merchandise(shop, "car", "honda", "car", x);
@@ -159,12 +164,14 @@ void test_edit_merch_name()
     }
 
     ioopm_shop_destroy(shop);
+    ioopm_free_string_values(merch_names);
     ioopm_linked_list_destroy(merch_names);
 }
 
 void test_edit_merch_and_update_cart_item_name()
 {
     ioopm_shop_t *shop = ioopm_create_shop();
+    retain(shop);
     unsigned int x = 3;
     unsigned int quantity = 5;
     char *old_name = "car";
@@ -174,7 +181,7 @@ void test_edit_merch_and_update_cart_item_name()
     bool insert_stock = ioopm_shop_insert_stock(shop, old_name, "A35", quantity);
     CU_ASSERT_TRUE(insert_stock);
 
-    unsigned int cart_index = ioopm_shop_create_cart(shop);
+    unsigned int cart_index = ioopm_shop_create_cart(shop); //cart is inserted in shop as value, +1 retain på cart
     bool add_to_cart = ioopm_shop_add_to_cart(shop, cart_index, old_name, 1);
     CU_ASSERT_TRUE(add_to_cart);
 
@@ -641,9 +648,8 @@ int main()
     // the test in question. If you want to add another test, just
     // copy a line below and change the information
     if (
-
         (CU_add_test(my_test_suite, "test process word insert new", test_create_shop) == NULL) ||
-        (CU_add_test(my_test_suite, "test add merch", test_add_merch) == NULL) ||
+        (CU_add_test(my_test_suite, "test add merch", test_add_merch) == NULL) || // TODO FIXME:
         (CU_add_test(my_test_suite, "test add already existing merch", test_add_already_existing_merch) == NULL) ||
         (CU_add_test(my_test_suite, "test edit a non existing merch", test_edit_nonexisting_merch) == NULL) ||
         (CU_add_test(my_test_suite, "test remove merch", test_remove_merch) == NULL) ||

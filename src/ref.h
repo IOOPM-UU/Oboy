@@ -45,3 +45,6 @@ void shutdown();
 lib_hash_table_t *get_metadata_ht();
 lib_list_t *get_schedule_linked_list();
 char *rc_strdup(char *src);
+
+// does nothing
+void str_dummy_destructor(obj *o);

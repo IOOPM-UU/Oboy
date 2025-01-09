@@ -14,12 +14,18 @@
 
 
 
-void merch_locations_destructor(ioopm_hash_table_t *merch_ht, ioopm_merch_t *merch) {
-    return;
+
+
+void merch_destructor(obj *merch) {
+    if (!merch) return;
+    release(((ioopm_merch_t *)merch)->name);
+    release(((ioopm_merch_t *)merch)->description);
+    release(((ioopm_merch_t *)merch)->locs);
 }
 
-void ht_shelves_destructor(){
-    
+void shelf_destructor(obj *shelf) {
+    if (!shelf) return;
+    release(((ioopm_shelf_t *)shelf)->name);
 }
 
 void destroy_merch_locations(ioopm_hash_table_t *locs_ht, ioopm_merch_t *merch)
@@ -35,11 +41,11 @@ void destroy_merch_locations(ioopm_hash_table_t *locs_ht, ioopm_merch_t *merch)
             ioopm_option_t option = ioopm_hash_table_remove(locs_ht, ptr_elem(shelf->name));
             if (Successful(option))
             {
-                release(option.key.p);
-                release(option.value.p);
+                release(option.key.p); // releases the key in the ht (string)
+                release(option.value.p); // releases the shelf
             }
-            release(shelf->name);
-            release(shelf);
+            //release(shelf->name);
+            //release(shelf);
         }
         ioopm_iterator_next(iter, &success);
     }
@@ -135,18 +141,24 @@ bool ioopm_shop_add_merch(ioopm_shop_t *shop, char *name, char *desc, unsigned i
         return false;
     }
 
-    ioopm_merch_t *new_merch = allocate(sizeof(ioopm_merch_t), NULL);
+    ioopm_merch_t *new_merch = allocate(sizeof(ioopm_merch_t), merch_destructor);
 
     char *name_alloc = rc_strdup(name); 
     char *desc_alloc = rc_strdup(desc); 
 
     new_merch->name = name_alloc;
+    retain(new_merch->name);
     new_merch->description = desc_alloc;
+    retain(new_merch->description);
     new_merch->price = price;
     new_merch->locs = ioopm_linked_list_create(shelf_eq);
+    retain(new_merch->locs);
 
     // Allocate memory for ht key string
     char *key = rc_strdup(name); 
+    retain(key);
+
+    retain(new_merch); // Usually shouldnt be retained in constructors, but since its only saved through here it should (i think)
 
     ioopm_hash_table_insert(shop->merch_ht, ptr_elem(key), ptr_elem(new_merch));
 
@@ -172,7 +184,8 @@ ioopm_list_t *ioopm_shop_get_merch(ioopm_shop_t *shop)
 
         ioopm_iterator_next(iter, &success);
 
-        merch_names[i] = (char *)(elem.p);
+        merch_names[i] = rc_strdup((char *)(elem.p));
+        retain(merch_names[i]);
     }
     sort_keys(merch_names, merch_count);
 
@@ -181,6 +194,7 @@ ioopm_list_t *ioopm_shop_get_merch(ioopm_shop_t *shop)
     for (int i = 0; i < merch_count; i++)
     {
         ioopm_linked_list_append(sorted_merch, ptr_elem(merch_names[i]));
+        merch_names[i] = NULL;
     }
 
     ioopm_linked_list_destroy(all_merch);
@@ -209,6 +223,7 @@ static void change_name_cart_item(ioopm_shop_t *shop, char *current_name, char *
                 cart_item_t *cart_item = items_option.value.p;
                 release(cart_item->name);
                 cart_item->name = rc_strdup(new_name); 
+                retain(cart_item->name);
             }
         }
     }
@@ -239,6 +254,7 @@ bool ioopm_shop_edit_merchandise(ioopm_shop_t *shop, char *old_name, char *new_n
 
     ioopm_merch_t *merch = option.value.p;
 
+
     release(merch->name);
     release(merch->description);
 
@@ -246,10 +262,13 @@ bool ioopm_shop_edit_merchandise(ioopm_shop_t *shop, char *old_name, char *new_n
     char *new_desc_alloc = rc_strdup(new_description); 
 
     merch->name = new_name_alloc;
+    retain(merch->name);
     merch->description = new_desc_alloc;
+    retain(merch->description);
     merch->price = new_price;
 
     char *new_key = rc_strdup(new_name); 
+    retain(new_key);
 
     ioopm_hash_table_insert(shop->merch_ht, ptr_elem(new_key), ptr_elem(merch));
 
@@ -268,6 +287,7 @@ bool ioopm_shop_edit_merchandise(ioopm_shop_t *shop, char *old_name, char *new_n
 
             char *name_alloc_locs = rc_strdup(new_name); 
             option.value.p = name_alloc_locs;
+            retain(name_alloc_locs);
         }
         ioopm_iterator_next(iter, &success);
     }
@@ -280,9 +300,10 @@ bool ioopm_shop_edit_merchandise(ioopm_shop_t *shop, char *old_name, char *new_n
 
 static ioopm_shelf_t *create_shelf(char *shelf_name, unsigned int shelf_quantity)
 {
-    ioopm_shelf_t *shelf = allocate(sizeof(ioopm_shelf_t), NULL);
+    ioopm_shelf_t *shelf = allocate(sizeof(ioopm_shelf_t), shelf_destructor);
     assert(shelf);
     shelf->name = rc_strdup(shelf_name); 
+    retain(shelf->name);
     shelf->quantity = shelf_quantity;
     return shelf;
 }
@@ -322,8 +343,13 @@ bool ioopm_shop_insert_stock(ioopm_shop_t *shop, char *merch_name, char *shelf_n
     else
     {
         ioopm_shelf_t *shelf = create_shelf(shelf_name, shelf_quantity);
+        retain(shelf);
         ioopm_linked_list_append(locs, ptr_elem(shelf));
-        ioopm_hash_table_insert(shop->locs_ht, ptr_elem(rc_strdup(shelf_name)), ptr_elem(rc_strdup(merch_name))); //FIXME: rc_strdup ej tillåtet
+        char *duped_shelf = rc_strdup(shelf_name);
+        retain(duped_shelf);
+        char *duped_merch = rc_strdup(merch_name);
+        retain(duped_merch);
+        ioopm_hash_table_insert(shop->locs_ht, ptr_elem(duped_shelf), ptr_elem(duped_merch)); //FIXME: rc_strdup ej tillåtet
     }
     return true;
 }
@@ -359,7 +385,7 @@ void destroy_shelfs_in_list(ioopm_list_t *list)
         ioopm_shelf_t *shelf = ioopm_iterator_current(iter, &success).p;
         if (success)
         {
-            release(shelf->name);
+            //release(shelf->name);
             release(shelf);
         }
         ioopm_iterator_next(iter, &success);

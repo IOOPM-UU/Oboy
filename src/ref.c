@@ -112,7 +112,7 @@ void default_destructor(obj* object){
     metadata_t *metadata = (metadata_t *)(option.value.p);
     size_t object_size = metadata->size;
 
-    for (size_t offset = 0; offset + sizeof(void *) <= object_size; offset += sizeof(void *))
+    for (size_t offset = 0; offset + sizeof(void *) <= object_size; offset++)
     {
         void **possible_pointer = (void **)((char *)object + offset);
         if (is_valid_pointer(*possible_pointer))
@@ -287,7 +287,7 @@ void set_cascade_limit(size_t size) {
     CASCADE_LIMIT = size; 
 }
 
-static void string_dummy_destructor(obj *o) {
+void str_dummy_destructor(obj *o) {
     // No pointer scanning, do nothing
 }
 
@@ -299,7 +299,7 @@ char *rc_strdup(char *src)
 
     while (src[len]) len++;
 
-    str = allocate(len + 1, string_dummy_destructor);
+    str = allocate(len + 1, str_dummy_destructor);
     p = str;
     while (*src)
         *p++ = *src++;

@@ -150,10 +150,11 @@ void shopping_carts_destructor(obj *shopping_carts) {
 
 void destroy_shopping_cart(shopping_carts_t *shopping_carts)
 {
-    ioopm_list_t *carts = ioopm_hash_table_values(shopping_carts->carts);
+    ioopm_list_t *carts = ioopm_hash_table_values(shopping_carts->carts); //denna måste vi tömma! FIXME: TODO:
+    retain(carts);
     ioopm_list_iterator_t *iter = ioopm_list_iterator(carts);
+    retain(iter);
 
-    ioopm_hash_table_destroy(shopping_carts->carts);
 
     bool success = true;
     while (success)
@@ -166,8 +167,12 @@ void destroy_shopping_cart(shopping_carts_t *shopping_carts)
         ioopm_iterator_next(iter, &success);
     }
 
-    ioopm_linked_list_destroy(carts);
+    //ioopm_free_string_values(carts);
+
+    ioopm_hash_table_destroy(shopping_carts->carts);
+
     ioopm_iterator_destroy(iter);
+    ioopm_linked_list_destroy(carts);
     release(shopping_carts);
 }
 
@@ -181,6 +186,7 @@ unsigned int ioopm_shop_create_cart(ioopm_shop_t *shop)
     cart->items = ioopm_linked_list_create(cart_item_eq);
     retain(cart->items);
     ioopm_hash_table_insert(shop->shopping_carts->carts, u_elem(index), ptr_elem(cart));
+    retain(cart); //cart needs to be retain here since hashtable doesn't retain values
     shop->shopping_carts->cart_index++;
 
     return index;
@@ -326,7 +332,7 @@ bool ioopm_shop_remove_from_cart(ioopm_shop_t *shop, unsigned int cart_index, ch
 
     if ((item->quantity - amount) <= 0)
     {
-        remove_item_from_cart(cart, item);
+        remove_item_from_cart(cart, item); // -1 (-1)
         return true;
     }
 
@@ -383,12 +389,9 @@ void destroy_shelf_in_locs_ht(ioopm_shop_t *shop, ioopm_shelf_t *shelf)
     ioopm_option_t shelf_option = ioopm_hash_table_remove(shop->locs_ht, ptr_elem(shelf->name));
     assert(Successful(shelf_option));
     release(shelf_option.key.p);
-    release(shelf_option.value.p);
+    release(shelf_option.value.p); // TODO FIXME:
 }
 
-/// @brief
-/// @param merch
-/// @return true if merch successfully decreased, otherwise false
 void decrease_merch(ioopm_shop_t *shop, ioopm_merch_t *merch, unsigned int amount)
 {
     ioopm_list_t *locs = merch->locs;
@@ -406,8 +409,8 @@ void decrease_merch(ioopm_shop_t *shop, ioopm_merch_t *merch, unsigned int amoun
             if (quantity_left_in_shelf <= 0)
             {
                 destroy_shelf_in_locs_ht(shop, shelf);
-                release(shelf->name);
-                release(shelf);
+                // release(shelf->name); // handled by shelfs destructor
+                // release(shelf); // handled by destroy_shelf...
                 ioopm_linked_list_remove(locs, i, &success);
                 i--;
                 amount -= shelf_quantity;

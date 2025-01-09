@@ -114,7 +114,7 @@ void entry_destructor(obj* object) {
 
 static entry_t *entry_create(elem_t key, elem_t value, entry_t *next)
 {
-    entry_t *result = allocate(sizeof(entry_t), NULL);
+    entry_t *result = allocate(sizeof(entry_t), entry_destructor);
     result->key = key;
     result->value = value;
     result->next = next; 
@@ -139,8 +139,9 @@ void ioopm_hash_table_insert(ioopm_hash_table_t *ht, elem_t key, elem_t value) /
         }
     }
 
-    previous_entry->next = entry_create(key, value, next);
-    retain(previous_entry->next);
+    previous_entry->next = entry_create(key, value, next); // +1 (1)
+    release(next); // -1 (0)
+    retain(previous_entry->next); // +1 (1)
     ht->size += 1;
 }
 

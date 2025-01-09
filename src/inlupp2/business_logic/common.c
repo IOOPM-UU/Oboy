@@ -71,7 +71,7 @@ void cart_item_destructor(obj *cart_item) {
 
 void destroy_cart_item(cart_item_t *cart_item) // TODO FIXME:
 {
-    cart_item_destructor(cart_item);
+    release(cart_item);
     // free(cart_item->name);
     // free(cart_item);
 }

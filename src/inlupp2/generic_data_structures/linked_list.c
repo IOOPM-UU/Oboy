@@ -41,8 +41,6 @@ void linked_list_destructor(obj* object){
     release(((ioopm_list_t *)object)->last);
 }
 
-
-
 bool ioopm_linked_list_is_empty(ioopm_list_t *list)
 {
     return list->size == 0;
@@ -359,7 +357,7 @@ struct iter
 
 void iter_destructor(obj* object){
     if(!object) return;
-    release(((ioopm_list_iterator_t*)object)->current); //TODO: should we release list?
+    release(((ioopm_list_iterator_t*)object)->current);
     release(((ioopm_list_iterator_t*)object)->list);
 }
 
@@ -392,6 +390,8 @@ elem_t ioopm_iterator_next(ioopm_list_iterator_t *iter, bool *success)
     }
     if (ioopm_iterator_has_next(iter))
     {
+        retain(iter->current->next);
+        release(iter->current);
         iter->current = iter->current->next;
         *success = true;
         return iter->current->value;
@@ -472,9 +472,11 @@ void ioopm_iterator_insert(ioopm_list_iterator_t *iter, elem_t element)
 
 void ioopm_iterator_reset(ioopm_list_iterator_t *iter)
 {
+    link_t *old_current = iter->current;
     release(iter->current);
     iter->current = iter->list->first->next;
     retain(iter->current);
+
 }
 
 elem_t ioopm_iterator_current(ioopm_list_iterator_t *iter, bool *success)
@@ -496,4 +498,12 @@ elem_t ioopm_iterator_current(ioopm_list_iterator_t *iter, bool *success)
 void ioopm_iterator_destroy(ioopm_list_iterator_t *iter)
 {
     release(iter);
+}
+
+static helper_free_value(int index, elem_t *value, void *extra) {
+    release(value->p);
+}
+
+void ioopm_free_string_values(ioopm_list_t* list) {
+    ioopm_linked_list_apply_to_all(list, helper_free_value, NULL);
 }
