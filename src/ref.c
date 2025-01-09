@@ -10,7 +10,7 @@ static lib_list_t *schedule_linked_list = NULL;
 static lib_hash_table_t *metadata_ht = NULL;
 static bool release_in_progress = false; 
 static const size_t STANDARD_CASCADE_LIMIT = 100;
-//static size_t CASCADE_LIMIT = STANDARD_CASCADE_LIMIT;
+// static size_t CASCADE_LIMIT = STANDARD_CASCADE_LIMIT;
 static size_t CASCADE_LIMIT = 100;
 
 bool int_equal(lib_elem_t a, lib_elem_t b) {
@@ -22,8 +22,7 @@ static int default_hash_function(lib_elem_t value){
     return value.i;
 } 
 
- 
-void initialize_collector() {
+static void initialize_collector() {
     if(!metadata_ht){
         metadata_ht = lib_hash_table_create(int_equal, NULL, default_hash_function);
     }
@@ -130,7 +129,6 @@ void free_scheduled_tasks(size_t size){
 
 obj *allocate(size_t bytes, function1_t destructor) {
     initialize_collector();
-    // free_scheduled_tasks(bytes); 
     schedule_task_manager(NULL, bytes);
 
     obj *object = calloc(1, bytes);
