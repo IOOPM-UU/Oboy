@@ -10,6 +10,7 @@
 #include "../generic_data_structures/hash_table.h"
 #include "../generic_data_structures/iterator.h"
 #include "../generic_utils/utils.h"
+#include "../../ref.h"
 
 bool pointer_is_null(void *ptr)
 {
@@ -63,8 +64,14 @@ int string_sum_hash(elem_t e)
     return result;
 }
 
-void destroy_cart_item(cart_item_t *cart_item)
+void cart_item_destructor(obj *cart_item) {
+    if (!cart_item) return;
+    release(((cart_item_t *)cart_item)->name);
+}
+
+void destroy_cart_item(cart_item_t *cart_item) // TODO FIXME:
 {
-    free(cart_item->name);
-    free(cart_item);
+    cart_item_destructor(cart_item);
+    // free(cart_item->name);
+    // free(cart_item);
 }

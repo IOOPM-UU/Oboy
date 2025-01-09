@@ -35,7 +35,7 @@ static unsigned int quantity_in_one_cart(cart_t *cart, ioopm_merch_t *merch)
         return 0;
     }
 
-    ioopm_list_iterator_t *iter = ioopm_list_iterator(cart->items);
+    ioopm_list_iterator_t *iter = ioopm_list_iterator(cart->items); // Doesnt need retain since its released later in the func
 
     unsigned int quantity_in_one_cart = 0;
 
@@ -110,11 +110,17 @@ static unsigned int quantity_in_stock(ioopm_shop_t *shop, ioopm_merch_t *merch)
 
 shopping_carts_t *create_shopping_cart()
 {
-    shopping_carts_t *shopping_carts = allocate(sizeof(shopping_carts_t), NULL);
+    shopping_carts_t *shopping_carts = allocate(sizeof(shopping_carts_t), shopping_carts_destructor);
     assert(!pointer_is_null(shopping_carts));
     shopping_carts->cart_index = 0;
     shopping_carts->carts = ioopm_hash_table_create(int_eq, cart_item_eq, NULL);
+    retain(shopping_carts->carts);
     return shopping_carts;
+}
+
+void cart_destructor(obj *cart) {
+    if (!cart) return;
+    release(((cart_t *) cart)->items);
 }
 
 void destroy_cart(cart_t *cart)
@@ -133,8 +139,13 @@ void destroy_cart(cart_t *cart)
     }
 
     ioopm_iterator_destroy(iter);
-    ioopm_linked_list_destroy(cart->items);
+    //ioopm_linked_list_destroy(cart->items); // shouldnt be necessary since cart_destructor releases cart->items
     release(cart);
+}
+
+void shopping_carts_destructor(obj *shopping_carts) {
+    if (!shopping_carts) return;
+    release(((shopping_carts_t *)shopping_carts)->carts);
 }
 
 void destroy_shopping_cart(shopping_carts_t *shopping_carts)
@@ -164,10 +175,11 @@ unsigned int ioopm_shop_create_cart(ioopm_shop_t *shop)
 {
     unsigned int index = shop->shopping_carts->cart_index;
 
-    cart_t *cart = allocate(sizeof(cart_t), NULL);
+    cart_t *cart = allocate(sizeof(cart_t), cart_destructor);
     assert(!pointer_is_null(cart));
 
     cart->items = ioopm_linked_list_create(cart_item_eq);
+    retain(cart->items);
     ioopm_hash_table_insert(shop->shopping_carts->carts, u_elem(index), ptr_elem(cart));
     shop->shopping_carts->cart_index++;
 
@@ -189,10 +201,11 @@ bool ioopm_shop_remove_cart(ioopm_shop_t *shop, unsigned int index)
 
 cart_item_t *create_cart_item(char *name, unsigned int quantity)
 {
-    cart_item_t *cart = allocate(sizeof(cart_item_t), NULL);
+    cart_item_t *cart = allocate(sizeof(cart_item_t), cart_item_destructor);
     assert(!pointer_is_null(cart));
 
     cart->name = rc_strdup(name); //new strdup function that uses allocate()
+    retain(cart->name);
     cart->quantity = quantity;
     return cart;
 }
@@ -242,7 +255,9 @@ bool ioopm_shop_add_to_cart(ioopm_shop_t *shop, unsigned int cart_index, char *m
     }
     else
     {
-        ioopm_linked_list_append(cart->items, ptr_elem(create_cart_item(merch_name, amount)));
+        cart_item_t *result = create_cart_item(merch_name, amount);
+        retain(result);
+        ioopm_linked_list_append(cart->items, ptr_elem(result));
     }
     return true;
 }

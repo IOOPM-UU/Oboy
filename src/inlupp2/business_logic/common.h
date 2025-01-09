@@ -141,6 +141,8 @@ bool shelf_eq(elem_t e1, elem_t e2);
 /// @return int, integer
 int string_sum_hash(elem_t e);
 
+void cart_item_destructor(obj *cart_item);
+
 /// @brief Frees all the memory attached to a cart item
 /// @param cart_item the cart_item to be destroyed
 void destroy_cart_item(cart_item_t *cart_item);
