@@ -481,7 +481,7 @@ void ioopm_iterator_reset(ioopm_list_iterator_t *iter)
 }
 
 elem_t ioopm_iterator_current(ioopm_list_iterator_t *iter, bool *success)
-{ // Should be retained outside this func, when used
+{ // Should be retained outside this func, when used // probably doesnt always need to be retained since the value might not be allocated
     if (iter->current == NULL)
     {
         *success = false;
