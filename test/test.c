@@ -47,8 +47,6 @@ int clean_suite(void) {
     return 0;
 }
 
-
-
 // Unit tests
 
 void test_allocate_and_deallocate(void)
@@ -146,35 +144,6 @@ void metadata_destructor(void *ptr) {
     free(ptr);
 }
 
-/* void test_free_scheduled_tasks_over_cascade(){
-    set_cascade_limit(3);
-    lib_list_t *list = get_schedule_linked_list();
-    obj *object = malloc(sizeof(obj));
-    add_to_schedule(object);
-    add_to_schedule(object);
-    add_to_schedule(object);
-    add_to_schedule(object);
-    CU_ASSERT_EQUAL(lib_linked_list_size(list), 4);
-    free_scheduled_tasks(4*sizeof(object));
-    CU_ASSERT_EQUAL(lib_linked_list_size(list), 0);
-}
-
-void test_free_scheduled_tasks_until_size(){
-
-    set_cascade_limit(100);
-    lib_list_t *list = get_schedule_linked_list();
-    obj *object = malloc(sizeof(obj));
-    add_to_schedule(object);
-    add_to_schedule(object);
-    add_to_schedule(object);
-    CU_ASSERT_EQUAL(lib_linked_list_size(list), 3);
-    free_scheduled_tasks(2*sizeof(object));
-  
-    CU_ASSERT_EQUAL(lib_linked_list_size(list), 1);
-    //free(object);
-}
-
- */ 
 
 void test_default_destructor() {
     set_cascade_limit(10);
@@ -494,6 +463,30 @@ void test_array_struct_default_destructor() {
     release(arr2);
 }
 
+void test_cleanup(){
+    
+    set_cascade_limit(1);
+
+    struct cell *c = allocate(sizeof(struct cell), cell_destructor);
+    CU_ASSERT_TRUE(rc(c) == 0);
+    retain(c);
+    CU_ASSERT_TRUE(rc(c) == 1);
+
+    c->cell = allocate(sizeof(struct cell), cell_destructor);
+    
+    struct cell *c2 = c->cell;
+
+    c->cell->cell = allocate(sizeof(struct cell), cell_destructor);
+    release(c);
+
+    CU_ASSERT(lib_linked_list_size(get_schedule_linked_list()) == 2);
+
+    cleanup();
+
+    CU_ASSERT(lib_linked_list_size(get_schedule_linked_list()) == 0); 
+}
+
+
 int main() {
     // First we try to set up CUnit, and exit if we fail
     if (CU_initialize_registry() != CUE_SUCCESS)
@@ -531,6 +524,7 @@ int main() {
         (CU_add_test(unit_test_suite1, "Create and destroy a weird array with a given destructor", test_array_struct_given_destructor) == NULL) ||
         (CU_add_test(unit_test_suite1, "Create and destroy a weird array with the default destructor", test_array_struct_default_destructor) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate links and release", test_allocate_and_deallocate_links) == NULL) ||
+        (CU_add_test(unit_test_suite1, "Cleanup", test_cleanup) == NULL) ||
         0
     ) 
     {
