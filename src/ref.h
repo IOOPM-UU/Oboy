@@ -34,6 +34,8 @@ void retain(obj *);
 void release(obj *);
 uint8_t rc(obj *);
 obj *allocate(size_t bytes, function1_t destructor);
+void destructor_loop(size_t object_size, obj *object);
+void task_manager_loop(size_t size);
 obj *allocate_array(size_t elements, size_t elem_size, function1_t destructor);
 metadata_t *metadata_generate(function1_t destructor, size_t size);
 void deallocate(obj *);
