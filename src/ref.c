@@ -6,6 +6,7 @@
 #include <limits.h>
 #include <assert.h>
 #include <string.h>
+
 static lib_list_t *schedule_linked_list = NULL;
 static lib_hash_table_t *metadata_ht = NULL;
 static bool release_in_progress = false; 
@@ -120,8 +121,6 @@ void default_destructor(obj* object){
         }
     }
 }
-
- 
 
 obj *allocate(size_t bytes, function1_t destructor) {
     initialize_collector();
@@ -239,26 +238,6 @@ void schedule_task_manager(obj *object, size_t size) {
 void cleanup() {
     uintptr_t key_as_int;
     schedule_task_manager(NULL, SIZE_MAX); 
-
-    while (lib_linked_list_size(get_schedule_linked_list()) > 0) {
-        bool successful = false;
-        obj *object = lib_linked_list_get(get_schedule_linked_list(), 0, &successful).p;
-
-        if (successful && object) {
-            key_as_int = (uintptr_t)object;
-            lib_option_t option = lib_hash_table_lookup(get_metadata_ht(), lib_int_elem(key_as_int));
-
-            if (option.success){
-                metadata_t *metadata = (metadata_t *)(option.value.p);  
-                if (metadata->rc == 0){
-                    release_destructor(object);
-                    lib_hash_table_remove(get_metadata_ht(), lib_int_elem(key_as_int));
-                }
-            }
-             
-        }
-        lib_linked_list_remove(get_schedule_linked_list(), 0, &successful);
-    }
 }
 
 void free_all() {
