@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "linked_list.h"
+#include "../../ref.h"
 
 #define Success(k, v) \
     (ioopm_option_t) { .success = true, .key = k, .value = v }
@@ -39,13 +40,18 @@ static int default_hash_function(elem_t value)
     return value.i;
 }
 
+void hash_table_destructor(obj* object) {
+    if(!object) return;
 
+    for(int i = 0; i < No_Buckets; i++) {
+        release(((ioopm_hash_table_t *) object)->buckets[i].next);
+    }
+}
 
 ioopm_hash_table_t *ioopm_hash_table_create(ioopm_eq_function *key_eq_func, ioopm_eq_function *value_eq_func, ioopm_hash_function *hash_function)
 {
-    // Allocate space for a ioopm_hast_table_t = 17 pointers to entry_ts, which are set to NULL due to CALLOC
-    //ioopm_hash_table_t *result = allocate(sizeof(ioopm_hash_table_t), );
-    ioopm_hash_table_t *result = calloc(1, sizeof(ioopm_hash_table_t));
+    // Allocate space for a ioopm_allocatete_t = 17 pointers to entry,NULL_ts, which are set to NULL due to CALLOC
+    ioopm_hash_table_t *result = allocate(sizeof(ioopm_hash_table_t), hash_table_destructor);
     result->size = 0;
     result->key_eq_func = key_eq_func;
     result->value_eq_func = value_eq_func;
@@ -62,18 +68,21 @@ ioopm_hash_table_t *ioopm_hash_table_create(ioopm_eq_function *key_eq_func, ioop
 
 static void entry_destroy(entry_t *e)
 {
-    free(e);
+    release(e);
 }
 
 void ioopm_hash_table_destroy(ioopm_hash_table_t *ht)
 {
-    ioopm_hash_table_clear(ht);
-    free(ht);
+    release(ht);
 }
 
 static entry_t *find_previous_entry_for_key(ioopm_hash_table_t *ht, entry_t *e, elem_t key)
 {
-    if (e->next == NULL || ht->key_eq_func(e->next->key, key))
+    if (e->next == NULL)
+    {
+        return e;
+    }
+    else if (ht->key_eq_func(e->next->key, key))
     {
         return e;
     }
@@ -98,12 +107,18 @@ static entry_t *find_previous_entry_for_key(ioopm_hash_table_t *ht, entry_t *e, 
 //     return cursor;
 // }
 
+void entry_destructor(obj* object) {
+    if(!object) return;
+    release(((entry_t *) object)->next);
+}
+
 static entry_t *entry_create(elem_t key, elem_t value, entry_t *next)
 {
-    entry_t *result = calloc(1, sizeof(entry_t));
+    entry_t *result = allocate(sizeof(entry_t), entry_destructor);
     result->key = key;
     result->value = value;
-    result->next = next;
+    result->next = next; 
+    retain(result->next);
     return result;
 }
 
@@ -124,7 +139,9 @@ void ioopm_hash_table_insert(ioopm_hash_table_t *ht, elem_t key, elem_t value) /
         }
     }
 
-    previous_entry->next = entry_create(key, value, next);
+    previous_entry->next = entry_create(key, value, next); // +1 (1)
+    release(next); // -1 (0)
+    retain(previous_entry->next); // +1 (1)
     ht->size += 1;
 }
 
@@ -156,8 +173,8 @@ ioopm_option_t ioopm_hash_table_remove(ioopm_hash_table_t *ht, elem_t key)
     if (to_be_removed != NULL)
     {
         previous_entry->next = to_be_removed->next;
-
         entry_t tmp = *to_be_removed;
+        retain(to_be_removed->next);
 
         entry_destroy(to_be_removed);
 
@@ -190,14 +207,18 @@ void ioopm_hash_table_clear(ioopm_hash_table_t *ht)
 
     for (int i = 0; i < No_Buckets; i++) // Loopar över alla buckets
     {
-        entry_t *first_entry = ht->buckets[i].next; // Första entryn i bucketen är en dummy entry, så den faktiskt första ges av detta uttryck
-        entry_t *current_entry = first_entry;
-        while (current_entry != NULL) // Vi måste ta oss till den sista entryn innan vi börjar ta bort, för att undvika danling pointers och memory leaks
-        {
-            entry_t *next_entry = current_entry->next;
-            ioopm_hash_table_remove(ht, current_entry->key);
-            current_entry = next_entry;
-        }
+        // entry_t *first_entry = ht->buckets[i].next; // Första entryn i bucketen är en dummy entry, så den faktiskt första ges av detta uttryck
+        // entry_t *current_entry = first_entry;
+        // while (current_entry != NULL) // Vi måste ta oss till den sista entryn innan vi börjar ta bort, för att undvika danling pointers och memory leaks
+        // {
+        //     entry_t *next_entry = current_entry->next;
+        //     ioopm_hash_table_remove(ht, current_entry->key);
+        //     current_entry = next_entry;
+        // }
+        entry_t *first_entry = ht->buckets[i].next;
+        release(first_entry);
+        ht->buckets[i].next = NULL;
+
     }
     ht->size = 0;
 }

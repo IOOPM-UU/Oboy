@@ -3,14 +3,12 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include "inlupp2_DONOTTOUCH/generic_data_structures/hash_table.h"
-#include "inlupp2_DONOTTOUCH/generic_data_structures/linked_list.h"
-#include "inlupp2_DONOTTOUCH/business_logic/common.h"
+#include "lib/lib_hash_table.h"
+#include "lib/lib_linked_list.h"
+#include "lib/lib_common.h"
 
-// Retrieves the metadata for the object, which is stored just before the object on the heap
-//#define GET_METADATA(obj) ((metadata_t *)((char *)(obj) - sizeof(metadata_t)))
 
-//
+// Void pointer used for allocation
 typedef void obj;
 
 // A destructor function pointer
@@ -110,21 +108,16 @@ void shutdown();
  * 
  * @return A pointer to the metadata hash table.
  */
-ioopm_hash_table_t *get_metadata_ht();
+lib_hash_table_t *get_metadata_ht();
 
 /**
  * @brief Retrieves the global schedule linked list.
  * 
  * @return A pointer to the schedule linked list.
  */
-ioopm_list_t *get_schedule_linked_list();
+lib_list_t *get_schedule_linked_list();
 
-/**
- * @brief Frees a specified number of scheduled tasks, up to the cascade limit.
- * 
- * @param size The total size of objects to free.
- */
-void free_scheduled_tasks(size_t size);
+
 
 /**
  * @brief Adds an object to the schedule for later deallocation.
@@ -137,3 +130,18 @@ void add_to_schedule(obj *object);
  * @brief Frees all resources and clears all metadata and scheduled tasks.
  */
 void free_all();
+
+/**
+ * @brief Creates a new reference-counted copy of the input string.
+ * 
+ * @param src A pointer to the source string to duplicate.
+ * @return A pointer to the duplicated string.
+ */
+char *rc_strdup(char *src);
+
+/**
+ * @brief A dummy destructor for strings.
+ * 
+ * @param o A pointer to the object.
+ */
+void str_dummy_destructor(obj *o);

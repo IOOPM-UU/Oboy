@@ -1,0 +1,18 @@
+A
+HammarbyTröja
+StickadTröja
+10
+E
+HammarbyTröja
+DjurgårdsTröja
+Äcklig tröja
+20
+l
+E
+DjurgårdsTröja
+HammarbyTröja
+TvättadTröja
+100
+l
+Q
+Y

@@ -9,6 +9,7 @@
 #include "../generic_data_structures/hash_table.h"
 #include "../generic_data_structures/iterator.h"
 #include "../generic_utils/utils.h"
+#include "../../ref.h"
 
 #define ValidOptions "AaLlDdEeSsPpCcRr+-=OoQq"
 
@@ -69,7 +70,7 @@ bool vaild_option(char *input)
 
 char *ask_question_menu_option(char *question)
 {
-    return ask_question(question, vaild_option, (convert_func *)strdup).string_value;
+    return ask_question(question, vaild_option, (convert_func *)rc_strdup).string_value;
 }
 
 void process_input(char *input, ioopm_shop_t *shop, bool *is_running)
@@ -134,19 +135,22 @@ int main(void)
     bool is_running = true;
 
     ioopm_shop_t *shop = ioopm_create_shop();
+    retain(shop);
 
     while (is_running)
     {
         char *input = ask_question_menu_option(menu_print);
+        retain(input);
         printf("\n");
 
         process_input(input, shop, &is_running);
         printf("\n");
 
-        free(input);
+        release(input);
     }
 
     ioopm_shop_destroy(shop);
+    shutdown();
     return 0;
 }
 
@@ -154,7 +158,9 @@ void add_merchendice(ioopm_shop_t *shop)
 {
     printf("Add merchandise\n");
     char *name = ask_question_string("Name: ");
+    retain(name);
     char *desc = ask_question_string("Description: ");
+    retain(desc);
     int price = ask_question_int("Price: ");
 
     if (ioopm_shop_add_merch(shop, name, desc, price))
@@ -166,14 +172,16 @@ void add_merchendice(ioopm_shop_t *shop)
         printf("\nFailed to add merchendice.\n");
     }
 
-    free(name);
-    free(desc);
+    release(name);
+    release(desc);
 }
 
 void list_merchendice(ioopm_shop_t *shop)
 {
     ioopm_list_t *merch = ioopm_shop_get_merch(shop);
+    retain(merch);
     ioopm_list_iterator_t *iter = ioopm_list_iterator(merch);
+    retain(iter);
 
     if (ioopm_linked_list_size(merch) == 0)
     {
@@ -197,31 +205,34 @@ void list_merchendice(ioopm_shop_t *shop)
 
         if (counter == 20 && ioopm_iterator_has_next(iter))
         {
-            char *input = ask_question("\nPress N to stop printing: ", everything_allowed, (convert_func *)strdup).string_value;
+            char *input = ask_question("\nPress N to stop printing: ", everything_allowed, (convert_func *)rc_strdup).string_value;
+            retain(input);
             if ((strlen(input) == 1) && char_eq_ignore_case(input, "n"))
             {
-                free(input);
+                release(input);
                 break;
             }
-            free(input);
+            release(input);
             counter = 0;
         }
         ioopm_iterator_next(iter, &success);
     }
 
-    ioopm_linked_list_destroy(merch);
     ioopm_iterator_destroy(iter);
+    ioopm_free_string_values(merch);
+    ioopm_linked_list_destroy(merch);
 }
 
 void remove_merchandise(ioopm_shop_t *shop)
 {
     printf("Remove merchandise\n");
     char *name = ask_question_string("Name: ");
+    retain(name);
 
     if (!user_confirmation())
     {
         printf("\nRemove aborted.\n");
-        free(name);
+        release(name);
         return;
     }
 
@@ -233,23 +244,26 @@ void remove_merchandise(ioopm_shop_t *shop)
     {
         printf("\nFailed to remove merchandise.\n");
     }
-    free(name);
+    release(name);
 }
 
 void edit_merchandise(ioopm_shop_t *shop)
 {
     printf("Edit merchandise\n");
     char *old_name = ask_question_string("Merchandise to edit: ");
+    retain(old_name);
     char *new_name = ask_question_string("New name: ");
+    retain(new_name);
     char *desc = ask_question_string("New description: ");
+    retain(desc);
     int price = ask_question_int("New price: ");
 
     if (!user_confirmation())
     {
         printf("\nEdit aborted.\n");
-        free(old_name);
-        free(new_name);
-        free(desc);
+        release(old_name);
+        release(new_name);
+        release(desc);
         return;
     }
 
@@ -262,22 +276,24 @@ void edit_merchandise(ioopm_shop_t *shop)
         printf("\nFailed to edit merchandise.\n");
     }
 
-    free(old_name);
-    free(new_name);
-    free(desc);
+    release(old_name);
+    release(new_name);
+    release(desc);
 }
 
 void show_stock(ioopm_shop_t *shop)
 {
     printf("Show stock\n");
     char *name = ask_question_string("Name: ");
+    retain(name);
 
     ioopm_list_t *stock = ioopm_shop_get_stock(shop, name);
+    retain(stock);
 
     if (stock == NULL)
     {
         printf("\nCould not find merch.\n");
-        free(name);
+        release(name);
         return;
     }
 
@@ -291,6 +307,7 @@ void show_stock(ioopm_shop_t *shop)
     }
 
     ioopm_list_iterator_t *iter = ioopm_list_iterator(stock);
+    retain(iter);
 
     bool success = true;
     while (success)
@@ -305,7 +322,7 @@ void show_stock(ioopm_shop_t *shop)
         ioopm_iterator_next(iter, &success);
     }
 
-    free(name);
+    release(name);
     ioopm_linked_list_destroy(stock);
     ioopm_iterator_destroy(iter);
 }
@@ -329,6 +346,7 @@ void replenish_stock(ioopm_shop_t *shop)
 {
     printf("Replenish stock\n");
     char *shelf_name = ask_question_string("Storage ID: ");
+    retain(shelf_name);
 
     if (!is_shelf(shelf_name))
     {
@@ -337,6 +355,7 @@ void replenish_stock(ioopm_shop_t *shop)
     }
 
     char *merch_name = ask_question_string("Merchandise name: ");
+    retain(merch_name);
     int quantity = ask_question_int("Quantity: ");
 
     if (quantity < 1)
@@ -352,8 +371,8 @@ void replenish_stock(ioopm_shop_t *shop)
         printf("\nFailed to replenish stock.\n");
     }
 
-    free(shelf_name);
-    free(merch_name);
+    release(shelf_name);
+    release(merch_name);
 }
 
 void create_cart(ioopm_shop_t *shop)
@@ -390,6 +409,7 @@ void add_to_cart(ioopm_shop_t *shop)
     printf("Add to cart\n");
     int cart_id = ask_question_int("Cart ID: ");
     char *merch_name = ask_question_string("Merchandise name: ");
+    retain(merch_name);
     int quantity = ask_question_int("Quantity: ");
 
     if (quantity < 1)
@@ -405,7 +425,7 @@ void add_to_cart(ioopm_shop_t *shop)
         printf("\nFailed to add merchandise to cart.\n");
     }
 
-    free(merch_name);
+    release(merch_name);
 }
 
 void remove_from_cart(ioopm_shop_t *shop)
@@ -413,6 +433,7 @@ void remove_from_cart(ioopm_shop_t *shop)
     printf("Remove from cart\n");
     int cart_id = ask_question_int("Cart ID: ");
     char *merch_name = ask_question_string("Merchandise name: ");
+    retain(merch_name);
     int quantity = ask_question_int("Quantity: ");
 
     if (ioopm_shop_remove_from_cart(shop, cart_id, merch_name, quantity))
@@ -424,7 +445,7 @@ void remove_from_cart(ioopm_shop_t *shop)
         printf("\nFailed to remove merchandise from cart.\n");
     }
 
-    free(merch_name);
+    release(merch_name);
 }
 
 void calculate_cost(ioopm_shop_t *shop)
@@ -467,12 +488,13 @@ void quit_shop(bool *is_running)
 
 bool user_confirmation()
 {
-    char *confirmation = ask_question("\nAre you sure? (Y/y): ", everything_allowed, (convert_func *)strdup).string_value;
+    char *confirmation = ask_question("\nAre you sure? (Y/y): ", everything_allowed, (convert_func *)rc_strdup).string_value;
+    retain(confirmation);
     if (char_eq_ignore_case(confirmation, "y"))
     {
-        free(confirmation);
+        release(confirmation);
         return true;
     }
-    free(confirmation);
+    release(confirmation);
     return false;
 }

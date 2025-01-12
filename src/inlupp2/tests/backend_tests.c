@@ -7,7 +7,7 @@
 #include "../generic_data_structures/linked_list.h"
 #include "../generic_data_structures/hash_table.h"
 #include "../generic_data_structures/iterator.h"
-#include "../generic_utils/utils.h"
+#include "../../ref.h"
 
 typedef struct merch ioopm_merch_t;
 typedef struct shelf ioopm_shelf_t;
@@ -66,8 +66,7 @@ int init_suite(void)
 
 int clean_suite(void)
 {
-    // Change this function if you want to do something *after* you
-    // run a test suite
+    shutdown();
     return 0;
 }
 
@@ -82,6 +81,7 @@ void test_create_shop()
 void test_add_merch()
 {
     ioopm_shop_t *shop = ioopm_create_shop();
+    retain(shop);
     char *name = "apple";
     char *description = "red";
     unsigned int price = 3;
@@ -92,6 +92,9 @@ void test_add_merch()
 
     CU_ASSERT_TRUE(ioopm_linked_list_contains(merch_list, ptr_elem(name)));
 
+    //ioopm_linked_list_apply_to_all()
+
+    ioopm_free_string_values(merch_list);
     ioopm_linked_list_destroy(merch_list);
     ioopm_shop_destroy(shop);
 }
@@ -138,6 +141,7 @@ void test_remove_merch()
 void test_edit_merch_name()
 {
     ioopm_shop_t *shop = ioopm_create_shop();
+    retain(shop);
     unsigned int x = 3;
     ioopm_shop_add_merch(shop, "car", "vroom", x);
     bool success = ioopm_shop_edit_merchandise(shop, "car", "honda", "car", x);
@@ -160,12 +164,14 @@ void test_edit_merch_name()
     }
 
     ioopm_shop_destroy(shop);
+    ioopm_free_string_values(merch_names);
     ioopm_linked_list_destroy(merch_names);
 }
 
 void test_edit_merch_and_update_cart_item_name()
 {
     ioopm_shop_t *shop = ioopm_create_shop();
+    retain(shop);
     unsigned int x = 3;
     unsigned int quantity = 5;
     char *old_name = "car";
@@ -175,7 +181,7 @@ void test_edit_merch_and_update_cart_item_name()
     bool insert_stock = ioopm_shop_insert_stock(shop, old_name, "A35", quantity);
     CU_ASSERT_TRUE(insert_stock);
 
-    unsigned int cart_index = ioopm_shop_create_cart(shop);
+    unsigned int cart_index = ioopm_shop_create_cart(shop); //cart is inserted in shop as value, +1 retain på cart
     bool add_to_cart = ioopm_shop_add_to_cart(shop, cart_index, old_name, 1);
     CU_ASSERT_TRUE(add_to_cart);
 
@@ -515,6 +521,7 @@ void test_remove_from_non_existent_cart()
 void test_remove_cart_item_totally_from_existing_item_cart()
 {
     ioopm_shop_t *shop = ioopm_create_shop();
+    retain(shop);
     unsigned int cart_index = ioopm_shop_create_cart(shop);
     char *merch_name = "car";
     char *shelf_name = "A35";
@@ -642,9 +649,8 @@ int main()
     // the test in question. If you want to add another test, just
     // copy a line below and change the information
     if (
-
         (CU_add_test(my_test_suite, "test process word insert new", test_create_shop) == NULL) ||
-        (CU_add_test(my_test_suite, "test add merch", test_add_merch) == NULL) ||
+        (CU_add_test(my_test_suite, "test add merch", test_add_merch) == NULL) || // TODO FIXME:
         (CU_add_test(my_test_suite, "test add already existing merch", test_add_already_existing_merch) == NULL) ||
         (CU_add_test(my_test_suite, "test edit a non existing merch", test_edit_nonexisting_merch) == NULL) ||
         (CU_add_test(my_test_suite, "test remove merch", test_remove_merch) == NULL) ||
@@ -667,7 +673,6 @@ int main()
         (CU_add_test(my_test_suite, "test calculate cost non existing cart", test_calculate_cost_non_existing_cart) == NULL) ||
         (CU_add_test(my_test_suite, "test calculate cost multiple items cart", test_calculate_cost_multiple_items_cart) == NULL) ||
         (CU_add_test(my_test_suite, "test calculate cost single item cart", test_calculate_cost_single_item_cart) == NULL) ||
-
         0)
     {
         // If adding any of the tests fails, we tear down CUnit and exit

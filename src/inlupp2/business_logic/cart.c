@@ -10,6 +10,7 @@
 #include "../generic_data_structures/hash_table.h"
 #include "../generic_data_structures/iterator.h"
 #include "../generic_utils/utils.h"
+#include "../../ref.h"
 
 #define Successful(o) (o.success == true)
 #define Unsuccessful(o) (o.success == false)
@@ -34,7 +35,7 @@ static unsigned int quantity_in_one_cart(cart_t *cart, ioopm_merch_t *merch)
         return 0;
     }
 
-    ioopm_list_iterator_t *iter = ioopm_list_iterator(cart->items);
+    ioopm_list_iterator_t *iter = ioopm_list_iterator(cart->items); // Doesnt need retain since its released later in the func
 
     unsigned int quantity_in_one_cart = 0;
 
@@ -109,11 +110,17 @@ static unsigned int quantity_in_stock(ioopm_shop_t *shop, ioopm_merch_t *merch)
 
 shopping_carts_t *create_shopping_cart()
 {
-    shopping_carts_t *shopping_carts = calloc(1, sizeof(shopping_carts_t));
+    shopping_carts_t *shopping_carts = allocate(sizeof(shopping_carts_t), shopping_carts_destructor);
     assert(!pointer_is_null(shopping_carts));
     shopping_carts->cart_index = 0;
     shopping_carts->carts = ioopm_hash_table_create(int_eq, cart_item_eq, NULL);
+    retain(shopping_carts->carts);
     return shopping_carts;
+}
+
+void cart_destructor(obj *cart) {
+    if (!cart) return;
+    release(((cart_t *) cart)->items);
 }
 
 void destroy_cart(cart_t *cart)
@@ -132,16 +139,22 @@ void destroy_cart(cart_t *cart)
     }
 
     ioopm_iterator_destroy(iter);
-    ioopm_linked_list_destroy(cart->items);
-    free(cart);
+    //ioopm_linked_list_destroy(cart->items); // shouldnt be necessary since cart_destructor releases cart->items
+    release(cart);
+}
+
+void shopping_carts_destructor(obj *shopping_carts) {
+    if (!shopping_carts) return;
+    release(((shopping_carts_t *)shopping_carts)->carts);
 }
 
 void destroy_shopping_cart(shopping_carts_t *shopping_carts)
 {
-    ioopm_list_t *carts = ioopm_hash_table_values(shopping_carts->carts);
+    ioopm_list_t *carts = ioopm_hash_table_values(shopping_carts->carts); //denna måste vi tömma! FIXME: TODO:
+    retain(carts);
     ioopm_list_iterator_t *iter = ioopm_list_iterator(carts);
+    retain(iter);
 
-    ioopm_hash_table_destroy(shopping_carts->carts);
 
     bool success = true;
     while (success)
@@ -154,20 +167,26 @@ void destroy_shopping_cart(shopping_carts_t *shopping_carts)
         ioopm_iterator_next(iter, &success);
     }
 
-    ioopm_linked_list_destroy(carts);
+    //ioopm_free_string_values(carts);
+
+    ioopm_hash_table_destroy(shopping_carts->carts);
+
     ioopm_iterator_destroy(iter);
-    free(shopping_carts);
+    ioopm_linked_list_destroy(carts);
+    release(shopping_carts);
 }
 
 unsigned int ioopm_shop_create_cart(ioopm_shop_t *shop)
 {
     unsigned int index = shop->shopping_carts->cart_index;
 
-    cart_t *cart = calloc(1, sizeof(cart_t));
+    cart_t *cart = allocate(sizeof(cart_t), cart_destructor);
     assert(!pointer_is_null(cart));
 
     cart->items = ioopm_linked_list_create(cart_item_eq);
+    retain(cart->items);
     ioopm_hash_table_insert(shop->shopping_carts->carts, u_elem(index), ptr_elem(cart));
+    retain(cart); //cart needs to be retain here since hashtable doesn't retain values
     shop->shopping_carts->cart_index++;
 
     return index;
@@ -188,10 +207,11 @@ bool ioopm_shop_remove_cart(ioopm_shop_t *shop, unsigned int index)
 
 cart_item_t *create_cart_item(char *name, unsigned int quantity)
 {
-    cart_item_t *cart = calloc(1, sizeof(cart_item_t));
+    cart_item_t *cart = allocate(sizeof(cart_item_t), cart_item_destructor);
     assert(!pointer_is_null(cart));
 
-    cart->name = strdup(name);
+    cart->name = rc_strdup(name); //new strdup function that uses allocate()
+    retain(cart->name);
     cart->quantity = quantity;
     return cart;
 }
@@ -241,7 +261,9 @@ bool ioopm_shop_add_to_cart(ioopm_shop_t *shop, unsigned int cart_index, char *m
     }
     else
     {
-        ioopm_linked_list_append(cart->items, ptr_elem(create_cart_item(merch_name, amount)));
+        cart_item_t *result = create_cart_item(merch_name, amount);
+        retain(result);
+        ioopm_linked_list_append(cart->items, ptr_elem(result));
     }
     return true;
 }
@@ -310,7 +332,7 @@ bool ioopm_shop_remove_from_cart(ioopm_shop_t *shop, unsigned int cart_index, ch
 
     if ((item->quantity - amount) <= 0)
     {
-        remove_item_from_cart(cart, item);
+        remove_item_from_cart(cart, item); // -1 (-1)
         return true;
     }
 
@@ -366,13 +388,10 @@ void destroy_shelf_in_locs_ht(ioopm_shop_t *shop, ioopm_shelf_t *shelf)
 {
     ioopm_option_t shelf_option = ioopm_hash_table_remove(shop->locs_ht, ptr_elem(shelf->name));
     assert(Successful(shelf_option));
-    free(shelf_option.key.p);
-    free(shelf_option.value.p);
+    release(shelf_option.key.p);
+    release(shelf_option.value.p); // TODO FIXME:
 }
 
-/// @brief
-/// @param merch
-/// @return true if merch successfully decreased, otherwise false
 void decrease_merch(ioopm_shop_t *shop, ioopm_merch_t *merch, unsigned int amount)
 {
     ioopm_list_t *locs = merch->locs;
@@ -390,8 +409,8 @@ void decrease_merch(ioopm_shop_t *shop, ioopm_merch_t *merch, unsigned int amoun
             if (quantity_left_in_shelf <= 0)
             {
                 destroy_shelf_in_locs_ht(shop, shelf);
-                free(shelf->name);
-                free(shelf);
+                // release(shelf->name); // handled by shelfs destructor
+                // release(shelf); // handled by destroy_shelf...
                 ioopm_linked_list_remove(locs, i, &success);
                 i--;
                 amount -= shelf_quantity;

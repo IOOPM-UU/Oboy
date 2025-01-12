@@ -8,6 +8,7 @@
 #include "../generic_data_structures/hash_table.h"
 #include "../generic_data_structures/iterator.h"
 #include "../generic_utils/utils.h"
+#include "../../ref.h"
 
 
 /**
@@ -142,3 +143,6 @@ char *ioopm_shop_get_shelf_name(ioopm_shelf_t *shelf);
 /// @param shelf the shelf struct
 /// @return unsigned int, the quantity of a merch on the shelf
 unsigned int ioopm_shop_get_shelf_quantity(ioopm_shelf_t *shelf);
+
+void cart_destructor(obj *cart);
+void shopping_carts_destructor(obj *shopping_carts);

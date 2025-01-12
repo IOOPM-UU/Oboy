@@ -1,6 +1,7 @@
 #pragma once
 #include <stdbool.h>
 
+
 /// Compares two elements and returns true if they are equal
 typedef union elem elem_t;
 typedef bool ioopm_eq_function(elem_t a, elem_t b);
