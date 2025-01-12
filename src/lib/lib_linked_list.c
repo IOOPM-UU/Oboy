@@ -112,7 +112,7 @@ void lib_linked_list_prepend(lib_list_t *list, lib_elem_t value)
     list->size++;
 }
 
-void lib_linked_list_insert(lib_list_t *list, int index, lib_elem_t value)
+void lib_linked_list_insert(lib_list_t *list, size_t index, lib_elem_t value)
 {
     if (index >= list->size)
     {
@@ -127,7 +127,7 @@ void lib_linked_list_insert(lib_list_t *list, int index, lib_elem_t value)
     }
 
    lib_link_t *current = list->first;
-    for (int i = 0; i < index && current->next != NULL; i++)
+    for (size_t i = 0; i < index && current->next != NULL; i++)
     {
         current = current->next;
     }
@@ -144,9 +144,9 @@ void lib_linked_list_insert(lib_list_t *list, int index, lib_elem_t value)
     list->size++;
 }
 
-lib_elem_t lib_linked_list_remove(lib_list_t *list, int index, bool *success)
+lib_elem_t lib_linked_list_remove(lib_list_t *list, size_t index, bool *success)
 {
-    if (index < 0 || index >= list->size)
+    if (index >= list->size)
     {
         *success = false;
         return null_elem;
@@ -170,7 +170,7 @@ lib_elem_t lib_linked_list_remove(lib_list_t *list, int index, bool *success)
         return value_removed;
     }
    lib_link_t *current_link = dummy;
-    for (int i = 0; i < index; i++)
+    for (size_t i = 0; i < index; i++)
     {
         current_link = current_link->next;
     }
@@ -190,9 +190,9 @@ lib_elem_t lib_linked_list_remove(lib_list_t *list, int index, bool *success)
     return value_removed;
 }
 
-lib_elem_t lib_linked_list_get(lib_list_t *list, int index, bool *success)
+lib_elem_t lib_linked_list_get(lib_list_t *list, size_t index, bool *success)
 {
-    if (index < 0 || index >= list->size)
+    if (index >= list->size)
     {
         *success = false;
         return null_elem;
@@ -200,7 +200,7 @@ lib_elem_t lib_linked_list_get(lib_list_t *list, int index, bool *success)
 
    lib_link_t *current_link = list->first->next;
 
-    for (int i = 0; i < index; i++)
+    for (size_t i = 0; i < index; i++)
     {
         current_link = current_link->next;
     }
@@ -235,7 +235,7 @@ bool lib_linked_list_any(lib_list_t *list, lib_int_predicate *prop, void *extra)
 {
    lib_link_t *current_entry = list->first->next;
 
-    for (int i = 0; i < list->size; i++)
+    for (size_t i = 0; i < list->size; i++)
     {
         if (prop(i, current_entry->value, extra))
         {

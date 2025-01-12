@@ -117,20 +117,6 @@ lib_hash_table_t *get_metadata_ht();
  */
 lib_list_t *get_schedule_linked_list();
 
-
-
-/**
- * @brief Adds an object to the schedule for later deallocation.
- * 
- * @param object A pointer to the object to schedule.
- */
-void add_to_schedule(obj *object);
-
-/**
- * @brief Frees all resources and clears all metadata and scheduled tasks.
- */
-void free_all();
-
 /**
  * @brief Creates a new reference-counted copy of the input string.
  * 
