@@ -121,11 +121,7 @@ void default_destructor(obj* object){
     }
 }
 
-void free_scheduled_tasks(size_t size){
-    
-    if(!schedule_linked_list || !metadata_ht) return; //is garbage initialized?
-    
-}
+ 
 
 obj *allocate(size_t bytes, function1_t destructor) {
     initialize_collector();
