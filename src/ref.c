@@ -85,7 +85,18 @@ static bool is_valid_pointer(void *object){
     return option.success;
 }
 
-static void default_destructor(obj* object){
+static void destructor_loop(size_t object_size, obj *object) {
+    for (size_t offset = 0; offset + sizeof(void *) <= object_size; offset++)
+    {
+        void **possible_pointer = (void **)((char *)object + offset);
+        if (is_valid_pointer(*possible_pointer))
+        {
+            release(*possible_pointer);
+        }
+    }
+}
+
+static void default_destructor(obj* object) {
     if(!object) return;
     uintptr_t key_as_int = (uintptr_t) object;
     lib_option_t option = lib_hash_table_lookup(get_metadata_ht(), lib_int_elem(key_as_int));
@@ -107,20 +118,7 @@ static void add_to_schedule(obj *object) {
     }
 }
 
-static void destructor_loop(size_t object_size, obj *object)
-{
-    for (size_t offset = 0; offset + sizeof(void *) <= object_size; offset++)
-    {
-        void **possible_pointer = (void **)((char *)object + offset);
-        if (is_valid_pointer(*possible_pointer))
-        {
-            release(*possible_pointer);
-        }
-    }
-}
-
-static void task_manager_loop(size_t size)
-{
+static void task_manager_loop(size_t size) {
     size_t freed_size = 0;
     size_t cascade_amount = 0;
     while ((freed_size < size || cascade_amount < CASCADE_LIMIT) &&
