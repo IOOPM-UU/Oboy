@@ -28,10 +28,6 @@ void cell_destructor(obj *c) //kanske borde returna Size på det vi tagit bort?
     release(((struct cell *) c)->cell);
 }
 
-void dummy_destructor(obj *object) {
-    return;
-}
-
 int init_suite(void) {
     // Change this function if you want to do something *before* you
     // run a test suite
@@ -226,19 +222,19 @@ void test_allocate_strings_then_release(void)
     set_cascade_limit(1);
 
     // 1. Allocate memory blocks
-    char *str1 = allocate_array(6, sizeof(char), dummy_destructor);
+    char *str1 = allocate_array(6, sizeof(char), str_dummy_destructor);
     for (int i = 0; i < 5; i++) {
         str1[i] = 'a';
     }
     CU_ASSERT_PTR_NOT_NULL(str1);
     
-    char *str2 = allocate_array(7, sizeof(char), dummy_destructor);
+    char *str2 = allocate_array(7, sizeof(char), str_dummy_destructor);
     for (int i = 0; i < 6; i++) {
         str2[i] = 'b';
     }
     CU_ASSERT_PTR_NOT_NULL(str2);
     
-    char *str3 = allocate_array(8, sizeof(char), dummy_destructor);
+    char *str3 = allocate_array(8, sizeof(char), str_dummy_destructor);
     for (int i = 0; i < 7; i++) {
         str3[i] = 'c';
     }
@@ -410,10 +406,6 @@ struct weird_array {
     weird_array_t *i6;
     int i7;
 };
-
-void str_non_destructor(obj *object) {
-    return;
-}
 
 void weird_array_destroy(obj *object) {
     weird_array_t *arr = (weird_array_t *) object;
