@@ -4,6 +4,7 @@ extern char *strdup(const char *);
 #include <ctype.h>  //för isdigit
 #include <stdio.h>
 #include "utils.h"
+#include "../../ref.h"
 
 bool not_empty(char *str)
 {
@@ -63,7 +64,7 @@ int read_string(char *buf, int buf_siz)
 
 char *ask_question_string(char *question)
 {
-    return ask_question(question, not_empty, (convert_func *)strdup).string_value;
+    return ask_question(question, not_empty, (convert_func *)rc_strdup).string_value;
 }
 
 int print(char *str)

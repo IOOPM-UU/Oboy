@@ -1,0 +1,14 @@
+A
+HammarbyTröja
+StickadTröja
+10
+P
+A20
+HammarbyTröja
+20
+p
+A20
+HammarbyTröja
+-20
+Q
+Y

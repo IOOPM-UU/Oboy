@@ -66,3 +66,21 @@ old_list:
 old_list_full:
 	gcc -g -Wall -pedantic generic_data_structures/linked_list.c generic_data_structures/linked_list_tests.c ../ref.c ../lib/lib_hash_table.c ../lib/lib_linked_list.c -lcunit -o old_list
 	valgrind -s --leak-check=full --show-leak-kinds=all ./old_list
+
+tests_hidden: frontend
+	@GREEN='\033[1;32m'; \
+	RED='\033[1;31m'; \
+	NC='\033[0m'; \
+	for file in ./user_interface/ui-tests/*.txt; do \
+		base_name=$$(basename $$file .txt); \
+		echo "Running test: $$base_name"; \
+		valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./frontend < $$file > temp_output.txt 2>&1; \
+		if grep -q "ERROR SUMMARY: 0 errors" temp_output.txt; then \
+			echo -e "$$base_name $$GREEN PASSED $$NC"; \
+		else \
+			echo -e "$$base_name $$RED FAILED $$NC"; \
+			cat temp_output.txt; \
+		fi; \
+	done
+	@rm -f temp_output.txt
+

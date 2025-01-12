@@ -521,6 +521,7 @@ void test_remove_from_non_existent_cart()
 void test_remove_cart_item_totally_from_existing_item_cart()
 {
     ioopm_shop_t *shop = ioopm_create_shop();
+    retain(shop);
     unsigned int cart_index = ioopm_shop_create_cart(shop);
     char *merch_name = "car";
     char *shelf_name = "A35";

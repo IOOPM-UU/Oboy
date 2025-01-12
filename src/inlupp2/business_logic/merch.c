@@ -349,13 +349,13 @@ bool ioopm_shop_insert_stock(ioopm_shop_t *shop, char *merch_name, char *shelf_n
         retain(duped_shelf);
         char *duped_merch = rc_strdup(merch_name);
         retain(duped_merch);
-        ioopm_hash_table_insert(shop->locs_ht, ptr_elem(duped_shelf), ptr_elem(duped_merch)); //FIXME: rc_strdup ej tillåtet
+        ioopm_hash_table_insert(shop->locs_ht, ptr_elem(duped_shelf), ptr_elem(duped_merch));
     }
     return true;
 }
 
 ioopm_list_t *ioopm_shop_get_stock(ioopm_shop_t *shop, char *merch_name)
-{
+{ // should be retained outside
     ioopm_option_t option = ioopm_hash_table_lookup(shop->merch_ht, ptr_elem(merch_name));
     if (Unsuccessful(option))
     {

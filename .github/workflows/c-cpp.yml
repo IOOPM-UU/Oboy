@@ -1,0 +1,24 @@
+name: C CI
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: | 
+          sudo apt-get update
+          sudo apt-get install -y build-essential libtool autoconf pkg-config libcunit1 libcunit1-doc libcunit1-dev gcovr lcov valgrind
+
+      - name: Run tests
+        run: |
+          make ref
+          make run
+

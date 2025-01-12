@@ -421,16 +421,17 @@ elem_t ioopm_iterator_remove(ioopm_list_iterator_t *iter, bool *success)
 
     if (to_remove == iter->list->last)
     {
-        release(to_remove);
+        release(to_remove); // -1 (-1) only -1. its the last element so it has an extra pointer and also its next must be null
         iter->list->last = iter->current->previous;
-        retain(iter->list->last);
+        retain(iter->list->last); // +1 (0)
     }
 
     iter->current = iter->current->next;
 
     // free(to_remove);
-    retain(to_remove->next);
-    release(to_remove);
+    retain(to_remove->next); // +1 (1)
+    release(to_remove); // -1 (0)
+    release(to_remove); // -1 (-1) // needs to released twice since it started as both iter-current and a part of the list
     iter->list->size--;
 
     *success = true;
@@ -480,7 +481,7 @@ void ioopm_iterator_reset(ioopm_list_iterator_t *iter)
 }
 
 elem_t ioopm_iterator_current(ioopm_list_iterator_t *iter, bool *success)
-{ // Should be retained outside this func, when used
+{ // Should be retained outside this func, when used // probably doesnt always need to be retained since the value might not be allocated
     if (iter->current == NULL)
     {
         *success = false;
