@@ -467,6 +467,7 @@ void test_cleanup(){
     c->cell = allocate(sizeof(struct cell), cell_destructor);
     
     struct cell *c2 = c->cell;
+    retain(c2);
 
     c->cell->cell = allocate(sizeof(struct cell), cell_destructor);
     release(c);
