@@ -160,7 +160,7 @@ obj *allocate_array(size_t elements, size_t bytes, function1_t destructor) {
     return allocate(total_size, destructor);
 }
 
-void deallocate(obj* object){
+void deallocate(obj* object) {
     if(!object) return; 
     uintptr_t key_as_int = (uintptr_t)object;
     metadata_t *metadata = get_metadata(object);
@@ -230,8 +230,7 @@ void set_cascade_limit(size_t size) {
 void str_dummy_destructor(obj *o) {
 }
 
-char *rc_strdup(char *src)
-{
+char *rc_strdup(char *src) {
     char *str;
     char *p;
     int len = 0;
