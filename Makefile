@@ -7,7 +7,7 @@ C_COVERAGE 	   = gcov -abcfu --coverage
 R_COVERAGE	   = gcovr -r . --html --html-details -o coverage.html
 
 # Source and object files
-REF            = src/ref.c
+REF            = src/refmem.c
 TEST_SRC       = test/test.c
 HASH 		   = src/lib/lib_hash_table.c
 LIST 		   = src/lib/lib_linked_list.c
@@ -18,7 +18,7 @@ OBJ_DIR        = obj
 SRC_DIR		   = src
 LIB_DIR		   = lib
 TEST_DIR	   = test
-REF_OBJ        = $(OBJ_DIR)/ref.o
+REF_OBJ        = $(OBJ_DIR)/refmem.o
 TEST_OBJ       = $(OBJ_DIR)/$(TEST_DIR)/test.o
 HASH_OBJ       = $(OBJ_DIR)/$(LIB_DIR)/lib_hash_table.o
 LIST_OBJ       = $(OBJ_DIR)/$(LIB_DIR)/lib_linked_list.o
@@ -35,13 +35,13 @@ $(OBJ_DIR)/test/%.o: test/%.c
 
 # Target for the reference executable
 all: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
-	$(C_COMPILER) $(C_LINK_OPTIONS) $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ) -o $@ $(CUNIT_LINK)
+	$(C_COMPILER) $(C_LINK_OPTIONS) $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ) -o  $@ $(CUNIT_LINK)
 
 run: ref
-	valgrind --leak-check=full --show-leak-kinds=all ./ref
+	valgrind --leak-check=full --show-leak-kinds=all ./refmem
 
 demo: 
-	$(MAKE) -C demo start
+	$(MAKE) -C demo run_frontend
 
 memdemo:
 	$(MAKE) -C demo full_val_frontend
@@ -50,10 +50,14 @@ memdemo:
 test: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
 	$(C_COMPILER) $(C_LINK_OPTIONS) $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ) -o $(OBJ_DIR)/test/test $(CUNIT_LINK)
 	$(OBJ_DIR)/test/test
+	$(MAKE) -C demo backend_tests
+	$(MAKE) -C demo run_backend_tests
 
 memtest: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
 	$(C_COMPILER) $(C_LINK_OPTIONS) $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ) -o $(OBJ_DIR)/test/test $(CUNIT_LINK)
 	valgrind --leak-check=full --show-leak-kinds=all $(OBJ_DIR)/test/test
+	$(MAKE) -C demo backend_tests
+	$(MAKE) -C demo full_val_backend_tests
 
 
 gdb: ref
@@ -69,6 +73,6 @@ coverage: cov
 
 # Clean up generated files
 clean:
-	rm -f obj/*.o obj/*/*.o obj/test/test *.gcda *.gcno ref* cov* test.c.*
+	rm -f obj/*.o obj/*/*.o obj/test/test obj/backend_tests obj/frontend *.gcda *.gcno ref* cov* test.c.*
 
-.PHONY: demo
+.PHONY: demo all

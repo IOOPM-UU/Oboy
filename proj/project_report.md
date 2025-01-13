@@ -3,14 +3,14 @@
 # 1 Grupp
 Vår grupp heter O’boy. Nedan följer information om gruppens medlemmar:
 
-| Namn                    | E-mail                                 | Aktiva Datum        |
-|-------------------------|----------------------------------------|---------------------|
-| Alexandra Barbu         | alexandra.barbu.0105@student.uu.se         | 4/12/2024 - End |
-| Albin Carlsson          | albin.carlsson.9644@student.uu.se          | 4/12/2024 - End |
-| Einar Eriksson Wahlin   | einar.eriksson-wahlin.5775@student.uu.se   | 4/12/2024 - End |
-| Felix Fagerstedt        | email4@example.com                         | 4/12/2024 - End |
-| David Julin             | david.carl.julin@gmail.com                 | 13/1/2025 - End |
-| Erika Wallin            | erika.wallin.6208@student.uu.se            | 4/12/2024 - End |
+| Namn                    | E-mail                                   | Aktiva Datum           |
+|-------------------------|------------------------------------------|------------------------|
+| Alexandra Barbu         | alexandra.barbu.0105@student.uu.se       | 4/12/2024 - 15/01/2025 |
+| Albin Carlsson          | albin.carlsson.9644@student.uu.se        | 4/12/2024 - 15/01/2025 |
+| Einar Eriksson Wahlin   | einar.eriksson-wahlin.5775@student.uu.se | 4/12/2024 - 15/01/2025 |
+| Felix Fagerstedt        | felix.fagerstedt.0046@student.uu.se      | 4/12/2024 - 15/01/2025 |
+| David Julin             | david.julin.1279@student.uu.se           | 4/12/2024 - 15/01/2025 |
+| Erika Wallin            | erika.wallin.6208@student.uu.se          | 4/12/2024 - 15/01/2025 |
 
 
 # 2 Kvantifering
@@ -24,22 +24,23 @@ I kommande möten vi hade, delade vi upp arbetet i fyra olika sprints, nedan fö
 
 Sprint   | Startdatum (ursprungligt) | Startdatum (ändrat) | Slutdatum (ursprungligt) |  Slutdatum (ändrat) 
 |--------|---------------------------|---------------------|--------------------------|--------------------------
-1        | 4/12/2024                 | ändrades ej         | 10/12/2024             | 17/12/2024
-2        | 10/12/2024                | 17/12/2024          | 16/12/2024             | 24/12/2024
-3        | 16/12/2024                | 24/12/2024          | 19/12/2024             | 1/1/2025
-4        | 21/12/2024                | 29/12/2024          | 1/1/2025               | 5/1/2025
+   1        | 4/12/2024                  | ändrades ej         | 10/12/2024               | 17/12/2024
+2           | 10/12/2024                 | 17/12/2024          | 16/12/2024               | 24/12/2024
+3           | 16/12/2024                 | 24/12/2024          | 19/12/2024               | 1/1/2025
+4        |  21/12/2024                   | 29/12/2024          | 1/1/2025                 | 5/1/2025
 
 
-Vi skrev totalt: //TODO: 
-*    rader C kod
-*    rader testkod
-*    rader ”script code”
+Vi skrev totalt:
+*  242  rader C kod
+*  539  rader testkod
 
 
-Vi hade totalt:  //TODO:
-*   git commits
-*   git issues
-*   GitHub issues
+Som ett grupp jobbade vi totalt 260 timmar.
+
+Vi hade totalt: 
+* 183  git commits
+* 34  Pull Requests
+* 25  GitHub issues
 
 
 # 3 Process
@@ -176,9 +177,9 @@ Den sista sprinten innefattar de sista stegen: att implementera skräpsamlaren i
 utveckla de befintliga testerna, genomföra små justeringar för att säkerställa programmets funktionalitet,
 samt skriva klart de olika dokument som behöver lämnas in (rapporter och presentation). Eftersom implementationen verkade
 vara relativt enkel så tilldelades ett par denna uppgift, medan de andra olika medlemmar fokuserade på olika dokument och
-genomföra de små ändringar/tester som behövdes. Eftersom den totala arbetsbelastningen var inte jämnt fördelat i slutet, 
-valde vi att tilldela större uppdrag till medlemmarna som har arbetat mindre antal timmar, medan de andra fick fokusera
-på mindre delar av programmet.
+genomföra de små ändringar/tester som behövdes. Dock så hittade vi en stor bugg som ledde till en omstrukturering av
+programmet. Eftersom den totala arbetsbelastningen var inte jämnt fördelat i slutet, valde vi att tilldela större 
+uppdrag till medlemmarna som har arbetat mindre antal timmar, medan de andra fick fokusera på mindre delar av programmet.
 
 ## Arbetsuppdelning
 
@@ -192,7 +193,7 @@ Som förväntat visade det sig att största delen av tiden gick åt kodskrivning
 då många viktiga beslut angående programmets implementation fattades här. Minst tid spenderades på dokumentering eftersom
 detta är inte lika tidskrävande och gjordes bara en gång i slutet av projektet. 
 
-# 7 Reflection //TODO
+# 7 Reflection 
 Detta projekt representerar för alla medlemmar den första möjligheten att arbeta i en stor grupp. Även om olika ansvarsområden
 tilldelades till olika personer så har vi alla försökt delta i varje viktig moment av projektets utveckling och stödja varandra.
 På en skala från 1 till 7 bedömer vi vår tillfredsställelse med processen till en 6:a. Vi började alltid våra
@@ -205,9 +206,9 @@ Vi ser detta som vår största framgång – att kunna fortsätta och hitta lös
 
 Därför bedömer vi vår tillfredsställelse med den levererade produkten och kvalitetsgaranti till en 6. Genom att omstrukturera
 koden från början, säkerställde vi en stabil grund för vidare implementationer. Detta siffra återspeglas i vår
-tester kodtäckning som ligger på //TODO: %. Vi har lagt stort fokus på att göra noggranna tester och kodgranskningar så
-att vi hamnar inte i samma situation som innan och säkerställer kodkvaliteten. Detta arbete har lett till en pålitlig 
-produkt som vi kan vara stolta över.
+testers kodtäckning : 89% lines executed och 100% branch executed. Vi har lagt stort fokus på att göra noggranna tester 
+och kodgranskningar så att vi hamnar inte i samma situation som innan och säkerställer kodkvaliteten. Detta arbete har
+lett till en pålitlig produkt som vi kan vara stolta över.
 
 Sammanfattningsvis är vi nöjda med den levererade produkten. Vi har lärt oss vikten av att ha en detaljerad planering
 och struktur på programmet samt hur viktigt kommunikation och arbetsuppdelning är när man arbetar i en stor grupp. 
