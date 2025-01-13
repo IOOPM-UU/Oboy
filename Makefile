@@ -60,6 +60,9 @@ memtest: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
 	$(MAKE) -C demo full_val_backend_tests
 
 
+ref:  $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
+	$(C_COMPILER) -g $(C_LINK_OPTIONS) $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ) -o  $@ $(CUNIT_LINK)
+
 gdb: ref
 	gdb ./ref --tui
 
