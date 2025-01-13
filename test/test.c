@@ -73,7 +73,7 @@ void test_retain_release() {
     release(c);
     CU_ASSERT_TRUE(rc(c) == 1);
     release(c);
-    // CU_ASSERT_TRUE(rc(c) == 0); // cant find metadata
+    CU_ASSERT_TRUE(rc(c) == 0); // cant find metadata
 }
 
 void test_retain_release2() {
@@ -131,11 +131,6 @@ void test_cascade_limit() {
     set_cascade_limit(1);
     CU_ASSERT_EQUAL(get_cascade_limit(), 1);
 }
-
-void metadata_destructor(void *ptr) {
-    free(ptr);
-}
-
 
 void test_default_destructor() {
     set_cascade_limit(10);
@@ -276,7 +271,7 @@ void node_destroy(obj *object) {
 
 node_t *node_create(int val, node_t *left, node_t *right, function1_t destructor) {
     node_t *node = allocate(sizeof(node_t), destructor);
-    //retain(node); // TODO not sure if necessary
+    
     node->val = val;
     node->left = left;
     retain(node->left);
@@ -324,7 +319,7 @@ void test_binary_tree_given_destructor() {
     CU_ASSERT_EQUAL(n2_copy->val, 2);
     CU_ASSERT_EQUAL(n2_copy->left->val, 1);
 
-    CU_ASSERT_EQUAL(rc(n2_copy), 1); // TODO might not be reachable, can check if its 1 before
+    CU_ASSERT_EQUAL(rc(n2_copy), 1); 
     release(n2_copy);
     // releasing instead
 }
@@ -411,7 +406,7 @@ weird_array_t *weird_array_create(char *i4, weird_array_t *i6, function1_t destr
     arr->i1 = 1;
     arr->i2 = 2;
     arr->i3 = 3;
-    arr->i4 = rc_strdup(i4); // TODO not sure if it should be char or char*
+    arr->i4 = rc_strdup(i4); 
     retain(arr->i4);
     arr->i5 = 5;
     arr->i6 = i6;
@@ -472,7 +467,6 @@ void test_cleanup(){
     CU_ASSERT(lib_linked_list_size(get_schedule_linked_list()) == 0); 
 }
 
-
 int main() {
     // First we try to set up CUnit, and exit if we fail
     if (CU_initialize_registry() != CUE_SUCCESS)
@@ -494,6 +488,7 @@ int main() {
     // copy a line below and change the information
     if (
         (CU_add_test(unit_test_suite1, "Get and set cascade limit", test_get_and_set_cascade_limit) == NULL) ||
+        (CU_add_test(unit_test_suite1, "test cascade limit", test_cascade_limit) == NULL) ||
         (CU_add_test(unit_test_suite1, "ref count function", test_rc) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate and deallocate", test_allocate_and_deallocate) == NULL) ||
         (CU_add_test(unit_test_suite1, "Allocate array and deallocate", test_allocate_array_then_deallocate) == NULL) ||
