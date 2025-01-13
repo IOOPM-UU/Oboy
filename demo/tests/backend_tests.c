@@ -7,7 +7,7 @@
 #include "../generic_data_structures/linked_list.h"
 #include "../generic_data_structures/hash_table.h"
 #include "../generic_data_structures/iterator.h"
-#include "../../src/ref.h"
+#include "../../src/refmem.h"
 
 typedef struct merch ioopm_merch_t;
 typedef struct shelf ioopm_shelf_t;

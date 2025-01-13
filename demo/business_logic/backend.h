@@ -8,7 +8,7 @@
 #include "../generic_data_structures/hash_table.h"
 #include "../generic_data_structures/iterator.h"
 #include "../generic_utils/utils.h"
-#include "../../src/ref.h"
+#include "../../src/refmem.h"
 
 
 /**

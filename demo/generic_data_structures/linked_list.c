@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "common.h"
 #include <stddef.h>
-#include "../../src/ref.h"
+#include "../../src/refmem.h"
 
 #define null_elem \
     (elem_t) { 0 }

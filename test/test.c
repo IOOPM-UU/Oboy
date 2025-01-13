@@ -1,4 +1,4 @@
-#include "../src/ref.h"
+#include "../src/refmem.h"
 #include <CUnit/Basic.h>
 #include <stdlib.h>
 #include <math.h>

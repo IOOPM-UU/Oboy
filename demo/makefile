@@ -2,7 +2,7 @@ clean:
 	rm -f *.o frontend backend_tests old_hash old_list *.gcno *.gcda *.gcov backend_tests_coverage
 
 frontend: user_interface/frontend.c generic_utils/utils.c generic_data_structures/linked_list.c generic_data_structures/hash_table.c business_logic/shop.c business_logic/merch.c business_logic/cart.c business_logic/common.c
-	gcc -g user_interface/frontend.c generic_utils/utils.c generic_data_structures/linked_list.c generic_data_structures/hash_table.c business_logic/shop.c business_logic/merch.c business_logic/cart.c business_logic/common.c ../src/ref.c  ../src/lib/lib_hash_table.c  ../src/lib/lib_linked_list.c -o frontend -w
+	gcc -g user_interface/frontend.c generic_utils/utils.c generic_data_structures/linked_list.c generic_data_structures/hash_table.c business_logic/shop.c business_logic/merch.c business_logic/cart.c business_logic/common.c ../src/refmem.c  ../src/lib/lib_hash_table.c  ../src/lib/lib_linked_list.c -o frontend -w
 
 run_frontend:
 	clear; ./frontend
@@ -26,8 +26,8 @@ clean_val_frontend:
 clean_full_val_frontend:
 	make clean; make frontend; make full_val_frontend
 
-backend_tests: business_logic/common.c business_logic/shop.c business_logic/merch.c business_logic/cart.c tests/backend_tests.c generic_utils/utils.c generic_data_structures/linked_list.c generic_data_structures/hash_table.c ../ref.c
-	gcc -g -Wall -pedantic business_logic/common.c business_logic/shop.c business_logic/merch.c business_logic/cart.c tests/backend_tests.c generic_utils/utils.c generic_data_structures/linked_list.c generic_data_structures/hash_table.c ../ref.c  ../lib/lib_hash_table.c  ../lib/lib_linked_list.c -lcunit -o backend_tests
+backend_tests: business_logic/common.c business_logic/shop.c business_logic/merch.c business_logic/cart.c tests/backend_tests.c generic_utils/utils.c generic_data_structures/linked_list.c generic_data_structures/hash_table.c ../refmem.c
+	gcc -g -Wall -pedantic business_logic/common.c business_logic/shop.c business_logic/merch.c business_logic/cart.c tests/backend_tests.c generic_utils/utils.c generic_data_structures/linked_list.c generic_data_structures/hash_table.c ../refmem.c  ../lib/lib_hash_table.c  ../lib/lib_linked_list.c -lcunit -o backend_tests
 
 run_backend_tests:
 	./backend_tests
@@ -57,15 +57,15 @@ gcov:
 	gcov -b -c backend_tests_coverage-backend_tests.gcda > coverage.txt
 
 old_hash: 
-	gcc -g -Wall -pedantic generic_data_structures/hash_table.c generic_data_structures/linked_list.c generic_data_structures/hash_table_tests.c ../ref.c ../lib/lib_hash_table.c ../lib/lib_linked_list.c -lcunit -o old_hash
+	gcc -g -Wall -pedantic generic_data_structures/hash_table.c generic_data_structures/linked_list.c generic_data_structures/hash_table_tests.c ../refmem.c ../lib/lib_hash_table.c ../lib/lib_linked_list.c -lcunit -o old_hash
 	valgrind -s --leak-check=full ./old_hash
 
 old_list:
-	gcc -g -Wall -pedantic generic_data_structures/linked_list.c generic_data_structures/linked_list_tests.c ../ref.c ../lib/lib_hash_table.c ../lib/lib_linked_list.c -lcunit -o old_list
+	gcc -g -Wall -pedantic generic_data_structures/linked_list.c generic_data_structures/linked_list_tests.c ../refmem.c ../lib/lib_hash_table.c ../lib/lib_linked_list.c -lcunit -o old_list
 	valgrind -s --leak-check=full ./old_list
 
 old_list_full:
-	gcc -g -Wall -pedantic generic_data_structures/linked_list.c generic_data_structures/linked_list_tests.c ../ref.c ../lib/lib_hash_table.c ../lib/lib_linked_list.c -lcunit -o old_list
+	gcc -g -Wall -pedantic generic_data_structures/linked_list.c generic_data_structures/linked_list_tests.c ../refmem.c ../lib/lib_hash_table.c ../lib/lib_linked_list.c -lcunit -o old_list
 	valgrind -s --leak-check=full --show-leak-kinds=all ./old_list
 
 tests_hidden: frontend
