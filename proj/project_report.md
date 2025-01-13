@@ -3,13 +3,13 @@
 # 1 Grupp
 Vår grupp heter O’boy. Nedan följer information om gruppens medlemmar:
 
-| Namn                    | E-mail                          | Aktiva Datum    |
-|-------------------------|----------------------------------|-----------------|
-| Alexandra Barbu         | alexandra.barbu.0105@student.uu.se | 4/12/2024 - End |
-| Albin Carlsson          | albin.carlsson.9644@student.uu.se            | 4/12/2024 - End |
-| Einar Eriksson Wahlin   | einar.eriksson-wahlin.5775@student.uu.se        | 4/12/2024 - End |
-| Felix Fagerstedt        | email4@example.com             | 4/12/2024 - End |
-| David Julin             | email5@example.com             | 4/12/2024 - End |
+| Namn                    | E-mail                                 | Aktiva Datum        |
+|-------------------------|----------------------------------------|---------------------|
+| Alexandra Barbu         | alexandra.barbu.0105@student.uu.se         | 4/12/2024 - End |
+| Albin Carlsson          | albin.carlsson.9644@student.uu.se          | 4/12/2024 - End |
+| Einar Eriksson Wahlin   | einar.eriksson-wahlin.5775@student.uu.se   | 4/12/2024 - End |
+| Felix Fagerstedt        | email4@example.com                         | 4/12/2024 - End |
+| David Julin             | david.carl.julin@gmail.com                 | 13/1/2025 - End |
 | Erika Wallin            | erika.wallin.6208@student.uu.se            | 4/12/2024 - End |
 
 
@@ -24,10 +24,10 @@ I kommande möten vi hade, delade vi upp arbetet i fyra olika sprints, nedan fö
 
 Sprint   | Startdatum (ursprungligt) | Startdatum (ändrat) | Slutdatum (ursprungligt) |  Slutdatum (ändrat) 
 |--------|---------------------------|---------------------|--------------------------|--------------------------
-   1        | 4/12/2024                  | ändrades ej         | 10/12/2024               | 17/12/2024
-2           | 10/12/2024                 | 17/12/2024          | 16/12/2024               | 24/12/2024
-3           | 16/12/2024                 | 24/12/2024          | 19/12/2024               | 1/1/2025
-4        |  21/12/2024                   | 29/12/2024          | 1/1/2025                 | 5/1/2025
+1        | 4/12/2024                 | ändrades ej         | 10/12/2024             | 17/12/2024
+2        | 10/12/2024                | 17/12/2024          | 16/12/2024             | 24/12/2024
+3        | 16/12/2024                | 24/12/2024          | 19/12/2024             | 1/1/2025
+4        | 21/12/2024                | 29/12/2024          | 1/1/2025               | 5/1/2025
 
 
 Vi skrev totalt: //TODO: 
@@ -35,9 +35,6 @@ Vi skrev totalt: //TODO:
 *    rader testkod
 *    rader ”script code”
 
-
-Som ett grupp jobbade vi totalt : //TODO:    antal timmar. Dessa timmar innefattar gruppmöten som vi hade samt kodning 
-som gjordes i helgrupp (ej i par).
 
 Vi hade totalt:  //TODO:
 *   git commits
@@ -50,31 +47,62 @@ Vi hade totalt:  //TODO:
 Processen som valdes för det här projektet är Scrum eftersom vi arbetade med den under kursens gång och alla medlemmar 
 var vana med den. Det innebär att dela upp projektet i olika sprintar (delar) som ska klaras under en viss tid för 
 att följa utvecklingen. Till skillnad från kursens sprintar där allt var redan planerad och uppdelad så fick vi indela 
-arbetsuppgifterna själva, vilket representerade en stor del av planeringen. Vi skapade en Trello-board där vi
+arbetsuppgifterna själva, vilket representerade en stor del av planeringen. 
+
+## 3.2 Implementation
+Vi implementerade denna process med hjälp av en Trello-board, där vi
 kategoriserade olika upggifter till respektive sprint och person. För att säkerställa att vi är på rätt spår så hade
 vi vecko-möten där vi diskuterade indelningen av uppgifter samt justerade våra prioriteringar. Vi tycker att denna
 process gjorde det lättare för oss att följa utvecklingen av vårt projekt, eftersom med hjälp av Trello kunde vi
-visuellt se våra framsteg och snabbt justera arbetsbelastningen. 
+visuellt se våra framsteg och snabbt justera arbetsbelastningen.
 
-## 3.2 Implementation //TODO
-In this section, discuss:
+Under projektets gång märkte vi att processen hade både styrkor och svagheter. En av styrkorna var att vi lyckades
+fördela arbetsbelastningen jämnt i sprintar samt mellan gruppmedlemmarna. Detta gjorde att alla kunde jobba parallellt,
+vilket ökade effektiviteten. Däremot underskattade vi tiden vissa uppgifter kommer att ta, vilket ledde till förseningar 
+som påverkade hela planeringen. Detta representerar en tydlig svaghet och som grupp tog vi beslutet att ändra planeringen.
 
-what you actually implemented of the process
-strengths and weaknesses with your implementation of your chosen process
-what you would do differently if you were to start over tomorrow
-what successes you would attempt to repeat if you were to start over tomorrow
-how plans were made, key plans, and to what extent your plans were followed
-how decision making happened, key decisions, and whether they were followed
-how did you attack the Christmas break problem with planning?
+Om vi skulle börja om, så skulle vi göra mer detaljerade tidsplaner och ägna mer tid åt oväntade hinder, såsom buggar. 
+Detta representerar en smart lösning eftersom det kommer att minska stressen medlemmarna känner när man ligger efter i 
+planeringen och är ett mer realistisk tidsuppskattning.
+
+Alla beslut angående projektet togs i grupp på våra vecko-möten, där vi mest diskuterade läget och bestämde våra 
+prioriteringar för respektive vecka. Vi planerade att arbeta även under Jul-lovet (med vissa undantag) för att undvika
+större förseningar. Detta följdes av alla medlemmar och visade sig vara framgångsrik, då vi lyckades hålla projektet på 
+rätt spår trots tidigare problem.
 
 
-# 4 Use of Tools //TODO
-In this section, discuss:
 
-what tools you used in the project
-what use you had of those tools
-if there were any tools you were lacking
-tools you would rather not use in the future
+# 4 Användning av verktyg 
+Under projektet använde vi flera verktyg för att underlätta arbetsprocessen. Vi har använt Discord som huvudsaklig
+kommunikationsmetod eftersom den har en mängd användbara funktioner (röstsamtal, skärmdelning, text 
+meddelanden) som underlättar samarbetet. Planeringen har gjorts med hjälp av en Trello-board, som främjar Scrum processen.
+Alla medlemmar hade tillgång till denna board och kunde editera och visuellt se framsteg under arbetsprocessen. 
+
+Vi valde att koda i VS Code eftersom detta är en IDE som stödjer par-/grupparbete med sin LiveShare funktion och alla
+medlemmar var vana med den sedan innan. Kodning 
+gjordes mestadels i par och LiveShare gynnar medlemmarna eftersom man kan koda tillsammans utan konflikter. För att lösa
+buggar (segfaults eller stackoverflows) har vi använt oss av GDB, vilket är en debugger som gav oss möjligheten att 
+köra programmet steg för steg, inspektera variabler och hitta exakt vart ett fel inträffar. 
+
+Det är normalt att få minnesläckor eller andra minnesrelaterade problem när man utvecklar ett program i C-språket. För 
+att hitta och åtgärda dem, har vi använt oss av Valgrind, som identifierar minnesläckor eller ogiltiga 
+minnesåtkomster. För att säkerställa kodkvaliteten har vi tester som körs med hjälp av LCunit och GCOV. Genom att använda
+LCunit har vi tester som vi kan köra automatiskt och verifiera att vår kod fungerar som förväntat. GCOV används för
+att mäta kodtäckning, vilket gör det lätt för oss att se vilka områden som inte testas. Detta hjälper oss att identifiera 
+kod som inte täcks av testerna eller död kod och gör det möjligt för oss att fokusera på vilka områden som ska förbättras.
+
+För versionshantering och teknisk dokumentation använder vi GitHub med sina funktionaliteter: Issues och Pull Requests.
+Vi uppdelade arbetsuppgifterna i olika moduler och branches vilket främjade parallell kodning och gjorde att vi undvek 
+konflikter när vi senare skulle slå ihop alla delar av koden. När ett fel upptäcktes, skapade vi Issues, som
+är synliga för alla medlemmar men kan tilldelas till en viss person som behöver åtgärda dem. Detta underlättade 
+arbetsprocessen eftersom man kan enkelt hålla reda på vad som behöver göras. Vi har använt Pull Requests för att integrera
+en ny del av kod i huvudbranchen. Vi hade alltid en opartisk medlem som kodgranskar koden innan den inkorporerades , för
+att säkerställa att den uppfyllde kodstandarden och inte introducerade några buggar.
+
+Vi upplever inte att vi har saknat några verktyg under projektets gång eftersom de verktyg vi har använt
+bemöt våra behov när det gäller kodhantering, planering samt kommunikation. Vi har använt dessa verktyg tidigare och
+kommer att fortsätta använda dem eftersom de uppfyller våra krav.
+
 
 # 5 Kommunikation, Kooperation och Koordination
 
@@ -157,7 +185,6 @@ på mindre delar av programmet.
 I slutet har vi undersökt vad gruppen spenderade sin tid på under projektets gång med hjälp av en "pie chart". Här är
 resultaten vi fick:
 
-
 ![Pie Chart](pie.png)
 
 Som förväntat visade det sig att största delen av tiden gick åt kodskrivning främst på grund av att vi behövde 
@@ -166,13 +193,24 @@ då många viktiga beslut angående programmets implementation fattades här. Mi
 detta är inte lika tidskrävande och gjordes bara en gång i slutet av projektet. 
 
 # 7 Reflection //TODO
-In this section, discuss briefly:
+Detta projekt representerar för alla medlemmar den första möjligheten att arbeta i en stor grupp. Även om olika ansvarsområden
+tilldelades till olika personer så har vi alla försökt delta i varje viktig moment av projektets utveckling och stödja varandra.
+På en skala från 1 till 7 bedömer vi vår tillfredsställelse med processen till en 6:a. Vi började alltid våra
+möten genom att hur alla ligger till, visa hänsyn till de som behöver hjälp och planera för de kommande dagarna. Vi höll
+alltid en organiserad struktur på projektet även när problem inträffade. Vi kan inte ge oss själva den högsta betyget eftersom
+vår största misslyckande i projektet var att ignorera planeringen och börja koda utan att ha en fullständig struktur på
+hur programmet ska se ut. Detta ledde till massa förseningar och vi var tvungna att ändra planeringen och börja om.
+Kombinationen av frustration och av att ligga efter i planeringen hjälpte inte oss, men vi tog detta som ett lärdom.
+Vi ser detta som vår största framgång – att kunna fortsätta och hitta lösningar trots de utmaningar vi stötte på.
 
-How confident you are that have actually implemented the right thing (why, how, etc.
-On a scale 1–7 (7 is best), rate your satisfaction with your process and provide justification for that number
-On a scale 1–7 (7 is best), rate your satisfaction with your delivered product and provide justification for that number
-On a scale 1–7 (7 is best), rate your satisfaction with your quality assurance and provide justification for that number
-what does the team consider its biggest win?
-what does the team consider its biggest fail?
+Därför bedömer vi vår tillfredsställelse med den levererade produkten och kvalitetsgaranti till en 6. Genom att omstrukturera
+koden från början, säkerställde vi en stabil grund för vidare implementationer. Detta siffra återspeglas i vår
+tester kodtäckning som ligger på //TODO: %. Vi har lagt stort fokus på att göra noggranna tester och kodgranskningar så
+att vi hamnar inte i samma situation som innan och säkerställer kodkvaliteten. Detta arbete har lett till en pålitlig 
+produkt som vi kan vara stolta över.
+
+Sammanfattningsvis är vi nöjda med den levererade produkten. Vi har lärt oss vikten av att ha en detaljerad planering
+och struktur på programmet samt hur viktigt kommunikation och arbetsuppdelning är när man arbetar i en stor grupp. 
+
 
 
