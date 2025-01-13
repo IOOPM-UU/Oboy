@@ -9,7 +9,3 @@ make memtest - cleans, compiles and runs tests through valgrind with --leak-chec
 make demo - cleans, compiles and runs frontend 
 make memdemo - cleans, compiles and runs frontend 
 make clean- cleans all the object files (as well as unnecessary files)
-
-
-
-
