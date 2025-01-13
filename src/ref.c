@@ -77,17 +77,6 @@ uint8_t rc(obj* object) {
     }
 }
 
-void release_destructor(obj *to_remove) {
-    if (!to_remove) {
-        return;
-    }
-    
-    metadata_t *metadata = get_metadata(to_remove);
-    if (metadata) {
-        metadata->destructor(to_remove);
-    }
-}
-
 static bool is_valid_pointer(void *object){
     if (!object) return false;
     //memdata_t *metadata = GET_METADATA(object);
