@@ -3,13 +3,13 @@
 # 1 Grupp
 Vår grupp heter O’boy. Nedan följer information om gruppens medlemmar:
 
-| Namn                    | E-mail                          | Aktiva Datum    |
-|-------------------------|----------------------------------|-----------------|
-| Alexandra Barbu         | alexandra.barbu.0105@student.uu.se | 4/12/2024 - End |
-| Albin Carlsson          | albin.carlsson.9644@student.uu.se            | 4/12/2024 - End |
-| Einar Eriksson Wahlin   | einar.eriksson-wahlin.5775@student.uu.se        | 4/12/2024 - End |
-| Felix Fagerstedt        | email4@example.com             | 4/12/2024 - End |
-| David Julin             | email5@example.com             | 4/12/2024 - End |
+| Namn                    | E-mail                                 | Aktiva Datum        |
+|-------------------------|----------------------------------------|---------------------|
+| Alexandra Barbu         | alexandra.barbu.0105@student.uu.se         | 4/12/2024 - End |
+| Albin Carlsson          | albin.carlsson.9644@student.uu.se          | 4/12/2024 - End |
+| Einar Eriksson Wahlin   | einar.eriksson-wahlin.5775@student.uu.se   | 4/12/2024 - End |
+| Felix Fagerstedt        | email4@example.com                         | 4/12/2024 - End |
+| David Julin             | david.carl.julin@gmail.com                 | 13/1/2025 - End |
 | Erika Wallin            | erika.wallin.6208@student.uu.se            | 4/12/2024 - End |
 
 
@@ -24,10 +24,10 @@ I kommande möten vi hade, delade vi upp arbetet i fyra olika sprints, nedan fö
 
 Sprint   | Startdatum (ursprungligt) | Startdatum (ändrat) | Slutdatum (ursprungligt) |  Slutdatum (ändrat) 
 |--------|---------------------------|---------------------|--------------------------|--------------------------
-   1        | 4/12/2024                  | ändrades ej         | 10/12/2024               | 17/12/2024
-2           | 10/12/2024                 | 17/12/2024          | 16/12/2024               | 24/12/2024
-3           | 16/12/2024                 | 24/12/2024          | 19/12/2024               | 1/1/2025
-4        |  21/12/2024                   | 29/12/2024          | 1/1/2025                 | 5/1/2025
+1        | 4/12/2024                 | ändrades ej         | 10/12/2024             | 17/12/2024
+2        | 10/12/2024                | 17/12/2024          | 16/12/2024             | 24/12/2024
+3        | 16/12/2024                | 24/12/2024          | 19/12/2024             | 1/1/2025
+4        | 21/12/2024                | 29/12/2024          | 1/1/2025               | 5/1/2025
 
 
 Vi skrev totalt: //TODO: 
@@ -168,7 +168,7 @@ detta är inte lika tidskrävande och gjordes bara en gång i slutet av projekte
 # 7 Reflection //TODO
 In this section, discuss briefly:
 
-How confident you are that have actually implemented the right thing (why, how, etc.
+How confident you are that have actually implemented the right thing (why, how, etc.)
 On a scale 1–7 (7 is best), rate your satisfaction with your process and provide justification for that number
 On a scale 1–7 (7 is best), rate your satisfaction with your delivered product and provide justification for that number
 On a scale 1–7 (7 is best), rate your satisfaction with your quality assurance and provide justification for that number

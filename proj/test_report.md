@@ -55,11 +55,11 @@ Vi har automatiserat våra tester med GitHub Actions. Detta gör att de körs vi
 
 Här är de sex allvarligaste buggarna som vi har stött på under projektets gång, samt länk till deras github-issues:
 
-#### Bug 1 - evighets loop?? gamla inluppen gav problem 
+#### Bug 1 - free_scheduled_tasks kallas rekursivt: https://github.com/IOOPM-UU/Oboy/issues/43 
 
 #### Bug 2 - Stack overflow
 
-#### Bug 3 - ?
+#### Bug 3 - https://github.com/IOOPM-UU/Oboy/issues/42 
 
 #### Bug 4 - ?
 

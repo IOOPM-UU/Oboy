@@ -1,5 +1,8 @@
 # Design Documentation
-This is a memory management library that implements a basic version of reference counting. It is designed to replace malloc/calloc and free in a program with library functions like allocate/release. This would make memory management safer avoiding memory leaks. The library also supports limiting cascading frees.
+This is a memory management library that implements a basic version of reference counting. 
+It is designed to replace malloc/calloc and free in a program with library functions like 
+allocate/release. This would make memory management safer avoiding memory leaks. The library 
+also supports limiting cascading frees.
 
 # High level Design
 
@@ -16,11 +19,14 @@ Reference counting:
 
 Scheduling:
 - Objects with rc = 0 are scheduled for destruction using a linked list
-- Scheduled objects are processed using free_scheduled_tasks, which frees a set number of objects per call, as defined by a global cascade limit
+- Scheduled objects are processed using free_scheduled_tasks, which frees a set number of 
+    objects per call, as defined by a global cascade limit
 
 Destructors:
-- Default destructor is implemented that can free complex data structures. It manages recursive destruction of pointer-based objects.
-- Custom destructors for hash-tables and linked-lists are made which improve performance for those data structures
+- Default destructor is implemented that can free complex data structures. It manages recursive 
+    destruction of pointer-based objects.
+- Custom destructors for hash-tables and linked-lists are made which improve performance for 
+    those data structures
 
 Memory allocation:
 - Objects are allocated using allocate or allocate_array
@@ -30,7 +36,8 @@ Cleanup:
 - Cleanup clears out all objects scheduled for deallocation.
 
 Shutdown:
-- Cleans up all system resources. Frees all objects and destroys hash table and linked list used in library functions
+- Cleans up all system resources. Frees all objects and destroys hash table and linked list 
+    used in library functions
 
 # User implementation
 For this library to work with any program, one would need to do the following:
