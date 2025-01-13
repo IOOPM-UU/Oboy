@@ -2,21 +2,22 @@ clean:
 	rm -f *.o frontend backend_tests old_hash old_list *.gcno *.gcda *.gcov backend_tests_coverage
 
 frontend: user_interface/frontend.c generic_utils/utils.c generic_data_structures/linked_list.c generic_data_structures/hash_table.c business_logic/shop.c business_logic/merch.c business_logic/cart.c business_logic/common.c
-	gcc -g -Wall -pedantic user_interface/frontend.c generic_utils/utils.c generic_data_structures/linked_list.c generic_data_structures/hash_table.c business_logic/shop.c business_logic/merch.c business_logic/cart.c business_logic/common.c ../ref.c  ../lib/lib_hash_table.c  ../lib/lib_linked_list.c -o frontend
+	gcc -g user_interface/frontend.c generic_utils/utils.c generic_data_structures/linked_list.c generic_data_structures/hash_table.c business_logic/shop.c business_logic/merch.c business_logic/cart.c business_logic/common.c ../src/ref.c  ../src/lib/lib_hash_table.c  ../src/lib/lib_linked_list.c -o frontend -w
 
 run_frontend:
-	./frontend
+	clear; ./frontend
 
 val_frontend:
 	valgrind -s ./frontend
 
 full_val_frontend:
-	valgrind -s --leak-check=full ./frontend
+	make frontend; clear; valgrind -s --leak-check=full ./frontend
 
 clean_frontend:
 	make clean; make frontend; make run_frontend
 
 start:
+	clear
 	make clean_frontend
 
 clean_val_frontend:

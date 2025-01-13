@@ -9,7 +9,7 @@
 #include "../generic_data_structures/hash_table.h"
 #include "../generic_data_structures/iterator.h"
 #include "../generic_utils/utils.h"
-#include "../../ref.h"
+#include "../../src/ref.h"
 
 #define ValidOptions "AaLlDdEeSsPpCcRr+-=OoQq"
 

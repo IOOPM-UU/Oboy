@@ -4,7 +4,7 @@ extern char *strdup(const char *);
 #include <ctype.h>  //för isdigit
 #include <stdio.h>
 #include "utils.h"
-#include "../../ref.h"
+#include "../../src/ref.h"
 
 bool not_empty(char *str)
 {

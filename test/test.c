@@ -4,27 +4,24 @@
 #include <math.h>
 #include <stdint.h>
 #include "../src/lib/lib_linked_list.h"
-#include "../src/inlupp2/generic_data_structures/linked_list.h"
 #include <assert.h>
 #include <limits.h>
 
-struct cell
-{
+struct cell {
   struct cell *cell;
   int i;
   char *string;
 };
+
 typedef struct lib_link lib_link_t;
 
-struct lib_link
-{
+struct lib_link {
     lib_elem_t value;
     lib_link_t *previous;
     lib_link_t *next;
 };
 
-void cell_destructor(obj *c) //kanske borde returna Size på det vi tagit bort?
-{
+void cell_destructor(obj *c) { //kanske borde returna Size på det vi tagit bort?
     release(((struct cell *) c)->cell);
 }
 
@@ -45,8 +42,7 @@ int clean_suite(void) {
 
 // Unit tests
 
-void test_allocate_and_deallocate(void)
-{
+void test_allocate_and_deallocate(void) {
     // Set cascade limit
     set_cascade_limit(1);
 
@@ -161,8 +157,7 @@ void test_default_destructor() {
     (lib_elem_t) { 0 }
 
 // Helper function for testing on links
-static lib_link_t *link_create_with_allocate(lib_elem_t value, lib_link_t *previous, lib_link_t *next)
-{
+static lib_link_t *link_create_with_allocate(lib_elem_t value, lib_link_t *previous, lib_link_t *next) {
     lib_link_t *link = allocate(sizeof(lib_link_t), NULL);
     link->previous = previous;
     link->next = next;
@@ -172,8 +167,7 @@ static lib_link_t *link_create_with_allocate(lib_elem_t value, lib_link_t *previ
 }
 
 
-void test_allocate_and_deallocate_links(void)
-{
+void test_allocate_and_deallocate_links(void) {
     // Set cascade limit
     set_cascade_limit(1);
 
@@ -193,8 +187,7 @@ void test_allocate_and_deallocate_links(void)
     deallocate(link3);
 }
 
-void test_allocate_array_then_deallocate(void)
-{
+void test_allocate_array_then_deallocate(void) {
     // Set cascade limit
     set_cascade_limit(3);
 
@@ -216,8 +209,7 @@ void test_allocate_array_then_deallocate(void)
     //should not leak when running tests!
 }
 
-void test_allocate_strings_then_release(void)
-{
+void test_allocate_strings_then_release(void) {
     // Set cascade limit
     set_cascade_limit(1);
 
@@ -252,7 +244,7 @@ void test_allocate_strings_then_release(void)
     // free_all();
 }
 
-void test_get_and_set_cascade_limit(){
+void test_get_and_set_cascade_limit() {
     // Set cascade limit
     set_cascade_limit(2);
     // Check that get_cascade_limit gets the right limit
@@ -269,6 +261,7 @@ void test_get_and_set_cascade_limit(){
 
 // Binary trees
 typedef struct node node_t;
+
 struct node {
     int val;
     node_t *left;
@@ -536,4 +529,4 @@ int main() {
     // Tear down CUnit before exiting
     CU_cleanup_registry();
     return CU_get_error();
-} 
+}

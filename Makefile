@@ -1,6 +1,6 @@
 # Define compiler and options
 C_COMPILER     = gcc
-C_OPTIONS      = -Wall -pedantic -Wextra -g
+C_OPTIONS      = 
 C_LINK_OPTIONS = -lm
 CUNIT_LINK     = -lcunit
 C_COVERAGE 	   = gcov -abcfu --coverage
@@ -8,29 +8,53 @@ R_COVERAGE	   = gcovr -r . --html --html-details -o coverage.html
 
 # Source and object files
 REF            = src/ref.c
-REF_OBJ        = src/ref.o
 TEST_SRC       = test/test.c
-TEST_OBJ       = test/test.o
 HASH 		   = src/lib/lib_hash_table.c
-HASH_OBJ	   = src/lib/lib_hash_table.o
 LIST 		   = src/lib/lib_linked_list.c
-LIST_OBJ	   = src/lib/lib_linked_list.o
+
+
+# Object files
+OBJ_DIR        = obj
+SRC_DIR		   = src
+LIB_DIR		   = lib
+TEST_DIR	   = test
+REF_OBJ        = $(OBJ_DIR)/ref.o
+TEST_OBJ       = $(OBJ_DIR)/$(TEST_DIR)/test.o
+HASH_OBJ       = $(OBJ_DIR)/$(LIB_DIR)/lib_hash_table.o
+LIST_OBJ       = $(OBJ_DIR)/$(LIB_DIR)/lib_linked_list.o
 
 # Pattern rule to compile .c files into .o files
-%.o: %.c
+$(OBJ_DIR)/%.o: src/%.c 
+	$(C_COMPILER) $(C_OPTIONS) -c $< -o $@
+
+$(OBJ_DIR)/lib/%.o: src/lib/%.c 
+	$(C_COMPILER) $(C_OPTIONS) -c $< -o $@
+
+$(OBJ_DIR)/test/%.o: test/%.c 
 	$(C_COMPILER) $(C_OPTIONS) -c $< -o $@
 
 # Target for the reference executable
-ref: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
+all: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
 	$(C_COMPILER) $(C_LINK_OPTIONS) $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ) -o $@ $(CUNIT_LINK)
 
 run: ref
 	valgrind --leak-check=full --show-leak-kinds=all ./ref
 
+demo: 
+	$(MAKE) -C demo start
+
+memdemo:
+	$(MAKE) -C demo full_val_frontend
+
 # Target for the test executable
-ref_test: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
-	$(C_COMPILER) $(C_LINK_OPTIONS) $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ) -o $@ $(CUNIT_LINK)
-	valgrind --leak-check=full --show-leak-kinds=all ./ref_test
+test: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
+	$(C_COMPILER) $(C_LINK_OPTIONS) $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ) -o $(OBJ_DIR)/test/test $(CUNIT_LINK)
+	$(OBJ_DIR)/test/test
+
+memtest: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
+	$(C_COMPILER) $(C_LINK_OPTIONS) $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ) -o $(OBJ_DIR)/test/test $(CUNIT_LINK)
+	valgrind --leak-check=full --show-leak-kinds=all $(OBJ_DIR)/test/test
+
 
 gdb: ref
 	gdb ./ref --tui
@@ -45,4 +69,6 @@ coverage: cov
 
 # Clean up generated files
 clean:
-	rm -f src/*.o inlupp2_DONOTTOUCH/generic_data_structures/*.o test/*.o ref* cov* test.c.*
+	rm -f obj/*.o obj/*/*.o obj/test/test *.gcda *.gcno ref* cov* test.c.*
+
+.PHONY: demo

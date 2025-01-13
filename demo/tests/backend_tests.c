@@ -7,7 +7,7 @@
 #include "../generic_data_structures/linked_list.h"
 #include "../generic_data_structures/hash_table.h"
 #include "../generic_data_structures/iterator.h"
-#include "../../ref.h"
+#include "../../src/ref.h"
 
 typedef struct merch ioopm_merch_t;
 typedef struct shelf ioopm_shelf_t;
@@ -15,7 +15,6 @@ typedef struct shop ioopm_shop_t;
 typedef struct shopping_carts shopping_carts_t;
 typedef struct cart cart_t;
 typedef struct cart_item cart_item_t;
-
 #define Successful(o) (o.success == true)
 #define Unsuccessful(o) (o.success == false)
 
