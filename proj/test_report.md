@@ -48,20 +48,22 @@ Vi har försökt att automatisera våra tester med GitHub Actions så att de kö
 
 ## De sex otäckaste buggarna
 
-Här är de sex allvarligaste buggarna som vi har stött på under projektets gång, samt länk till deras github-issues:
+Här är de sex allvarligaste buggarna som vi har stött på under projektets gång, samt länk till deras github-issues. Vi började använda oss av github-issues sent under projektet och därmed finns det inte länkar till alla buggar:
 
 #### Bug 1 - Free_scheduled_tasks kallades rekursivt 
 https://github.com/IOOPM-UU/Oboy/issues/43
 
 
-#### Bug 2 - Problem med Cascade Limit
+#### Bug 2 - Problem med Cascade Limit - Stack overflow
 https://github.com/IOOPM-UU/Oboy/issues/42
 
-#### Bug 3  - Stack overflow
+#### Bug 3  - Gammal bugg från inlupp 2
+När vi ändrade namn på en vara och därefter försökte lägga till fler av den, ändrades inte lagersaldot.
 
-#### Bug 4 - ?
+#### Bug 4 - Free_scheduled_tasks frigjorde för mycket
+När free_scheduled_list() låg i funkunen allocate() blev det minnesläckor på grund av att länkar frigjordes för tidigt.
 
-#### Bug 5 - Tester som läcker
+#### Bug 5 - Tester som läcker 
 https://github.com/IOOPM-UU/Oboy/issues/46 
 
 #### Bug 6 - Tester i main som skrevs 'fel' från början
