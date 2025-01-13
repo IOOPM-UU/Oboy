@@ -23,6 +23,8 @@ TEST_OBJ       = $(OBJ_DIR)/$(TEST_DIR)/test.o
 HASH_OBJ       = $(OBJ_DIR)/$(LIB_DIR)/lib_hash_table.o
 LIST_OBJ       = $(OBJ_DIR)/$(LIB_DIR)/lib_linked_list.o
 
+CREATE_DIRS = mkdir -p $(OBJ_DIR) $(OBJ_DIR)/$(LIB_DIR) $(OBJ_DIR)/$(TEST_DIR)
+
 # Pattern rule to compile .c files into .o files
 $(OBJ_DIR)/%.o: src/%.c 
 	$(C_COMPILER) $(C_OPTIONS) -c $< -o $@
