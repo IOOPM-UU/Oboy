@@ -71,16 +71,6 @@ static bool is_valid_pointer(void *object){
     return option.success;
 }
 
-static void default_destructor(obj* object) {
-    if(!object) return;
-    
-    metadata_t *metadata = get_metadata(object);
-    if(!metadata) return;
-    
-    size_t object_size = metadata->size;
-    destructor_loop(object_size, object);
-}
-
 static void destructor_loop(size_t object_size, obj *object) {
     for (size_t offset = 0; offset + sizeof(void *) <= object_size; offset++)
     {
@@ -90,6 +80,16 @@ static void destructor_loop(size_t object_size, obj *object) {
             release(*possible_pointer);
         }
     }
+}
+
+static void default_destructor(obj* object) {
+    if(!object) return;
+    
+    metadata_t *metadata = get_metadata(object);
+    if(!metadata) return;
+    
+    size_t object_size = metadata->size;
+    destructor_loop(object_size, object);
 }
 
 static void add_to_schedule(obj *object) {
