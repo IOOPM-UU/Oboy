@@ -16,7 +16,7 @@ typedef void(*function1_t)(obj *);
 
 // The data we store when allocating a object
 struct metadata {
-    uint8_t rc;                      // Reference count
+    uint16_t rc;                      // Reference count
     function1_t destructor;          // Function to call before freeing
     size_t size;                     // Total size of the user allocation
 };
