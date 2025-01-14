@@ -175,7 +175,7 @@ ioopm_list_t *ioopm_shop_get_merch(ioopm_shop_t *shop)
     ioopm_list_iterator_t *iter = ioopm_list_iterator(all_merch);
 
     bool success = false;
-    for (int i = 0; i < merch_count; i++)
+    for (size_t i = 0; i < merch_count; i++)
     {
         elem_t elem = ioopm_iterator_current(iter, &success);
 
@@ -190,7 +190,7 @@ ioopm_list_t *ioopm_shop_get_merch(ioopm_shop_t *shop)
 
     ioopm_list_t *sorted_merch = ioopm_linked_list_create(string_eq);
 
-    for (int i = 0; i < merch_count; i++)
+    for (size_t i = 0; i < merch_count; i++)
     {
         ioopm_linked_list_append(sorted_merch, ptr_elem(merch_names[i]));
         merch_names[i] = NULL;
@@ -208,7 +208,7 @@ static void change_name_cart_item(ioopm_shop_t *shop, char *current_name, char *
 {
     unsigned int cart_index = shop->shopping_carts->cart_index;
     assert(shop->shopping_carts->carts);
-    for (int i = 0; i < cart_index; i++) // kollar genom hela hashtable
+    for (size_t i = 0; i < cart_index; i++) // kollar genom hela hashtable
     {
         ioopm_option_t cart_option = ioopm_hash_table_lookup(shop->shopping_carts->carts, u_elem(i));
         if (Successful(cart_option))

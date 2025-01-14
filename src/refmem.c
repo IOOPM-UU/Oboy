@@ -31,16 +31,16 @@ static void initialize_collector() {
 }
 
 lib_hash_table_t *get_metadata_ht() {
-    if (metadata_ht == NULL) {
-        metadata_ht = lib_hash_table_create(int_equal, NULL, default_hash_function);
-    }
+    // if (metadata_ht == NULL) {
+    // metadata_ht = lib_hash_table_create(int_equal, NULL, default_hash_function);
+    // }
     return metadata_ht;
 }
 
 lib_list_t *get_schedule_linked_list() {
-    if (!schedule_linked_list) {
-        schedule_linked_list = lib_linked_list_create(int_equal); // TODO!!! int_equal, but ptr_elem values
-    }
+    // if (!schedule_linked_list) {
+    // schedule_linked_list = lib_linked_list_create(int_equal); // TODO!!! int_equal, but ptr_elem values
+    // }
     return schedule_linked_list;
 }
 
