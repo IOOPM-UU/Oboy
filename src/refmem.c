@@ -54,7 +54,7 @@ static metadata_t *get_metadata(obj* object) {
     return (metadata_t*) found_data.value.p;
 }
 
-uint8_t rc(obj* object) {
+uint16_t rc(obj* object) {
     metadata_t *metadata = get_metadata(object);
     if (metadata) {
         return metadata->rc;
