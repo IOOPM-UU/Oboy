@@ -119,7 +119,8 @@ lib_list_t *get_schedule_linked_list();
 
 /**
  * @brief Creates a new reference-counted copy of the input string.
- * 
+ * Based on implementation from stack overflow by fluter (2016):
+ * https://stackoverflow.com/questions/37132549/implementation-of-strdup-in-c-programming
  * @param src A pointer to the source string to duplicate.
  * @return A pointer to the duplicated string.
  */
