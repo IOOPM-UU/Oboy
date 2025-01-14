@@ -84,10 +84,10 @@ static void destructor_loop(size_t object_size, obj *object) {
 
 static void default_destructor(obj* object) {
     if(!object) return;
-    uintptr_t key_as_int = (uintptr_t) object;
-    lib_option_t option = lib_hash_table_lookup(get_metadata_ht(), lib_int_elem(key_as_int));
-    if (!option.success) return;
-    metadata_t *metadata = (metadata_t *)(option.value.p);
+    
+    metadata_t *metadata = get_metadata(object);
+    if(!metadata) return;
+    
     size_t object_size = metadata->size;
     destructor_loop(object_size, object);
 }

@@ -40,7 +40,7 @@ all: $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ)
 	CREATE_DIRS
 	$(C_COMPILER) $(C_LINK_OPTIONS) $(REF_OBJ) $(TEST_OBJ) $(HASH_OBJ) $(LIST_OBJ) -o  $@ $(CUNIT_LINK)
 
-run: ref
+run: refmem
 	valgrind --leak-check=full --show-leak-kinds=all ./refmem
 
 demo: 
