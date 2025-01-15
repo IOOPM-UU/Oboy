@@ -42,7 +42,7 @@ void release(obj *object);
  * @param object A pointer to the object.
  * @return The reference count of the object, or 0 if the object has no metadata.
  */
-uint8_t rc(obj *object);
+uint16_t rc(obj *object);
 
 /**
  * @brief Allocates memory for an object and associates it with metadata.
