@@ -177,7 +177,7 @@ static void destructor_loop(size_t object_size, obj *object) {
 }
 ```
 6. **Library Cleanup and Shutdown**
-The function cleanup() requests a full pass over all scheduled objects.
+The function cleanup() calls schedule_task_manager() with no cascade limit, freeing all scheduled objects.
 ```
 void cleanup() {
 schedule_task_manager(NULL, SIZE_MAX);
